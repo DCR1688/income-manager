@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>贷款收入计算器 - 完整修复版</title>
+    <title>贷款收入计算器 - 优化版</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -13,361 +13,39 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
         
-        html, body {
-            height: 100%;
-            width: 100%;
-            overflow: auto; /* 改为auto以适应内容 */
-        }
-        
         body {
             background: #f5f5f7;
-            display: flex;
-            flex-direction: column;
             color: #333;
+            padding: 15px;
+            line-height: 1.6;
         }
         
         .container {
-            width: 100%;
-            min-height: 100%; /* 改为min-height */
+            max-width: 1200px;
+            margin: 0 auto;
             display: flex;
             flex-direction: column;
-            background: #f5f5f7;
+            gap: 20px;
         }
         
         .header {
             background: #ffffff;
             color: #000;
-            padding: 20px 20px 15px;
+            padding: 20px;
             text-align: center;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            position: relative;
-            z-index: 10;
-            flex-shrink: 0;
+            border-radius: 14px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         }
         
         .header h1 {
             font-size: 22px;
             margin-bottom: 5px;
             font-weight: 600;
-            letter-spacing: -0.2px;
-            white-space: nowrap;
         }
         
         .header p {
             opacity: 0.6;
             font-size: 14px;
-            font-weight: 400;
-            white-space: nowrap;
-        }
-        
-        .app-content {
-            padding: 15px;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: auto; /* 改为auto以适应内容 */
-        }
-        
-        .content-wrapper {
-            display: flex;
-            flex-direction: column;
-            height: auto; /* 改为auto以适应内容 */
-            gap: 15px;
-        }
-        
-        .input-section {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            flex-shrink: 0;
-            overflow-y: auto;
-            max-height: none; /* 移除限制 */
-        }
-        
-        .section-card {
-            background: #ffffff;
-            border-radius: 14px;
-            padding: 18px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            transition: transform 0.2s ease;
-        }
-        
-        .section-card:active {
-            transform: scale(0.98);
-        }
-        
-        .section-title {
-            color: #000;
-            margin-bottom: 18px;
-            font-size: 17px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid #f0f0f0;
-            white-space: nowrap;
-        }
-        
-        .section-title i {
-            color: #007AFF;
-        }
-        
-        .input-row {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            margin-bottom: 16px;
-        }
-        
-        .input-group {
-            width: 100%;
-        }
-        
-        .input-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: #000;
-            font-size: 15px;
-            padding-left: 5px;
-            white-space: nowrap;
-        }
-        
-        .input-group input, .input-group select {
-            width: 100%;
-            padding: 16px;
-            border: 1px solid #e5e5ea;
-            border-radius: 12px;
-            font-size: 16px;
-            transition: all 0.2s;
-            background: #ffffff;
-            -webkit-appearance: none;
-            appearance: none;
-            white-space: nowrap;
-        }
-        
-        /* iOS风格下拉选择框 */
-        .input-group select {
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23007AFF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 16px center;
-            background-size: 16px;
-            padding-right: 45px;
-        }
-        
-        .input-group input:focus, .input-group select:focus {
-            border-color: #007AFF;
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.2);
-        }
-        
-        .btn {
-            padding: 18px;
-            border: none;
-            border-radius: 12px;
-            font-size: 17px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            margin-bottom: 10px;
-            background: #007AFF;
-            color: white;
-            white-space: nowrap;
-        }
-        
-        .btn-primary {
-            background: #007AFF;
-        }
-        
-        .btn-primary:active {
-            background: #0056b3;
-            transform: scale(0.98);
-        }
-        
-        .btn-secondary {
-            background: #34C759;
-        }
-        
-        .btn-secondary:active {
-            background: #2a9e48;
-            transform: scale(0.98);
-        }
-        
-        .btn-danger {
-            background: #FF3B30;
-        }
-        
-        .btn-danger:active {
-            background: #d32f2f;
-            transform: scale(0.98);
-        }
-        
-        .btn-file {
-            background: #AF52DE;
-        }
-        
-        .btn-file:active {
-            background: #8946ab;
-            transform: scale(0.98);
-        }
-        
-        .btn i {
-            margin-right: 10px;
-        }
-        
-        .summary-section {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            flex-shrink: 0;
-        }
-        
-        .summary-cards {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-        
-        .summary-card {
-            width: 100%;
-            background: #ffffff;
-            border-radius: 14px;
-            padding: 20px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            text-align: center;
-            transition: transform 0.2s ease;
-            white-space: nowrap;
-        }
-        
-        .summary-card:active {
-            transform: scale(0.98);
-        }
-        
-        .summary-card h3 {
-            color: #000;
-            margin-bottom: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            white-space: nowrap;
-        }
-        
-        .summary-value {
-            font-size: 26px;
-            font-weight: 700;
-            text-align: center;
-            color: #007AFF;
-            margin: 8px 0;
-            white-space: nowrap;
-        }
-        
-        .monthly-summary {
-            background: #34C759;
-            color: white;
-        }
-        
-        .monthly-summary h3 {
-            color: white;
-        }
-        
-        .monthly-summary .summary-value {
-            color: white;
-        }
-        
-        .action-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            flex-shrink: 0;
-        }
-        
-        .table-section {
-            flex: 1;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .table-container {
-            flex: 1;
-            overflow: auto;
-            border-radius: 14px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            background: #ffffff;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            table-layout: fixed;
-        }
-        
-        th, td {
-            padding: 16px 12px;
-            text-align: left;
-            border-bottom: 1px solid #e5e5ea;
-            font-size: 15px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        th {
-            background: #f9f9f9;
-            position: sticky;
-            top: 0;
-            font-weight: 600;
-            color: #000;
-            font-size: 15px;
-            text-align: center;
-            border-bottom: 2px solid #e5e5ea;
-        }
-        
-        td {
-            text-align: center;
-            vertical-align: middle;
-        }
-        
-        /* 日期列特殊处理 */
-        td:nth-child(3) {
-            min-width: 120px;
-            white-space: nowrap;
-            overflow: visible;
-            text-overflow: clip;
-        }
-        
-        tr {
-            transition: background-color 0.2s;
-        }
-        
-        tr:active {
-            background-color: #f0f0f0;
-        }
-        
-        .footer {
-            text-align: center;
-            padding: 20px;
-            color: #8e8e93;
-            font-size: 14px;
-            background: #ffffff;
-            font-weight: 400;
-            border-top: 1px solid #e5e5ea;
-            flex-shrink: 0;
-            white-space: nowrap;
-        }
-        
-        .commission-high {
-            color: #34C759;
-            font-weight: 600;
-        }
-        
-        .commission-low {
-            color: #FF3B30;
-            font-weight: 600;
         }
         
         .logo {
@@ -388,6 +66,88 @@
             font-size: 30px;
         }
         
+        .main-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .input-section {
+            flex: 1;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .section-card {
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 18px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        
+        .section-title {
+            color: #000;
+            margin-bottom: 18px;
+            font-size: 17px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .section-title i {
+            color: #007AFF;
+        }
+        
+        .input-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .input-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #000;
+            font-size: 15px;
+            padding-left: 5px;
+        }
+        
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #e5e5ea;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.2s;
+            background: #ffffff;
+        }
+        
+        .input-group select {
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23007AFF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            background-size: 16px;
+            padding-right: 45px;
+        }
+        
+        .input-group input:focus, .input-group select:focus {
+            border-color: #007AFF;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.2);
+        }
+        
         .commission-info {
             background: #e6f2ff;
             border-radius: 12px;
@@ -397,54 +157,96 @@
             font-size: 15px;
             color: #007AFF;
             border: 1px solid #b3d7ff;
-            white-space: nowrap;
         }
         
-        .month-selector-container {
+        .btn {
+            padding: 14px 18px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 12px;
-            margin: 20px 0;
-            flex-wrap: wrap;
-            flex-shrink: 0;
+            gap: 8px;
         }
         
-        .month-selector-label {
-            font-weight: 500;
-            color: #000;
-            font-size: 15px;
-            white-space: nowrap;
+        .btn-primary {
+            background: #007AFF;
+            color: white;
         }
         
-        .month-selector {
-            padding: 14px 16px;
-            border: 1px solid #e5e5ea;
-            border-radius: 12px;
-            font-size: 15px;
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+        
+        .btn-danger {
+            background: #FF3B30;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #d32f2f;
+        }
+        
+        .btn-secondary {
+            background: #34C759;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #2a9e48;
+        }
+        
+        .table-section {
+            flex: 2;
+            min-width: 300px;
+        }
+        
+        .table-container {
             background: #ffffff;
-            min-width: 130px;
-            appearance: none;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23007AFF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 16px center;
-            background-size: 16px;
-            padding-right: 45px;
-            white-space: nowrap;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            overflow-x: auto;
         }
         
-        .month-selector:focus {
-            border-color: #007AFF;
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.2);
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
         }
         
-        /* 操作按钮样式 - 修复对齐问题 */
+        th, td {
+            padding: 14px 12px;
+            text-align: left;
+            border-bottom: 1px solid #e5e5ea;
+            font-size: 14px;
+        }
+        
+        th {
+            background: #f9f9f9;
+            font-weight: 600;
+            color: #000;
+            position: sticky;
+            top: 0;
+        }
+        
+        .commission-high {
+            color: #34C759;
+            font-weight: 600;
+        }
+        
+        .commission-low {
+            color: #FF3B30;
+            font-weight: 600;
+        }
+        
         .action-cell {
             display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100%;
+            gap: 8px;
         }
         
         .action-btn {
@@ -453,264 +255,171 @@
             cursor: pointer;
             font-size: 16px;
             color: #007AFF;
-            padding: 8px;
-            transition: color 0.2s;
+            padding: 6px;
             border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 100%;
-            height: 100%;
         }
         
-        .action-btn:active {
+        .action-btn:hover {
             background: #f0f0f0;
         }
         
-        /* 成功提示样式 */
-        .success-toast {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 16px 24px;
+        .btn-delete {
+            color: #FF3B30;
+        }
+        
+        .summary-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-top: 10px;
+        }
+        
+        .summary-card {
+            flex: 1;
+            min-width: 180px;
+            background: #ffffff;
             border-radius: 14px;
-            z-index: 1000;
+            padding: 18px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+        
+        .summary-card h3 {
+            color: #000;
+            margin-bottom: 12px;
+            font-size: 15px;
+            font-weight: 600;
+        }
+        
+        .summary-value {
+            font-size: 22px;
+            font-weight: 700;
+            color: #007AFF;
+        }
+        
+        .monthly-summary {
+            background: #34C759;
+            color: white;
+        }
+        
+        .monthly-summary h3 {
+            color: white;
+        }
+        
+        .monthly-summary .summary-value {
+            color: white;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #8e8e93;
+            font-size: 14px;
+            background: #ffffff;
+            border-radius: 14px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            margin-top: 20px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .action-buttons .btn {
+            flex: 1;
+            min-width: 150px;
+        }
+        
+        /* 详情下拉面板样式 */
+        .details-panel {
+            background-color: #f9f9f9;
+            border-radius: 0 0 12px 12px;
+            padding: 15px;
+            display: none;
+        }
+        
+        .details-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 12px;
+        }
+        
+        .detail-item {
             display: flex;
             align-items: center;
-            gap: 12px;
-            animation: fadeInUp 0.3s, fadeOut 0.3s 2.5s forwards;
-            font-size: 16px;
-            white-space: nowrap;
+            gap: 10px;
+            padding: 8px 0;
         }
         
-        /* 动画效果 */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translate(-50%, 20px);
+        .detail-icon {
+            width: 24px;
+            text-align: center;
+            color: #007AFF;
+        }
+        
+        .detail-label {
+            font-weight: 500;
+            min-width: 80px;
+            font-size: 14px;
+        }
+        
+        .detail-value {
+            flex: 1;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .expand-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #007AFF;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
             }
-            to {
-                opacity: 1;
-                transform: translate(-50%, 0);
+            
+            .input-group {
+                min-width: 100%;
+            }
+            
+            .action-buttons .btn {
+                min-width: 100%;
+            }
+            
+            .summary-card {
+                min-width: calc(50% - 10px);
             }
         }
         
-        @keyframes fadeOut {
-            from {
-                opacity: 1;
-            }
-            to {
-                opacity: 0;
-                visibility: hidden;
-            }
-        }
-        
-        /* 移动设备优化 */
-        @media (max-width: 767px) {
+        @media (max-width: 480px) {
             .header h1 {
                 font-size: 20px;
-            }
-            
-            .header p {
-                font-size: 13px;
-            }
-            
-            .app-content {
-                padding: 10px;
             }
             
             .section-card {
                 padding: 15px;
             }
             
-            .input-group input, .input-group select {
-                padding: 14px;
-                font-size: 16px; /* 保持较大的字体以便触摸 */
-            }
-            
-            .btn {
-                padding: 16px;
-                font-size: 16px;
-            }
-            
             .summary-card {
-                padding: 15px;
+                min-width: 100%;
             }
             
-            .summary-value {
-                font-size: 22px;
-            }
-            
-            .month-selector-container {
-                flex-direction: column;
-                gap: 8px;
-            }
-            
-            /* 表格在小屏幕上的优化 */
-            .table-container {
-                overflow-x: auto;
-                font-size: 14px;
-            }
-            
-            table {
-                min-width: 800px; /* 确保表格有最小宽度 */
-            }
-            
-            th, td {
-                padding: 12px 8px;
-                font-size: 14px;
-            }
-            
-            /* 调整操作按钮大小 */
-            .action-btn {
-                padding: 6px;
-                font-size: 14px;
-            }
-        }
-        
-        /* 中等屏幕设备 */
-        @media (min-width: 768px) and (max-width: 1023px) {
-            .content-wrapper {
-                flex-direction: column;
-            }
-            
-            .input-row {
-                flex-direction: row;
-            }
-            
-            .summary-cards {
-                flex-direction: row;
-                flex-wrap: wrap;
-            }
-            
-            .summary-card {
-                flex: 1;
-                min-width: calc(50% - 10px);
-            }
-            
-            .action-buttons {
-                flex-direction: row;
-                flex-wrap: wrap;
-            }
-            
-            .btn {
-                width: auto;
-                flex: 1;
-                min-width: 160px;
-            }
-        }
-        
-        /* 桌面端优化 */
-        @media (min-width: 1024px) {
-            .content-wrapper {
-                flex-direction: row;
-                height: 100%;
-            }
-            
-            .left-panel {
-                flex: 0 0 45%;
-                display: flex;
-                flex-direction: column;
-                overflow: hidden;
-                gap: 15px;
-            }
-            
-            .right-panel {
-                flex: 1;
-                display: flex;
-                flex-direction: column;
-                overflow: hidden;
-            }
-            
-            .input-section {
-                max-height: 65%;
-                overflow-y: auto;
-            }
-            
-            .summary-section {
-                max-height: 35%;
-                overflow-y: auto;
-            }
-            
-            .input-row {
-                flex-direction: row;
-            }
-            
-            .summary-cards {
-                flex-direction: row;
-                flex-wrap: wrap;
-            }
-            
-            .summary-card {
-                flex: 1;
-                min-width: calc(50% - 10px);
-            }
-            
-            .action-buttons {
-                flex-direction: row;
-                flex-wrap: wrap;
-            }
-            
-            .btn {
-                width: auto;
-                flex: 1;
-                min-width: 160px;
-                padding: 16px 20px;
-                font-size: 16px;
-            }
-        }
-        
-        /* 超大屏幕优化 */
-        @media (min-width: 1400px) {
-            .container {
-                max-width: 1400px;
-                margin: 0 auto;
-            }
-        }
-        
-        /* 文件输入隐藏 */
-        #fileInput {
-            display: none;
-        }
-        
-        /* 超小屏幕设备 (小于400px) */
-        @media (max-width: 400px) {
-            .header {
-                padding: 15px 15px 10px;
-            }
-            
-            .header h1 {
-                font-size: 18px;
-            }
-            
-            .logo-circle {
-                width: 60px;
-                height: 60px;
-                font-size: 24px;
-            }
-            
-            .section-title {
-                font-size: 16px;
-            }
-            
-            .commission-info {
-                font-size: 14px;
-                padding: 12px;
-            }
-            
-            .input-group label {
-                font-size: 14px;
-            }
-            
-            .month-selector-label {
-                font-size: 14px;
-            }
-            
-            .footer p {
-                font-size: 12px;
+            .details-content {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -724,196 +433,147 @@
                 </div>
             </div>
             <h1>贷款收入计算器</h1>
-            <p>计算贷款提成，数据自动保存 - 完整修复版</p>
+            <p>计算贷款提成，数据自动保存 - 优化版</p>
         </div>
         
-        <div class="app-content">
-            <div class="content-wrapper">
-                <div class="left-panel">
-                    <div class="input-section">
-                        <div class="commission-info">
-                            <i class="fas fa-info-circle"></i> 提成计算公式: (放款金额 × 服务费率 - 渠道成本 - 平台成本 + 返点) × 30%
+        <div class="main-content">
+            <div class="input-section">
+                <div class="commission-info">
+                    <i class="fas fa-info-circle"></i> 提成计算公式: (放款金额 × 服务费率 - 渠道成本 - 平台成本 + 返点) × 30%
+                </div>
+                
+                <!-- 基本信息卡片 -->
+                <div class="section-card">
+                    <div class="section-title">
+                        <i class="fas fa-info-circle"></i> 基本信息
+                    </div>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label for="clientName"><i class="fas fa-user"></i> 客户名称</label>
+                            <input type="text" id="clientName" placeholder="请输入客户名称">
                         </div>
                         
-                        <!-- 基本信息卡片 -->
-                        <div class="section-card">
-                            <div class="section-title">
-                                <i class="fas fa-info-circle"></i> 基本信息
-                            </div>
-                            <div class="input-row">
-                                <div class="input-group">
-                                    <label for="clientName"><i class="fas fa-user"></i> 客户名称</label>
-                                    <input type="text" id="clientName" placeholder="请输入客户名称">
-                                </div>
-                                
-                                <div class="input-group">
-                                    <label for="loanDate"><i class="fas fa-calendar-alt"></i> 放款日期</label>
-                                    <input type="date" id="loanDate">
-                                </div>
-                            </div>
-                            
-                            <div class="input-row">
-                                <div class="input-group">
-                                    <label for="productType"><i class="fas fa-box"></i> 产品类型</label>
-                                    <select id="productType">
-                                        <option value="" disabled selected>-- 请选择产品类型 --</option>
-                                        <option value="抵押">抵押贷</option>
-                                        <option value="信用贷">信用贷</option>
-                                        <option value="企业贷">企业贷</option>
-                                    </select>
-                                </div>
-                                
-                                <div class="input-group">
-                                    <label for="loanAmount"><i class="fas fa-money-bill-wave"></i> 放款金额 (元)</label>
-                                    <input type="number" id="loanAmount" placeholder="请输入放款金额" step="0.01">
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- 费率信息卡片 -->
-                        <div class="section-card">
-                            <div class="section-title">
-                                <i class="fas fa-percent"></i> 费率信息
-                            </div>
-                            <div class="input-row">
-                                <div class="input-group">
-                                    <label for="serviceRate"><i class="fas fa-hand-holding-usd"></i> 服务费率 (%)</label>
-                                    <input type="number" id="serviceRate" placeholder="请输入服务费率" step="0.01">
-                                </div>
-                                
-                                <div class="input-group">
-                                    <label for="rebateRate"><i class="fas fa-gift"></i> 返点费率 (%)</label>
-                                    <input type="number" id="rebateRate" placeholder="请输入返点费率" step="0.01" value="0">
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- 成本信息卡片 -->
-                        <div class="section-card">
-                            <div class="section-title">
-                                <i class="fas fa-money-bill-alt"></i> 成本信息
-                            </div>
-                            <div class="input-row">
-                                <div class="input-group">
-                                    <label for="channelCost"><i class="fas fa-tag"></i> 渠道成本 (元)</label>
-                                    <input type="number" id="channelCost" placeholder="请输入渠道成本" step="0.01">
-                                </div>
-                                
-                                <div class="input-group">
-                                    <label for="platformCost"><i class="fas fa-server"></i> 平台成本 (元)</label>
-                                    <input type="text" id="platformCost" placeholder="自动计算" readonly>
-                                </div>
-                            </div>
-                            
-                            <div class="input-row">
-                                <div class="input-group">
-                                    <label for="rebateAmount"><i class="fas fa-gift"></i> 返点金额 (元)</label>
-                                    <input type="text" id="rebateAmount" placeholder="自动计算" readonly>
-                                </div>
-                                
-                                <div class="input-group">
-                                    <label for="commission"><i class="fas fa-coins"></i> 提成 (元)</label>
-                                    <input type="text" id="commission" placeholder="自动计算" readonly>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div style="text-align: center; margin: 15px 0;">
-                            <button id="addRow" class="btn btn-primary">
-                                <i class="fas fa-plus-circle"></i> 添加新行
-                            </button>
+                        <div class="input-group">
+                            <label for="loanDate"><i class="fas fa-calendar-alt"></i> 放款日期</label>
+                            <input type="date" id="loanDate">
                         </div>
                     </div>
                     
-                    <div class="summary-section">
-                        <div class="summary-cards">
-                            <div class="summary-card">
-                                <h3><i class="fas fa-chart-pie"></i> 总提成汇总</h3>
-                                <div class="summary-value" id="totalCommission">0</div>
-                            </div>
-                            
-                            <div class="summary-card monthly-summary">
-                                <h3><i class="fas fa-calendar-check"></i> 月度提成汇总</h3>
-                                <div class="summary-value" id="monthlyCommission">0</div>
-                            </div>
-                            
-                            <div class="summary-card">
-                                <h3><i class="fas fa-calendar-alt"></i> 年度提成汇总</h3>
-                                <div class="summary-value" id="yearlyCommission">0</div>
-                            </div>
-                        </div>
-                        
-                        <div class="month-selector-container">
-                            <span class="month-selector-label"><i class="fas fa-filter"></i> 选择月份:</span>
-                            <select id="monthSelector" class="month-selector">
-                                <option value="0">一月</option>
-                                <option value="1">二月</option>
-                                <option value="2">三月</option>
-                                <option value="3">四月</option>
-                                <option value="4">五月</option>
-                                <option value="5">六月</option>
-                                <option value="6">七月</option>
-                                <option value="7">八月</option>
-                                <option value="8">九月</option>
-                                <option value="9">十月</option>
-                                <option value="10">十一月</option>
-                                <option value="11">十二月</option>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label for="productType"><i class="fas fa-box"></i> 产品类型</label>
+                            <select id="productType">
+                                <option value="" disabled selected>-- 请选择产品类型 --</option>
+                                <option value="抵押">抵押贷</option>
+                                <option value="信用贷">信用贷</option>
+                                <option value="企业贷">企业贷</option>
                             </select>
-                            <span class="month-selector-label"><i class="fas fa-calendar"></i> 当前选择: <span id="selectedMonth">一月</span></span>
                         </div>
                         
-                        <div class="action-buttons">
-                            <button id="saveData" class="btn btn-primary">
-                                <i class="fas fa-save"></i> 保存数据
-                            </button>
-                            <button id="saveToFile" class="btn btn-file">
-                                <i class="fas fa-download"></i> 保存到文件
-                            </button>
-                            <button id="loadFromFile" class="btn btn-file">
-                                <i class="fas fa-upload"></i> 从文件加载
-                            </button>
-                            <button id="clearData" class="btn btn-danger">
-                                <i class="fas fa-trash-alt"></i> 清除数据
-                            </button>
-                            <button id="exportData" class="btn btn-secondary">
-                                <i class="fas fa-file-export"></i> 导出CSV
-                            </button>
+                        <div class="input-group">
+                            <label for="loanAmount"><i class="fas fa-money-bill-wave"></i> 放款金额 (元)</label>
+                            <input type="number" id="loanAmount" placeholder="请输入放款金额" step="0.01">
                         </div>
-                        
-                        <input type="file" id="fileInput" accept=".json">
                     </div>
                 </div>
                 
-                <div class="right-panel">
-                    <div class="table-section">
-                        <div class="table-container">
-                            <table id="dataTable">
-                                <thead>
-                                    <tr>
-                                        <th>客户名称</th>
-                                        <th>产品类型</th>
-                                        <th>放款日期</th>
-                                        <th>放款金额</th>
-                                        <th>服务费率</th>
-                                        <th>渠道成本</th>
-                                        <th>返点金额</th>
-                                        <th>平台成本</th>
-                                        <th>提成</th>
-                                        <th>操作</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <!-- 数据行将通过JavaScript动态添加 -->
-                                </tbody>
-                            </table>
+                <!-- 费率信息卡片 -->
+                <div class="section-card">
+                    <div class="section-title">
+                        <i class="fas fa-percent"></i> 费率信息
+                    </div>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label for="serviceRate"><i class="fas fa-hand-holding-usd"></i> 服务费率 (%)</label>
+                            <input type="number" id="serviceRate" placeholder="请输入服务费率" step="0.01">
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="rebateRate"><i class="fas fa-gift"></i> 返点费率 (%)</label>
+                            <input type="number" id="rebateRate" placeholder="请输入返点费率" step="0.01" value="0">
                         </div>
                     </div>
+                </div>
+                
+                <!-- 成本信息卡片 -->
+                <div class="section-card">
+                    <div class="section-title">
+                        <i class="fas fa-money-bill-alt"></i> 成本信息
+                    </div>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label for="channelCost"><i class="fas fa-tag"></i> 渠道成本 (元)</label>
+                            <input type="number" id="channelCost" placeholder="请输入渠道成本" step="0.01">
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="platformCost"><i class="fas fa-server"></i> 平台成本 (元)</label>
+                            <input type="text" id="platformCost" placeholder="自动计算" readonly>
+                        </div>
+                    </div>
+                    
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label for="rebateAmount"><i class="fas fa-gift"></i> 返点金额 (元)</label>
+                            <input type="text" id="rebateAmount" placeholder="自动计算" readonly>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="commission"><i class="fas fa-coins"></i> 提成 (元)</label>
+                            <input type="text" id="commission" placeholder="自动计算" readonly>
+                        </div>
+                    </div>
+                </div>
+                
+                <button id="addRow" class="btn btn-primary">
+                    <i class="fas fa-plus-circle"></i> 添加新行
+                </button>
+                
+                <div class="summary-section">
+                    <div class="summary-card">
+                        <h3><i class="fas fa-chart-pie"></i> 总提成汇总</h3>
+                        <div class="summary-value" id="totalCommission">0</div>
+                    </div>
+                    
+                    <div class="summary-card monthly-summary">
+                        <h3><i class="fas fa-calendar-check"></i> 月度提成汇总</h3>
+                        <div class="summary-value" id="monthlyCommission">0</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="table-section">
+                <div class="table-container">
+                    <table id="dataTable">
+                        <thead>
+                            <tr>
+                                <th>客户名称</th>
+                                <th>产品类型</th>
+                                <th>放款日期</th>
+                                <th>放款金额</th>
+                                <th>提成</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- 数据行将通过JavaScript动态添加 -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="action-buttons">
+                    <button id="clearData" class="btn btn-danger">
+                        <i class="fas fa-trash-alt"></i> 清除数据
+                    </button>
+                    <button id="exportData" class="btn btn-secondary">
+                        <i class="fas fa-file-export"></i> 导出CSV
+                    </button>
                 </div>
             </div>
         </div>
         
         <div class="footer">
-            <p>© 2023 贷款收入计算器 - 完整修复版 | 支持返点与平台成本计算</p>
+            <p>© 2023 贷款收入计算器 - 优化版 | 支持返点与平台成本计算</p>
         </div>
     </div>
 
@@ -932,20 +592,10 @@
             const commissionInput = document.getElementById('commission');
             const addRowButton = document.getElementById('addRow');
             const clearDataButton = document.getElementById('clearData');
-            const saveDataButton = document.getElementById('saveData');
-            const saveToFileButton = document.getElementById('saveToFile');
-            const loadFromFileButton = document.getElementById('loadFromFile');
             const exportDataButton = document.getElementById('exportData');
             const totalCommissionElement = document.getElementById('totalCommission');
             const monthlyCommissionElement = document.getElementById('monthlyCommission');
-            const yearlyCommissionElement = document.getElementById('yearlyCommission');
             const tableBody = document.querySelector('#dataTable tbody');
-            const monthSelector = document.getElementById('monthSelector');
-            const selectedMonthElement = document.getElementById('selectedMonth');
-            const fileInput = document.getElementById('fileInput');
-            
-            let currentMonth = new Date().getMonth();
-            let currentYear = new Date().getFullYear();
             
             // 设置默认日期为今天
             const today = new Date();
@@ -954,26 +604,8 @@
             const dd = String(today.getDate()).padStart(2, '0');
             loanDateInput.value = `${yyyy}-${mm}-${dd}`;
             
-            // 设置月份选择器默认值为当前月份
-            monthSelector.value = currentMonth;
-            updateSelectedMonthText();
-            
             // 从本地存储加载数据
             loadData();
-            
-            // 月份选择器变化事件
-            monthSelector.addEventListener('change', function() {
-                currentMonth = parseInt(this.value);
-                updateSelectedMonthText();
-                updateMonthlySummary();
-            });
-            
-            // 更新选择的月份文本
-            function updateSelectedMonthText() {
-                const monthNames = ["一月", "二月", "三月", "四月", "五月", "六月", 
-                                  "七月", "八月", "九月", "十月", "十一月", "十二月"];
-                selectedMonthElement.textContent = monthNames[currentMonth];
-            }
             
             // 格式化数字显示，整数不显示小数部分
             function formatNumber(value) {
@@ -1000,28 +632,6 @@
                 const dd = String(date.getDate()).padStart(2, '0');
                 
                 return `${yyyy}-${mm}-${dd}`;
-            }
-            
-            // 显示成功提示
-            function showSuccessToast(message) {
-                // 移除现有的提示
-                const existingToast = document.querySelector('.success-toast');
-                if (existingToast) {
-                    existingToast.remove();
-                }
-                
-                // 创建新提示
-                const toast = document.createElement('div');
-                toast.className = 'success-toast';
-                toast.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
-                document.body.appendChild(toast);
-                
-                // 3秒后自动移除
-                setTimeout(() => {
-                    if (toast.parentNode) {
-                        toast.parentNode.removeChild(toast);
-                    }
-                }, 3000);
             }
             
             // 计算返点金额
@@ -1086,49 +696,25 @@
             function updateSummary() {
                 let total = 0;
                 let monthlyTotal = 0;
-                let yearlyTotal = 0;
+                const currentMonth = new Date().getMonth();
+                const currentYear = new Date().getFullYear();
                 const rows = tableBody.querySelectorAll('tr');
                 
                 rows.forEach(row => {
-                    const commission = parseFloat(row.cells[8].textContent) || 0;
+                    const commission = parseFloat(row.getAttribute('data-commission')) || 0;
                     total += commission;
                     
                     // 计算月度汇总
-                    const dateStr = row.cells[2].textContent;
+                    const dateStr = row.getAttribute('data-date');
                     if (dateStr) {
                         const date = new Date(dateStr);
                         if (date.getMonth() === currentMonth && date.getFullYear() === currentYear) {
                             monthlyTotal += commission;
-                        }
-                        
-                        // 计算年度汇总
-                        if (date.getFullYear() === currentYear) {
-                            yearlyTotal += commission;
                         }
                     }
                 });
                 
                 totalCommissionElement.textContent = formatNumber(total);
-                monthlyCommissionElement.textContent = formatNumber(monthlyTotal);
-                yearlyCommissionElement.textContent = formatNumber(yearlyTotal);
-            }
-            
-            // 更新月度汇总
-            function updateMonthlySummary() {
-                let monthlyTotal = 0;
-                const rows = tableBody.querySelectorAll('tr');
-                
-                rows.forEach(row => {
-                    const dateStr = row.cells[2].textContent;
-                    if (dateStr) {
-                        const date = new Date(dateStr);
-                        if (date.getMonth() === currentMonth && date.getFullYear() === currentYear) {
-                            const commission = parseFloat(row.cells[8].textContent) || 0;
-                            monthlyTotal += commission;
-                        }
-                    }
-                });
-                
                 monthlyCommissionElement.textContent = formatNumber(monthlyTotal);
             }
             
@@ -1152,20 +738,31 @@
                 }
                 
                 const newRow = document.createElement('tr');
+                newRow.setAttribute('data-date', loanDate);
+                newRow.setAttribute('data-commission', commission);
+                newRow.setAttribute('data-details', JSON.stringify({
+                    clientName,
+                    productType,
+                    loanDate,
+                    loanAmount,
+                    serviceRate,
+                    channelCost,
+                    rebateAmount,
+                    platformCost,
+                    commission
+                }));
                 
-                // 添加单元格
                 newRow.innerHTML = `
                     <td>${clientName}</td>
                     <td>${productType}</td>
                     <td>${formatDate(loanDate)}</td>
                     <td>${formatNumber(loanAmount)}</td>
-                    <td>${formatNumber(serviceRate)}%</td>
-                    <td>${formatNumber(channelCost)}</td>
-                    <td>${formatNumber(rebateAmount)}</td>
-                    <td>${formatNumber(platformCost)}</td>
                     <td class="${commission >= 1000 ? 'commission-high' : 'commission-low'}">${formatNumber(commission)}</td>
                     <td class="action-cell">
-                        <button class="action-btn delete-row">
+                        <button class="action-btn expand-btn" title="查看详情">
+                            <i class="fas fa-info-circle"></i>
+                        </button>
+                        <button class="action-btn btn-delete delete-row" title="删除">
                             <i class="fas fa-trash-alt"></i>
                         </button>
                     </td>
@@ -1183,6 +780,12 @@
                     }
                 });
                 
+                // 添加查看详情的事件监听器
+                newRow.querySelector('.expand-btn').addEventListener('click', function() {
+                    const details = JSON.parse(newRow.getAttribute('data-details'));
+                    showDetailsPopup(details);
+                });
+                
                 // 清除表单
                 clearForm();
                 
@@ -1191,23 +794,103 @@
                 
                 // 更新汇总
                 updateSummary();
+            }
+            
+            // 显示详情弹窗
+            function showDetailsPopup(details) {
+                // 创建弹窗
+                const popup = document.createElement('div');
+                popup.style.position = 'fixed';
+                popup.style.top = '50%';
+                popup.style.left = '50%';
+                popup.style.transform = 'translate(-50%, -50%)';
+                popup.style.backgroundColor = 'white';
+                popup.style.padding = '20px';
+                popup.style.borderRadius = '14px';
+                popup.style.boxShadow = '0 5px 15px rgba(0,0,0,0.2)';
+                popup.style.zIndex = '1000';
+                popup.style.maxWidth = '90%';
+                popup.style.width = '400px';
                 
-                // 显示成功提示
-                showSuccessToast('数据已成功添加！');
+                popup.innerHTML = `
+                    <h3 style="margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-info-circle" style="color: #007AFF;"></i> 贷款详情
+                    </h3>
+                    <div style="max-height: 60vh; overflow-y: auto;">
+                        <div class="detail-item">
+                            <div class="detail-icon"><i class="fas fa-user"></i></div>
+                            <div class="detail-label">客户名称:</div>
+                            <div class="detail-value">${details.clientName}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-icon"><i class="fas fa-box"></i></div>
+                            <div class="detail-label">产品类型:</div>
+                            <div class="detail-value">${details.productType}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-icon"><i class="fas fa-calendar-alt"></i></div>
+                            <div class="detail-label">放款日期:</div>
+                            <div class="detail-value">${formatDate(details.loanDate)}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-icon"><i class="fas fa-money-bill-wave"></i></div>
+                            <div class="detail-label">放款金额:</div>
+                            <div class="detail-value">${formatNumber(details.loanAmount)} 元</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-icon"><i class="fas fa-hand-holding-usd"></i></div>
+                            <div class="detail-label">服务费率:</div>
+                            <div class="detail-value">${details.serviceRate}%</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-icon"><i class="fas fa-tag"></i></div>
+                            <div class="detail-label">渠道成本:</div>
+                            <div class="detail-value">${formatNumber(details.channelCost)} 元</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-icon"><i class="fas fa-gift"></i></div>
+                            <div class="detail-label">返点金额:</div>
+                            <div class="detail-value">${formatNumber(details.rebateAmount)} 元</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-icon"><i class="fas fa-server"></i></div>
+                            <div class="detail-label">平台成本:</div>
+                            <div class="detail-value">${formatNumber(details.platformCost)} 元</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-icon"><i class="fas fa-coins"></i></div>
+                            <div class="detail-label">提成:</div>
+                            <div class="detail-value" style="font-weight: bold; color: ${details.commission >= 1000 ? '#34C759' : '#FF3B30'};">${formatNumber(details.commission)} 元</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 20px; text-align: center;">
+                        <button id="closePopup" style="padding: 10px 20px; background: #007AFF; color: white; border: none; border-radius: 8px; cursor: pointer;">关闭</button>
+                    </div>
+                `;
+                
+                document.body.appendChild(popup);
+                
+                // 添加关闭事件
+                popup.querySelector('#closePopup').addEventListener('click', function() {
+                    document.body.removeChild(popup);
+                });
+                
+                // 点击外部关闭
+                popup.addEventListener('click', function(e) {
+                    if (e.target === popup) {
+                        document.body.removeChild(popup);
+                    }
+                });
             }
             
             // 清除表单
             function clearForm() {
                 clientNameInput.value = '';
-                loanDateInput.value = `${yyyy}-${mm}-${dd}`;
-                productTypeInput.value = '';
+                productTypeInput.selectedIndex = 0;
                 loanAmountInput.value = '';
                 serviceRateInput.value = '';
                 channelCostInput.value = '';
                 rebateRateInput.value = '0';
-                rebateAmountInput.value = '';
-                platformCostInput.value = '';
-                commissionInput.value = '';
             }
             
             // 保存数据到本地存储
@@ -1216,17 +899,7 @@
                 const data = [];
                 
                 rows.forEach(row => {
-                    data.push({
-                        clientName: row.cells[0].textContent,
-                        productType: row.cells[1].textContent,
-                        loanDate: row.cells[2].textContent,
-                        loanAmount: row.cells[3].textContent,
-                        serviceRate: row.cells[4].textContent,
-                        channelCost: row.cells[5].textContent,
-                        rebateAmount: row.cells[6].textContent,
-                        platformCost: row.cells[7].textContent,
-                        commission: row.cells[8].textContent
-                    });
+                    data.push(JSON.parse(row.getAttribute('data-details')));
                 });
                 
                 localStorage.setItem('loanData', JSON.stringify(data));
@@ -1242,19 +915,21 @@
                         
                         data.forEach(item => {
                             const newRow = document.createElement('tr');
+                            newRow.setAttribute('data-date', item.loanDate);
+                            newRow.setAttribute('data-commission', item.commission);
+                            newRow.setAttribute('data-details', JSON.stringify(item));
                             
                             newRow.innerHTML = `
                                 <td>${item.clientName}</td>
                                 <td>${item.productType}</td>
-                                <td>${item.loanDate}</td>
-                                <td>${item.loanAmount}</td>
-                                <td>${item.serviceRate}</td>
-                                <td>${item.channelCost}</td>
-                                <td>${item.rebateAmount}</td>
-                                <td>${item.platformCost}</td>
-                                <td class="${parseFloat(item.commission) >= 1000 ? 'commission-high' : 'commission-low'}">${item.commission}</td>
+                                <td>${formatDate(item.loanDate)}</td>
+                                <td>${formatNumber(item.loanAmount)}</td>
+                                <td class="${parseFloat(item.commission) >= 1000 ? 'commission-high' : 'commission-low'}">${formatNumber(item.commission)}</td>
                                 <td class="action-cell">
-                                    <button class="action-btn delete-row">
+                                    <button class="action-btn expand-btn" title="查看详情">
+                                        <i class="fas fa-info-circle"></i>
+                                    </button>
+                                    <button class="action-btn btn-delete delete-row" title="删除">
                                         <i class="fas fa-trash-alt"></i>
                                     </button>
                                 </td>
@@ -1269,6 +944,11 @@
                                     saveDataToLocalStorage();
                                     updateSummary();
                                 }
+                            });
+                            
+                            // 添加查看详情的事件监听器
+                            newRow.querySelector('.expand-btn').addEventListener('click', function() {
+                                showDetailsPopup(item);
                             });
                         });
                         
@@ -1285,113 +965,7 @@
                     tableBody.innerHTML = '';
                     localStorage.removeItem('loanData');
                     updateSummary();
-                    showSuccessToast('所有数据已清除！');
                 }
-            }
-            
-            // 保存数据到文件
-            function saveDataToFile() {
-                const savedData = localStorage.getItem('loanData');
-                
-                if (!savedData) {
-                    alert('没有数据可保存！');
-                    return;
-                }
-                
-                const blob = new Blob([savedData], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `loan_data_${new Date().toISOString().slice(0, 10)}.json`;
-                document.body.appendChild(a);
-                a.click();
-                
-                // 清理
-                setTimeout(() => {
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-                }, 100);
-                
-                showSuccessToast('数据已保存到文件！');
-            }
-            
-            // 从文件加载数据
-            function loadDataFromFile() {
-                fileInput.click();
-            }
-            
-            // 处理文件选择
-            function handleFileSelect(event) {
-                const file = event.target.files[0];
-                
-                if (!file) return;
-                
-                const reader = new FileReader();
-                
-                reader.onload = function(e) {
-                    try {
-                        const data = JSON.parse(e.target.result);
-                        
-                        // 验证数据格式
-                        if (!Array.isArray(data)) {
-                            throw new Error('无效的数据格式');
-                        }
-                        
-                        // 清除现有数据
-                        tableBody.innerHTML = '';
-                        
-                        // 添加新数据
-                        data.forEach(item => {
-                            const newRow = document.createElement('tr');
-                            
-                            newRow.innerHTML = `
-                                <td>${item.clientName}</td>
-                                <td>${item.productType}</td>
-                                <td>${item.loanDate}</td>
-                                <td>${item.loanAmount}</td>
-                                <td>${item.serviceRate}</td>
-                                <td>${item.channelCost}</td>
-                                <td>${item.rebateAmount}</td>
-                                <td>${item.platformCost}</td>
-                                <td class="${parseFloat(item.commission) >= 1000 ? 'commission-high' : 'commission-low'}">${item.commission}</td>
-                                <td class="action-cell">
-                                    <button class="action-btn delete-row">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </td>
-                            `;
-                            
-                            tableBody.appendChild(newRow);
-                            
-                            // 添加删除行的事件监听器
-                            newRow.querySelector('.delete-row').addEventListener('click', function() {
-                                if (confirm('确定要删除这一行吗？')) {
-                                    newRow.remove();
-                                    saveDataToLocalStorage();
-                                    updateSummary();
-                                }
-                            });
-                        });
-                        
-                        // 保存到本地存储
-                        saveDataToLocalStorage();
-                        
-                        // 更新汇总
-                        updateSummary();
-                        
-                        // 显示成功提示
-                        showSuccessToast('数据已从文件加载！');
-                    } catch (e) {
-                        alert('文件格式无效，加载失败！');
-                        console.error('加载文件失败:', e);
-                    }
-                };
-                
-                reader.readAsText(file);
-                
-                // 重置文件输入，允许选择同一文件再次触发事件
-                event.target.value = '';
             }
             
             // 导出CSV
@@ -1406,20 +980,22 @@
                 let csvContent = "客户名称,产品类型,放款日期,放款金额,服务费率(%),渠道成本,返点金额,平台成本,提成\n";
                 
                 rows.forEach(row => {
-                    const rowData = [];
+                    const details = JSON.parse(row.getAttribute('data-details'));
+                    const rowData = [
+                        details.clientName,
+                        details.productType,
+                        formatDate(details.loanDate),
+                        details.loanAmount,
+                        details.serviceRate,
+                        details.channelCost,
+                        details.rebateAmount,
+                        details.platformCost,
+                        details.commission
+                    ];
                     
-                    for (let i = 0; i < row.cells.length - 1; i++) { // 跳过最后一列（操作列）
-                        let cellContent = row.cells[i].textContent;
-                        
-                        // 处理可能包含逗号的内容
-                        if (cellContent.includes(',')) {
-                            cellContent = `"${cellContent}"`;
-                        }
-                        
-                        rowData.push(cellContent);
-                    }
-                    
-                    csvContent += rowData.join(',') + '\n';
+                    // 处理可能包含逗号的内容
+                    const escapedData = rowData.map(item => `"${item}"`);
+                    csvContent += escapedData.join(',') + '\n';
                 });
                 
                 const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -1436,21 +1012,12 @@
                     document.body.removeChild(a);
                     URL.revokeObjectURL(url);
                 }, 100);
-                
-                showSuccessToast('数据已导出为CSV文件！');
             }
             
             // 事件监听器
             addRowButton.addEventListener('click', addRow);
             clearDataButton.addEventListener('click', clearAllData);
-            saveDataButton.addEventListener('click', function() {
-                saveDataToLocalStorage();
-                showSuccessToast('数据已保存到本地存储！');
-            });
-            saveToFileButton.addEventListener('click', saveDataToFile);
-            loadFromFileButton.addEventListener('click', loadDataFromFile);
             exportDataButton.addEventListener('click', exportToCSV);
-            fileInput.addEventListener('change', handleFileSelect);
         });
     </script>
 </body>
