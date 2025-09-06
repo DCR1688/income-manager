@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>贷款收入计算器 - 优化版</title>
+    <title>贷款收入计算器 - 优化响应式版</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -216,7 +216,7 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 600px;
+            min-width: 500px;
         }
         
         th, td {
@@ -336,25 +336,13 @@
             min-width: 150px;
         }
         
-        /* 详情下拉面板样式 */
-        .details-panel {
-            background-color: #f9f9f9;
-            border-radius: 0 0 12px 12px;
-            padding: 15px;
-            display: none;
-        }
-        
-        .details-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 12px;
-        }
-        
+        /* 详情弹窗样式 */
         .detail-item {
             display: flex;
             align-items: center;
             gap: 10px;
             padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
         }
         
         .detail-icon {
@@ -375,18 +363,7 @@
             font-size: 14px;
         }
         
-        .expand-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: #007AFF;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        
-        /* 响应式设计 */
+        /* 响应式设计 - 移动设备 */
         @media (max-width: 768px) {
             .main-content {
                 flex-direction: column;
@@ -403,6 +380,15 @@
             .summary-card {
                 min-width: calc(50% - 10px);
             }
+            
+            table {
+                min-width: 100%;
+            }
+            
+            th, td {
+                padding: 10px 8px;
+                font-size: 13px;
+            }
         }
         
         @media (max-width: 480px) {
@@ -418,9 +404,149 @@
                 min-width: 100%;
             }
             
-            .details-content {
-                grid-template-columns: 1fr;
+            .input-group input, .input-group select {
+                padding: 12px;
             }
+            
+            .btn {
+                padding: 12px 15px;
+                font-size: 15px;
+            }
+            
+            th, td {
+                padding: 8px 6px;
+                font-size: 12px;
+            }
+            
+            .action-cell {
+                flex-direction: column;
+                gap: 5px;
+            }
+        }
+        
+        /* 超小屏幕设备 */
+        @media (max-width: 360px) {
+            .container {
+                gap: 15px;
+            }
+            
+            .header {
+                padding: 15px;
+            }
+            
+            .logo-circle {
+                width: 60px;
+                height: 60px;
+                font-size: 24px;
+            }
+            
+            .input-row {
+                gap: 12px;
+            }
+            
+            .section-title {
+                font-size: 16px;
+            }
+            
+            .commission-info {
+                font-size: 14px;
+                padding: 12px;
+            }
+            
+            .input-group label {
+                font-size: 14px;
+            }
+            
+            .summary-card h3 {
+                font-size: 14px;
+            }
+            
+            .summary-value {
+                font-size: 18px;
+            }
+            
+            th, td {
+                padding: 6px 4px;
+                font-size: 11px;
+            }
+        }
+        
+        /* 大屏幕设备优化 */
+        @media (min-width: 1400px) {
+            .container {
+                max-width: 1400px;
+            }
+            
+            .input-section {
+                flex: 0.8;
+            }
+            
+            .table-section {
+                flex: 2.2;
+            }
+        }
+        
+        /* 弹窗样式 */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+        
+        .popup-content {
+            background: white;
+            border-radius: 14px;
+            padding: 20px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e5e5ea;
+        }
+        
+        .popup-title {
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #8e8e93;
+        }
+        
+        /* 表格紧凑模式 */
+        .compact-table th, 
+        .compact-table td {
+            padding: 10px 8px;
+        }
+        
+        /* 移动设备上的表格滚动 */
+        .table-scroll {
+            overflow-x: auto;
+            width: 100%;
         }
     </style>
 </head>
@@ -433,7 +559,7 @@
                 </div>
             </div>
             <h1>贷款收入计算器</h1>
-            <p>计算贷款提成，数据自动保存 - 优化版</p>
+            <p>计算贷款提成，数据自动保存 - 优化响应式版</p>
         </div>
         
         <div class="main-content">
@@ -544,21 +670,21 @@
             
             <div class="table-section">
                 <div class="table-container">
-                    <table id="dataTable">
-                        <thead>
-                            <tr>
-                                <th>客户名称</th>
-                                <th>产品类型</th>
-                                <th>放款日期</th>
-                                <th>放款金额</th>
-                                <th>提成</th>
-                                <th>操作</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- 数据行将通过JavaScript动态添加 -->
-                        </tbody>
-                    </table>
+                    <div class="table-scroll">
+                        <table id="dataTable">
+                            <thead>
+                                <tr>
+                                    <th>客户名称</th>
+                                    <th>放款金额</th>
+                                    <th>提成</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- 数据行将通过JavaScript动态添加 -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
                 
                 <div class="action-buttons">
@@ -573,7 +699,7 @@
         </div>
         
         <div class="footer">
-            <p>© 2023 贷款收入计算器 - 优化版 | 支持返点与平台成本计算</p>
+            <p>© 2023 贷款收入计算器 - 优化响应式版 | 支持返点与平台成本计算</p>
         </div>
     </div>
 
@@ -754,8 +880,6 @@
                 
                 newRow.innerHTML = `
                     <td>${clientName}</td>
-                    <td>${productType}</td>
-                    <td>${formatDate(loanDate)}</td>
                     <td>${formatNumber(loanAmount)}</td>
                     <td class="${commission >= 1000 ? 'commission-high' : 'commission-low'}">${formatNumber(commission)}</td>
                     <td class="action-cell">
@@ -799,33 +923,25 @@
             // 显示详情弹窗
             function showDetailsPopup(details) {
                 // 创建弹窗
-                const popup = document.createElement('div');
-                popup.style.position = 'fixed';
-                popup.style.top = '50%';
-                popup.style.left = '50%';
-                popup.style.transform = 'translate(-50%, -50%)';
-                popup.style.backgroundColor = 'white';
-                popup.style.padding = '20px';
-                popup.style.borderRadius = '14px';
-                popup.style.boxShadow = '0 5px 15px rgba(0,0,0,0.2)';
-                popup.style.zIndex = '1000';
-                popup.style.maxWidth = '90%';
-                popup.style.width = '400px';
+                const popupOverlay = document.createElement('div');
+                popupOverlay.className = 'popup-overlay';
                 
-                popup.innerHTML = `
-                    <h3 style="margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
-                        <i class="fas fa-info-circle" style="color: #007AFF;"></i> 贷款详情
-                    </h3>
-                    <div style="max-height: 60vh; overflow-y: auto;">
+                const popupContent = document.createElement('div');
+                popupContent.className = 'popup-content';
+                
+                popupContent.innerHTML = `
+                    <div class="popup-header">
+                        <div class="popup-title">
+                            <i class="fas fa-info-circle" style="color: #007AFF;"></i> 
+                            <span>贷款详情 - ${details.clientName}</span>
+                        </div>
+                        <button class="close-btn">&times;</button>
+                    </div>
+                    <div>
                         <div class="detail-item">
                             <div class="detail-icon"><i class="fas fa-user"></i></div>
                             <div class="detail-label">客户名称:</div>
                             <div class="detail-value">${details.clientName}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-icon"><i class="fas fa-box"></i></div>
-                            <div class="detail-label">产品类型:</div>
-                            <div class="detail-value">${details.productType}</div>
                         </div>
                         <div class="detail-item">
                             <div class="detail-icon"><i class="fas fa-calendar-alt"></i></div>
@@ -863,22 +979,21 @@
                             <div class="detail-value" style="font-weight: bold; color: ${details.commission >= 1000 ? '#34C759' : '#FF3B30'};">${formatNumber(details.commission)} 元</div>
                         </div>
                     </div>
-                    <div style="margin-top: 20px; text-align: center;">
-                        <button id="closePopup" style="padding: 10px 20px; background: #007AFF; color: white; border: none; border-radius: 8px; cursor: pointer;">关闭</button>
-                    </div>
                 `;
                 
-                document.body.appendChild(popup);
+                popupOverlay.appendChild(popupContent);
+                document.body.appendChild(popupOverlay);
                 
                 // 添加关闭事件
-                popup.querySelector('#closePopup').addEventListener('click', function() {
-                    document.body.removeChild(popup);
+                const closeBtn = popupContent.querySelector('.close-btn');
+                closeBtn.addEventListener('click', function() {
+                    document.body.removeChild(popupOverlay);
                 });
                 
                 // 点击外部关闭
-                popup.addEventListener('click', function(e) {
-                    if (e.target === popup) {
-                        document.body.removeChild(popup);
+                popupOverlay.addEventListener('click', function(e) {
+                    if (e.target === popupOverlay) {
+                        document.body.removeChild(popupOverlay);
                     }
                 });
             }
@@ -921,8 +1036,6 @@
                             
                             newRow.innerHTML = `
                                 <td>${item.clientName}</td>
-                                <td>${item.productType}</td>
-                                <td>${formatDate(item.loanDate)}</td>
                                 <td>${formatNumber(item.loanAmount)}</td>
                                 <td class="${parseFloat(item.commission) >= 1000 ? 'commission-high' : 'commission-low'}">${formatNumber(item.commission)}</td>
                                 <td class="action-cell">
