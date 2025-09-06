@@ -16,7 +16,7 @@
         html, body {
             height: 100%;
             width: 100%;
-            overflow: hidden;
+            overflow: auto; /* 改为auto以适应内容 */
         }
         
         body {
@@ -28,11 +28,10 @@
         
         .container {
             width: 100%;
-            height: 100%;
+            min-height: 100%; /* 改为min-height */
             display: flex;
             flex-direction: column;
             background: #f5f5f7;
-            overflow: hidden;
         }
         
         .header {
@@ -66,16 +65,14 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
-            height: calc(100% - 120px);
+            overflow: auto; /* 改为auto以适应内容 */
         }
         
         .content-wrapper {
             display: flex;
             flex-direction: column;
-            height: 100%;
+            height: auto; /* 改为auto以适应内容 */
             gap: 15px;
-            overflow: hidden;
         }
         
         .input-section {
@@ -84,7 +81,7 @@
             gap: 16px;
             flex-shrink: 0;
             overflow-y: auto;
-            max-height: 50%;
+            max-height: none; /* 移除限制 */
         }
         
         .section-card {
@@ -511,6 +508,101 @@
             }
         }
         
+        /* 移动设备优化 */
+        @media (max-width: 767px) {
+            .header h1 {
+                font-size: 20px;
+            }
+            
+            .header p {
+                font-size: 13px;
+            }
+            
+            .app-content {
+                padding: 10px;
+            }
+            
+            .section-card {
+                padding: 15px;
+            }
+            
+            .input-group input, .input-group select {
+                padding: 14px;
+                font-size: 16px; /* 保持较大的字体以便触摸 */
+            }
+            
+            .btn {
+                padding: 16px;
+                font-size: 16px;
+            }
+            
+            .summary-card {
+                padding: 15px;
+            }
+            
+            .summary-value {
+                font-size: 22px;
+            }
+            
+            .month-selector-container {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            /* 表格在小屏幕上的优化 */
+            .table-container {
+                overflow-x: auto;
+                font-size: 14px;
+            }
+            
+            table {
+                min-width: 800px; /* 确保表格有最小宽度 */
+            }
+            
+            th, td {
+                padding: 12px 8px;
+                font-size: 14px;
+            }
+            
+            /* 调整操作按钮大小 */
+            .action-btn {
+                padding: 6px;
+                font-size: 14px;
+            }
+        }
+        
+        /* 中等屏幕设备 */
+        @media (min-width: 768px) and (max-width: 1023px) {
+            .content-wrapper {
+                flex-direction: column;
+            }
+            
+            .input-row {
+                flex-direction: row;
+            }
+            
+            .summary-cards {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+            
+            .summary-card {
+                flex: 1;
+                min-width: calc(50% - 10px);
+            }
+            
+            .action-buttons {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+            
+            .btn {
+                width: auto;
+                flex: 1;
+                min-width: 160px;
+            }
+        }
+        
         /* 桌面端优化 */
         @media (min-width: 1024px) {
             .content-wrapper {
@@ -571,9 +663,55 @@
             }
         }
         
+        /* 超大屏幕优化 */
+        @media (min-width: 1400px) {
+            .container {
+                max-width: 1400px;
+                margin: 0 auto;
+            }
+        }
+        
         /* 文件输入隐藏 */
         #fileInput {
             display: none;
+        }
+        
+        /* 超小屏幕设备 (小于400px) */
+        @media (max-width: 400px) {
+            .header {
+                padding: 15px 15px 10px;
+            }
+            
+            .header h1 {
+                font-size: 18px;
+            }
+            
+            .logo-circle {
+                width: 60px;
+                height: 60px;
+                font-size: 24px;
+            }
+            
+            .section-title {
+                font-size: 16px;
+            }
+            
+            .commission-info {
+                font-size: 14px;
+                padding: 12px;
+            }
+            
+            .input-group label {
+                font-size: 14px;
+            }
+            
+            .month-selector-label {
+                font-size: 14px;
+            }
+            
+            .footer p {
+                font-size: 12px;
+            }
         }
     </style>
 </head>
@@ -999,57 +1137,69 @@
                 const clientName = clientNameInput.value.trim();
                 const loanDate = loanDateInput.value;
                 const productType = productTypeInput.value;
-                const loanAmount = parseFloat(loanAmountInput.value);
-                const serviceRate = parseFloat(serviceRateInput.value);
-                const channelCost = parseFloat(channelCostInput.value);
-                const rebateRate = parseFloat(rebateRateInput.value);
+                const loanAmount = parseFloat(loanAmountInput.value) || 0;
+                const serviceRate = parseFloat(serviceRateInput.value) || 0;
+                const channelCost = parseFloat(channelCostInput.value) || 0;
+                const rebateRate = parseFloat(rebateRateInput.value) || 0;
+                const rebateAmount = parseFloat(rebateAmountInput.value) || 0;
+                const platformCost = parseFloat(platformCostInput.value) || 0;
+                const commission = parseFloat(commissionInput.value) || 0;
                 
-                if (!clientName || !productType || isNaN(loanAmount) || isNaN(serviceRate) || isNaN(channelCost) || isNaN(rebateRate)) {
-                    alert('请填写所有字段！');
+                // 验证必填字段
+                if (!clientName || !productType || !loanAmount || !serviceRate) {
+                    alert('请填写必填字段：客户名称、产品类型、放款金额和服务费率');
                     return;
                 }
                 
-                const rebateAmount = calculateRebate();
-                const platformCost = calculatePlatformCost();
-                const commission = calculateCommission();
-                
                 const newRow = document.createElement('tr');
+                
+                // 添加单元格
                 newRow.innerHTML = `
                     <td>${clientName}</td>
                     <td>${productType}</td>
                     <td>${formatDate(loanDate)}</td>
                     <td>${formatNumber(loanAmount)}</td>
-                    <td>${formatNumber(serviceRate)}</td>
+                    <td>${formatNumber(serviceRate)}%</td>
                     <td>${formatNumber(channelCost)}</td>
                     <td>${formatNumber(rebateAmount)}</td>
                     <td>${formatNumber(platformCost)}</td>
-                    <td class="${commission >= 0 ? 'commission-high' : 'commission-low'}">${formatNumber(commission)}</td>
+                    <td class="${commission >= 1000 ? 'commission-high' : 'commission-low'}">${formatNumber(commission)}</td>
                     <td class="action-cell">
-                        <button class="action-btn delete-btn" title="删除">
-                            <i class="fas fa-trash"></i>
+                        <button class="action-btn delete-row">
+                            <i class="fas fa-trash-alt"></i>
                         </button>
                     </td>
                 `;
                 
+                // 添加到表格
                 tableBody.appendChild(newRow);
-                updateSummary();
-                saveData();
                 
-                // 显示成功提示
-                showSuccessToast('数据添加成功！');
-                
-                // 添加删除按钮事件
-                newRow.querySelector('.delete-btn').addEventListener('click', function() {
-                    if (confirm('确定要删除这条记录吗？')) {
+                // 添加删除行的事件监听器
+                newRow.querySelector('.delete-row').addEventListener('click', function() {
+                    if (confirm('确定要删除这一行吗？')) {
                         newRow.remove();
+                        saveDataToLocalStorage();
                         updateSummary();
-                        saveData();
-                        showSuccessToast('数据删除成功！');
                     }
                 });
                 
-                // 清空输入字段
+                // 清除表单
+                clearForm();
+                
+                // 保存数据到本地存储
+                saveDataToLocalStorage();
+                
+                // 更新汇总
+                updateSummary();
+                
+                // 显示成功提示
+                showSuccessToast('数据已成功添加！');
+            }
+            
+            // 清除表单
+            function clearForm() {
                 clientNameInput.value = '';
+                loanDateInput.value = `${yyyy}-${mm}-${dd}`;
                 productTypeInput.value = '';
                 loanAmountInput.value = '';
                 serviceRateInput.value = '';
@@ -1058,16 +1208,15 @@
                 rebateAmountInput.value = '';
                 platformCostInput.value = '';
                 commissionInput.value = '';
-                clientNameInput.focus();
             }
             
             // 保存数据到本地存储
-            function saveData() {
-                const rows = [];
-                const tableRows = tableBody.querySelectorAll('tr');
+            function saveDataToLocalStorage() {
+                const rows = tableBody.querySelectorAll('tr');
+                const data = [];
                 
-                tableRows.forEach(row => {
-                    rows.push({
+                rows.forEach(row => {
+                    data.push({
                         clientName: row.cells[0].textContent,
                         productType: row.cells[1].textContent,
                         loanDate: row.cells[2].textContent,
@@ -1080,7 +1229,7 @@
                     });
                 });
                 
-                localStorage.setItem('loanData', JSON.stringify(rows));
+                localStorage.setItem('loanData', JSON.stringify(data));
             }
             
             // 从本地存储加载数据
@@ -1089,36 +1238,36 @@
                 
                 if (savedData) {
                     try {
-                        const rows = JSON.parse(savedData);
+                        const data = JSON.parse(savedData);
                         
-                        rows.forEach(row => {
+                        data.forEach(item => {
                             const newRow = document.createElement('tr');
+                            
                             newRow.innerHTML = `
-                                <td>${row.clientName}</td>
-                                <td>${row.productType}</td>
-                                <td>${row.loanDate}</td>
-                                <td>${row.loanAmount}</td>
-                                <td>${row.serviceRate}</td>
-                                <td>${row.channelCost}</td>
-                                <td>${row.rebateAmount}</td>
-                                <td>${row.platformCost}</td>
-                                <td class="${parseFloat(row.commission) >= 0 ? 'commission-high' : 'commission-low'}">${row.commission}</td>
+                                <td>${item.clientName}</td>
+                                <td>${item.productType}</td>
+                                <td>${item.loanDate}</td>
+                                <td>${item.loanAmount}</td>
+                                <td>${item.serviceRate}</td>
+                                <td>${item.channelCost}</td>
+                                <td>${item.rebateAmount}</td>
+                                <td>${item.platformCost}</td>
+                                <td class="${parseFloat(item.commission) >= 1000 ? 'commission-high' : 'commission-low'}">${item.commission}</td>
                                 <td class="action-cell">
-                                    <button class="action-btn delete-btn" title="删除">
-                                        <i class="fas fa-trash"></i>
+                                    <button class="action-btn delete-row">
+                                        <i class="fas fa-trash-alt"></i>
                                     </button>
                                 </td>
                             `;
                             
                             tableBody.appendChild(newRow);
                             
-                            // 添加删除按钮事件
-                            newRow.querySelector('.delete-btn').addEventListener('click', function() {
-                                if (confirm('确定要删除这条记录吗？')) {
+                            // 添加删除行的事件监听器
+                            newRow.querySelector('.delete-row').addEventListener('click', function() {
+                                if (confirm('确定要删除这一行吗？')) {
                                     newRow.remove();
+                                    saveDataToLocalStorage();
                                     updateSummary();
-                                    saveData();
-                                    showSuccessToast('数据删除成功！');
                                 }
                             });
                         });
@@ -1131,165 +1280,177 @@
             }
             
             // 清除所有数据
-            function clearData() {
-                if (confirm('确定要清除所有数据吗？此操作不可撤销！')) {
+            function clearAllData() {
+                if (confirm('确定要清除所有数据吗？此操作不可恢复！')) {
                     tableBody.innerHTML = '';
                     localStorage.removeItem('loanData');
                     updateSummary();
-                    showSuccessToast('数据已清除！');
+                    showSuccessToast('所有数据已清除！');
                 }
             }
             
             // 保存数据到文件
-            function saveToFile() {
-                const data = localStorage.getItem('loanData');
-                if (!data) {
+            function saveDataToFile() {
+                const savedData = localStorage.getItem('loanData');
+                
+                if (!savedData) {
                     alert('没有数据可保存！');
                     return;
                 }
                 
-                const blob = new Blob([data], { type: 'application/json' });
+                const blob = new Blob([savedData], { type: 'application/json' });
                 const url = URL.createObjectURL(blob);
+                
                 const a = document.createElement('a');
                 a.href = url;
                 a.download = `loan_data_${new Date().toISOString().slice(0, 10)}.json`;
                 document.body.appendChild(a);
                 a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
+                
+                // 清理
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 100);
                 
                 showSuccessToast('数据已保存到文件！');
             }
             
             // 从文件加载数据
-            function loadFromFile() {
+            function loadDataFromFile() {
                 fileInput.click();
             }
             
             // 处理文件选择
-            fileInput.addEventListener('change', function(e) {
-                const file = e.target.files[0];
+            function handleFileSelect(event) {
+                const file = event.target.files[0];
+                
                 if (!file) return;
                 
                 const reader = new FileReader();
+                
                 reader.onload = function(e) {
                     try {
                         const data = JSON.parse(e.target.result);
-                        if (!Array.isArray(data)) {
-                            throw new Error('无效的数据格式');
-                        }
                         
                         // 验证数据格式
-                        const requiredFields = ['clientName', 'productType', 'loanDate', 'loanAmount', 'serviceRate', 'channelCost', 'rebateAmount', 'platformCost', 'commission'];
-                        const isValid = data.every(item => {
-                            return requiredFields.every(field => field in item);
-                        });
-                        
-                        if (!isValid) {
-                            throw new Error('文件格式不正确');
+                        if (!Array.isArray(data)) {
+                            throw new Error('无效的数据格式');
                         }
                         
                         // 清除现有数据
                         tableBody.innerHTML = '';
                         
-                        // 加载新数据
-                        data.forEach(row => {
+                        // 添加新数据
+                        data.forEach(item => {
                             const newRow = document.createElement('tr');
+                            
                             newRow.innerHTML = `
-                                <td>${row.clientName}</td>
-                                <td>${row.productType}</td>
-                                <td>${row.loanDate}</td>
-                                <td>${row.loanAmount}</td>
-                                <td>${row.serviceRate}</td>
-                                <td>${row.channelCost}</td>
-                                <td>${row.rebateAmount}</td>
-                                <td>${row.platformCost}</td>
-                                <td class="${parseFloat(row.commission) >= 0 ? 'commission-high' : 'commission-low'}">${row.commission}</td>
+                                <td>${item.clientName}</td>
+                                <td>${item.productType}</td>
+                                <td>${item.loanDate}</td>
+                                <td>${item.loanAmount}</td>
+                                <td>${item.serviceRate}</td>
+                                <td>${item.channelCost}</td>
+                                <td>${item.rebateAmount}</td>
+                                <td>${item.platformCost}</td>
+                                <td class="${parseFloat(item.commission) >= 1000 ? 'commission-high' : 'commission-low'}">${item.commission}</td>
                                 <td class="action-cell">
-                                    <button class="action-btn delete-btn" title="删除">
-                                        <i class="fas fa-trash"></i>
+                                    <button class="action-btn delete-row">
+                                        <i class="fas fa-trash-alt"></i>
                                     </button>
                                 </td>
                             `;
                             
                             tableBody.appendChild(newRow);
                             
-                            // 添加删除按钮事件
-                            newRow.querySelector('.delete-btn').addEventListener('click', function() {
-                                if (confirm('确定要删除这条记录吗？')) {
+                            // 添加删除行的事件监听器
+                            newRow.querySelector('.delete-row').addEventListener('click', function() {
+                                if (confirm('确定要删除这一行吗？')) {
                                     newRow.remove();
+                                    saveDataToLocalStorage();
                                     updateSummary();
-                                    saveData();
-                                    showSuccessToast('数据删除成功！');
                                 }
                             });
                         });
                         
                         // 保存到本地存储
-                        localStorage.setItem('loanData', JSON.stringify(data));
+                        saveDataToLocalStorage();
+                        
+                        // 更新汇总
                         updateSummary();
+                        
+                        // 显示成功提示
                         showSuccessToast('数据已从文件加载！');
                     } catch (e) {
-                        alert('加载文件失败: ' + e.message);
+                        alert('文件格式无效，加载失败！');
+                        console.error('加载文件失败:', e);
                     }
                 };
+                
                 reader.readAsText(file);
                 
-                // 重置文件输入，允许再次选择同一文件
-                fileInput.value = '';
-            });
+                // 重置文件输入，允许选择同一文件再次触发事件
+                event.target.value = '';
+            }
             
-            // 导出CSV文件
+            // 导出CSV
             function exportToCSV() {
-                const rows = [];
-                const tableRows = tableBody.querySelectorAll('tr');
+                const rows = tableBody.querySelectorAll('tr');
                 
-                if (tableRows.length === 0) {
+                if (rows.length === 0) {
                     alert('没有数据可导出！');
                     return;
                 }
                 
-                // 添加表头
-                rows.push(['客户名称', '产品类型', '放款日期', '放款金额', '服务费率(%)', '渠道成本', '返点金额', '平台成本', '提成'].join(','));
+                let csvContent = "客户名称,产品类型,放款日期,放款金额,服务费率(%),渠道成本,返点金额,平台成本,提成\n";
                 
-                // 添加数据行
-                tableRows.forEach(row => {
-                    const cells = row.querySelectorAll('td:not(:last-child)'); // 排除操作列
-                    const rowData = Array.from(cells).map(cell => {
-                        // 处理可能包含逗号的值
-                        let value = cell.textContent;
-                        if (value.includes(',')) {
-                            value = `"${value}"`;
+                rows.forEach(row => {
+                    const rowData = [];
+                    
+                    for (let i = 0; i < row.cells.length - 1; i++) { // 跳过最后一列（操作列）
+                        let cellContent = row.cells[i].textContent;
+                        
+                        // 处理可能包含逗号的内容
+                        if (cellContent.includes(',')) {
+                            cellContent = `"${cellContent}"`;
                         }
-                        return value;
-                    });
-                    rows.push(rowData.join(','));
+                        
+                        rowData.push(cellContent);
+                    }
+                    
+                    csvContent += rowData.join(',') + '\n';
                 });
                 
-                const csvContent = rows.join('\n');
                 const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
                 const url = URL.createObjectURL(blob);
+                
                 const a = document.createElement('a');
                 a.href = url;
                 a.download = `loan_data_${new Date().toISOString().slice(0, 10)}.csv`;
                 document.body.appendChild(a);
                 a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
+                
+                // 清理
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 100);
                 
                 showSuccessToast('数据已导出为CSV文件！');
             }
             
-            // 添加事件监听器
+            // 事件监听器
             addRowButton.addEventListener('click', addRow);
-            clearDataButton.addEventListener('click', clearData);
+            clearDataButton.addEventListener('click', clearAllData);
             saveDataButton.addEventListener('click', function() {
-                saveData();
-                showSuccessToast('数据已保存！');
+                saveDataToLocalStorage();
+                showSuccessToast('数据已保存到本地存储！');
             });
-            saveToFileButton.addEventListener('click', saveToFile);
-            loadFromFileButton.addEventListener('click', loadFromFile);
+            saveToFileButton.addEventListener('click', saveDataToFile);
+            loadFromFileButton.addEventListener('click', loadDataFromFile);
             exportDataButton.addEventListener('click', exportToCSV);
+            fileInput.addEventListener('change', handleFileSelect);
         });
     </script>
 </body>
