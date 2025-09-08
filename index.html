@@ -1,6 +1,16 @@
+<!-- 用于输入加密数据的主密码 -->
+<div style="margin: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
+    <label for="master-password-input">数据加密密码：</label>
+    <input type="password" id="master-password-input" placeholder="请输入加密密码">
+    <button onclick="setMasterPassword()">设置密码</button>
+    <p style="font-size: 0.8em; color: #666;">此密码用于加密您的数据，请务必牢记。我们不会存储该密码。</p>
+</div>
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+<!-- 引入 CryptoJS 用于数据加密解密 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>收入管理系统</title>

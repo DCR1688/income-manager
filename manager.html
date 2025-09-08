@@ -29,6 +29,18 @@
         }
         
         body {
+<!-- ========== 新增的云端操作按钮 ========== -->
+<div style="border: 2px solid blue; padding: 10px; margin: 10px; background: #f0f8ff;">
+    <h3>🌩️ 云端存储功能</h3>
+    <p>首先设置密码：<input type="password" id="master-password-input" placeholder="输入加密密码"> 
+       <button onclick="setMasterPassword()">设置密码</button>
+    </p>
+    <p>然后使用下面按钮：</p>
+    <button onclick="saveDataToCloud()" style="background: #4CAF50; color: white; padding: 10px;">💾 保存到云端</button>
+    <button onclick="loadDataFromCloud()" style="background: #2196F3; color: white; padding: 10px;">☁️ 从云端加载</button>
+    <p style="color: red; font-size: 12px;">注意：点击按钮后会弹窗要求输入GitHub Token，请输入你之前生成的那串字符</p>
+</div>
+<!-- ========== 新增结束 ========== -->
             font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', sans-serif;
             background: var(--ios-light-gray);
             padding: 0;
@@ -120,8 +132,22 @@
             color: var(--ios-blue);
         }
         
+        .toggle-icon {
+            transition: transform 0.3s ease;
+        }
+        
         .card-body {
             padding: 16px;
+        }
+        
+        /* 折叠内容 */
+        .collapsible-section {
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .collapsible-section.collapsed {
+            display: none;
         }
         
         /* iOS风格表单元素 */
@@ -317,6 +343,42 @@
             margin-bottom: 16px;
         }
         
+        /* 月份选择器 */
+        .month-selector {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 12px;
+        }
+        
+        /* 智能成本信息 */
+        .smart-cost-info {
+            background: #E8F5E8;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 8px;
+            font-size: 14px;
+            color: #2E7D32;
+            border-left: 3px solid var(--ios-green);
+        }
+        
+        /* 公式提示 */
+        .formula-hint {
+            font-size: 13px;
+            color: var(--ios-gray);
+            margin-top: 4px;
+        }
+        
+        /* 部分标题 */
+        .cost-section-title, .rebate-section-title {
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
         /* 标签管理 */
         .salesperson-management, .product-management {
             margin-top: 12px;
@@ -343,30 +405,15 @@
             font-size: 14px;
         }
         
-        /* 折叠面板 */
-        .collapsible-section {
-            transition: all 0.3s ease;
-            overflow: hidden;
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
         
-        .collapsible-section.collapsed {
-            display: none;
-        }
-        
-        /* 保存区域 */
-        .save-section {
-            background: #FFF3E0;
-            padding: 16px;
-            border-radius: 12px;
-            margin-top: 16px;
-        }
-        
-        /* 月份选择器 */
-        .month-selector {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-top: 12px;
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
         /* 移动端优化 */
@@ -398,157 +445,216 @@
             }
         }
         
-        /* 智能成本信息 */
-        .smart-cost-info {
-            background: #E8F5E8;
-            padding: 12px;
-            border-radius: 8px;
-            margin-top: 8px;
-            font-size: 14px;
-            color: #2E7D32;
-            border-left: 3px solid var(--ios-green);
-        }
-        
-        /* 公式提示 */
-        .formula-hint {
-            font-size: 13px;
-            color: var(--ios-gray);
-            margin-top: 4px;
-        }
-        
-        /* 部分标题 */
-        .cost-section-title, .rebate-section-title {
-            font-weight: 600;
-            margin-bottom: 12px;
-            color: #000;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        /* 动画效果 */
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        /* 加载指示器 */
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 20px;
-            color: var(--ios-gray);
-        }
-        
-        .loading i {
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        /* 安全区域适配 */
-        .safe-area-bottom {
-            padding-bottom: env(safe-area-inset-bottom);
-        }
-
-        /* 新增记录高亮动画 */
-        @keyframes highlight {
-            0% { background-color: rgba(52, 199, 89, 0.2); }
-            100% { background-color: transparent; }
-        }
-        
-        .highlight-row {
-            animation: highlight 2s ease;
-        }
-
-        /* 成功提示 */
-        .toast-container {
+        /* 悬浮详情模态框 */
+        .details-modal {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 1050;
-        }
-        
-        .toast {
-            background-color: var(--ios-green);
-            color: white;
-            border-radius: 12px;
-            padding: 16px 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            animation: slideDown 0.3s ease;
-        }
-        
-        .toast i {
-            font-size: 20px;
-        }
-
-        /* 详情下拉面板样式 */
-        .details-panel {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 16px;
-            margin-top: 8px;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
             display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            animation: fadeIn 0.3s ease;
         }
         
-        .details-panel.show {
-            display: block;
-            animation: fadeIn 0.3s ease;
+        .details-modal.active {
+            display: flex;
+            /* 新增数据记录卡片 - 默认折叠 */
+<div class="card">
+    <div class="card-header" onclick="toggleSection('dataFormSection')">
+        <span><i class="fas fa-plus-circle"></i> 新增数据记录</span>
+        <span class="toggle-icon">
+            <i class="fas fa-chevron-down"></i>
+        </span>
+    </div>
+    <div class="collapsible-section collapsed" id="dataFormSection">
+        <div class="card-body">
+            <!-- 表单内容 -->
+        </div>
+    </div>
+</div>
+
+<!-- 业务员管理卡片 -->
+<div class="card">
+    <div class="card-header" onclick="toggleSection('salespersonSection')">
+        <span><i class="fas fa-users"></i> 业务员管理</span>
+        <span class="toggle-icon">
+            <i class="fas fa-chevron-down"></i>
+        </span>
+    </div>
+    <div class="collapsible-section collapsed" id="salespersonSection">
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-8 mb-3">
+                    <label class="form-label">新增业务员</label>
+                    <input type="text" class="form-control" id="newSalesperson" placeholder="请输入业务员姓名">
+                </div>
+                <div class="col-md-4 mb-3 d-flex align-items-end">
+                    <button type="button" class="btn btn-primary w-100" id="addSalespersonBtn">
+                        <i class="fas fa-plus"></i> 添加
+                    </button>
+                </div>
+            </div>
+            
+            <div class="salesperson-management">
+                <label class="form-label">当前业务员列表</label>
+                <div class="salesperson-list" id="salespersonList">
+                    <!-- 业务员列表将通过JS动态生成 -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 产品管理卡片 -->
+<div class="card">
+    <div class="card-header" onclick="toggleSection('productSection')">
+        <span><i class="fas fa-box"></i> 产品管理</span>
+        <span class="toggle-icon">
+            <i class="fas fa-chevron-down"></i>
+        </span>
+    </div>
+    <div class="collapsible-section collapsed" id="productSection">
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-8 mb-3">
+                    <label class="form-label">新增产品</label>
+                    <input type="text" class="form-control" id="newProduct" placeholder="请输入产品名称">
+                </div>
+                <div class="col-md-4 mb-3 d-flex align-items-end">
+                    <button type="button" class="btn btn-primary w-100" id="addProductBtn">
+                        <i class="fas fa-plus"></i> 添加
+                    </button>
+                </div>
+            </div>
+            
+            <div class="product-management">
+                <label class="form-label">当前产品列表</label>
+                <div class="product-list" id="productList">
+                    <!-- 产品列表将通过JS动态生成 -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 数据管理卡片 -->
+<div class="card save-section">
+    <div class="card-header" onclick="toggleSection('dataManagementSection')">
+        <span><i class="fas fa-hard-drive"></i> 数据管理</span>
+        <span class="toggle-icon">
+            <i class="fas fa-chevron-down"></i>
+        </span>
+    </div>
+    <div class="collapsible-section collapsed" id="dataManagementSection">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <button type="button" class="btn btn-outline w-100" id="backupDataBtn">
+                        <i class="fas fa-file-export"></i> 备份数据
+                    </button>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <input type="file" id="restoreFileInput" accept=".json" style="display: none;">
+                    <button type="button" class="btn btn-outline w-100" id="importDataBtn">
+                        <i class="fas fa-file-import"></i> 导入数据
+                    </button>
+                </div>
+            </div>
+            <div class="form-text">
+                数据已安全保存到设备存储，清除浏览器数据不会丢失
+            </div>
+        </div>
+    </div>
+</div>
+        </div>
+        
+        .details-content {
+            background: white;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 20px;
+            animation: slideUp 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .details-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--ios-border);
+        }
+        
+        .details-title {
+            font-weight: 600;
+            font-size: 18px;
+            color: #000;
+        }
+        
+        .details-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--ios-gray);
+            cursor: pointer;
+            padding: 5px;
         }
         
         .detail-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            grid-template-columns: 1fr;
             gap: 12px;
         }
         
         .detail-item {
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            padding: 12px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            padding: 10px 0;
+            border-bottom: 1px solid var(--ios-light-gray);
         }
         
-        .detail-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: var(--ios-light-gray);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 12px;
-            color: var(--ios-blue);
-            flex-shrink: 0;
-        }
-        
-        .detail-content {
-            flex: 1;
+        .detail-item:last-child {
+            border-bottom: none;
         }
         
         .detail-label {
-            font-size: 13px;
+            font-size: 14px;
             color: var(--ios-gray);
-            margin-bottom: 2px;
+            font-weight: 500;
         }
         
         .detail-value {
-            font-size: 16px;
-            font-weight: 500;
+            font-size: 14px;
+            font-weight: 600;
             color: #000;
+            text-align: right;
+        }
+        
+        .detail-section {
+            margin: 15px 0;
+            padding: 15px;
+            background: var(--ios-light-gray);
+            border-radius: 12px;
+        }
+        
+        .detail-section-title {
+            font-weight: 600;
+            font-size: 15px;
+            color: var(--ios-blue);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
         .toggle-details {
@@ -557,48 +663,15 @@
             font-size: 14px;
             display: inline-flex;
             align-items: center;
-            gap: 4px;
-            padding: 6px 10px;
-            border-radius: 6px;
+            gap: 6px;
+            padding: 8px 12px;
+            border-radius: 8px;
             background: rgba(0, 122, 255, 0.1);
+            transition: all 0.2s;
         }
         
-        .toggle-details i {
-            transition: transform 0.3s ease;
-        }
-        
-        .toggle-details.expanded i {
-            transform: rotate(180deg);
-        }
-        
-        .cost-details {
-            margin-top: 16px;
-            padding-top: 16px;
-            border-top: 1px dashed var(--ios-border);
-        }
-        
-        .cost-details-title {
-            font-weight: 600;
-            margin-bottom: 12px;
-            color: #000;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .commission-details {
-            margin-top: 16px;
-            padding-top: 16px;
-            border-top: 1px dashed var(--ios-border);
-        }
-        
-        .commission-details-title {
-            font-weight: 600;
-            margin-bottom: 12px;
-            color: #000;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        .toggle-details:active {
+            background: rgba(0, 122, 255, 0.2);
         }
     </style>
 </head>
@@ -608,149 +681,237 @@
             <div class="header-content">
                 <div>
                     <h4><i class="fas fa-chart-line"></i> 收入表管理系统</h4>
-                    <p>智能成本计算 - PWA离线可用</p>
+                    <p>智能成本计算 - 移动端优化版</p>
                 </div>
             </div>
         </div>
 
-        <!-- 加载指示器 -->
-        <div class="loading" id="loading">
-            <i class="fas fa-spinner fa-2x"></i>
-            <p>加载中...</p>
-        </div>
-
         <div class="desktop-layout">
             <div class="left-column">
+                <!-- 新增数据记录卡片 - 默认折叠 -->
                 <div class="card">
-                    <div class="card-header">
+                    <div class="card-header" onclick="toggleSection('dataFormSection')">
                         <span><i class="fas fa-plus-circle"></i> 新增数据记录</span>
+                        <span class="toggle-icon">
+                            <i class="fas fa-chevron-down"></i>
+                        </span>
                     </div>
-                    <div class="card-body">
-                        <form id="dataForm">
-                            <div class="row mb-3">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">业务员</label>
-                                    <select class="form-select" id="salesperson" required>
-                                        <option value="">请选择业务员</option>
-                                        <option value="蔡建荣">蔡建荣</option>
-                                        <option value="吴嘉莹">吴嘉莹</option>
-                                        <option value="陈建凤">陈建凤</option>
-                                        <option value="邓映红">邓映红</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">客户</label>
-                                    <input type="text" class="form-control" id="client" required placeholder="请输入客户名称">
-                                </div>
-                            </div>
-                            
-                            <div class="row mb-3">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">办理产品</label>
-                                    <select class="form-select" id="product" required>
-                                        <option value="">请选择产品</option>
-                                        <option value="信用贷">信用贷</option>
-                                        <option value="抵押贷">抵押贷</option>
-                                        <option value="企业经营贷">企业经营贷</option>
-                                        <option value="消费贷">消费贷</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">放款日期</label>
-                                    <input type="date" class="form-control" id="loanDate" required>
-                                </div>
-                            </div>
-                            
-                            <div class="row mb-3">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">放款金额 (元)</label>
-                                    <input type="number" class="form-control" id="loanAmount" required placeholder="0.00" min="0" step="0.01">
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">服务费率</label>
-                                    <div class="input-with-percent">
-                                        <input type="number" class="form-control" id="serviceRate" required placeholder="0" min="0" max="100" step="0.01">
-                                        <span class="percent-symbol">%</span>
-                                    </div>
-                                    <div class="formula-hint">请输入百分比数字，例如：5 表示 5%</div>
-                                </div>
-                            </div>
-                            
-                            <div class="rebate-section mb-3">
-                                <div class="rebate-section-title"><i class="fas fa-percentage"></i> 返点信息</div>
-                                <div class="row">
+                    <div class="collapsible-section collapsed" id="dataFormSection">
+                        <div class="card-body">
+                            <form id="dataForm">
+                                <div class="row mb-3">
                                     <div class="col-md-6 mb-3">
-                                        <label class="form-label">返点</label>
+                                        <label class="form-label">业务员</label>
+                                        <select class="form-select" id="salesperson" required>
+                                            <option value="">请选择业务员</option>
+                                            <!-- 业务员选项将通过JS动态生成 -->
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">客户</label>
+                                        <input type="text" class="form-control" id="client" required placeholder="请输入客户名称" autocomplete="off">
+                                    </div>
+                                </div>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">办理产品</label>
+                                        <select class="form-select" id="product" required>
+                                            <option value="">请选择产品</option>
+                                            <!-- 产品选项将通过JS动态生成 -->
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">放款日期</label>
+                                        <input type="date" class="form-control" id="loanDate" required>
+                                    </div>
+                                </div>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">放款金额 (元)</label>
+                                        <input type="number" class="form-control" id="loanAmount" required placeholder="0.00" min="0" step="0.01">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">服务费率</label>
                                         <div class="input-with-percent">
-                                            <input type="number" class="form-control" id="rebateRate" placeholder="0" min="0" max="100" step="0.01">
+                                            <input type="number" class="form-control" id="serviceRate" required placeholder="0" min="0" max="100" step="0.01">
                                             <span class="percent-symbol">%</span>
                                         </div>
-                                        <div class="formula-hint">请输入百分比数字，例如：1 表示 1%</div>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label">返点金额 (元)</label>
-                                        <input type="number" class="form-control calculated-field" id="rebateAmount" readonly>
-                                        <div class="formula-hint">计算公式: 放款金额 × 返点</div>
+                                        <div class="formula-hint">请输入百分比数字，例如：5 表示 5%</div>
                                     </div>
                                 </div>
-                            </div>
-                            
-                            <div class="row mb-3">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">总收 (元)</label>
-                                    <input type="number" class="form-control calculated-field" id="totalIncome" readonly>
-                                    <div class="formula-hint">计算公式: 放款金额 × 服务费率 + 返点金额</div>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">提成点数</label>
-                                    <select class="form-select" id="points" required>
-                                        <option value="">请选择提成点数</option>
-                                        <option value="0.12">12%</option>
-                                        <option value="0.09">9%</option>
-                                        <option value="0.06">6%</option>
-                                    </select>
-                                </div>
-                            </div>
-                            
-                            <div class="cost-section mb-3">
-                                <div class="cost-section-title"><i class="fas fa-money-bill-wave"></i> 成本明细</div>
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label">平台成本 (元)</label>
-                                        <input type="number" class="form-control calculated-field" id="platformCost" readonly>
-                                        <div class="formula-hint" id="platformCostHint">根据产品类型自动计算</div>
-                                        <div class="smart-cost-info" id="smartCostInfo">
-                                            <i class="fas fa-info-circle"></i> 智能计算: 抵押贷/企业贷 = 放款金额×1%, 信用贷/消费贷 = 放款金额×2%
+                                
+                                <div class="rebate-section mb-3">
+                                    <div class="rebate-section-title"><i class="fas fa-percentage"></i> 返点信息</div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">返点</label>
+                                            <div class="input-with-percent">
+                                                <input type="number" class="form-control" id="rebateRate" placeholder="0" min="0" max="100" step="0.01">
+                                                <span class="percent-symbol">%</span>
+                                            </div>
+                                            <div class="formula-hint">请输入百分比数字，例如：1 表示 1%</div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">返点金额 (元)</label>
+                                            <input type="number" class="form-control calculated-field" id="rebateAmount" readonly>
+                                            <div class="formula-hint">计算公式: 放款金额 × 返点</div>
                                         </div>
                                     </div>
+                                </div>
+                                
+                                <div class="row mb-3">
                                     <div class="col-md-6 mb-3">
-                                        <label class="form-label">渠道成本 (元)</label>
-                                        <input type="number" class="form-control" id="channelCost" required placeholder="0.00" min="0" step="0.01">
+                                        <label class="form-label">总收 (元)</label>
+                                        <input type="number" class="form-control calculated-field" id="totalIncome" readonly>
+                                        <div class="formula-hint">计算公式: 放款金额 × 服务费率 + 返点金额</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">提成点数</label>
+                                        <select class="form-select" id="points" required>
+                                            <option value="">请选择提成点数</option>
+                                            <option value="0.12">12%</option>
+                                            <option value="0.09">9%</option>
+                                            <option value="0.06">6%</option>
+                                        </select>
                                     </div>
                                 </div>
-                                <div class="row">
-                                    <div class="col-12">
-                                        <label class="form-label">总成本 (元)</label>
-                                        <input type="number" class="form-control calculated-field" id="totalCost" readonly>
-                                        <div class="formula-hint">计算公式: 平台成本 + 渠道成本</div>
+                                
+                                <div class="cost-section mb-3">
+                                    <div class="cost-section-title"><i class="fas fa-money-bill-wave"></i> 成本明细</div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">平台成本 (元)</label>
+                                            <input type="number" class="form-control calculated-field" id="platformCost" readonly>
+                                            <div class="formula-hint" id="platformCostHint">根据产品类型自动计算</div>
+                                            <div class="smart-cost-info" id="smartCostInfo">
+                                                <i class="fas fa-info-circle"></i> 智能计算: 抵押贷/企业贷 = 放款金额×1%, 信用贷/消费贷 = 放款金额×2%
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">渠道成本 (元)</label>
+                                            <input type="number" class="form-control" id="channelCost" required placeholder="0.00" min="0" step="0.01">
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <label class="form-label">总成本 (元)</label>
+                                            <input type="number" class="form-control calculated-field" id="totalCost" readonly>
+                                            <div class="formula-hint">计算公式: 平台成本 + 渠道成本</div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            
+                                
+                                <div class="row mb-3">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">提成 (元)</label>
+                                        <input type="number" class="form-control calculated-field" id="commissionPreview" readonly>
+                                        <div class="formula-hint">计算公式: (总收 - 平台成本 - 渠道成本) × 提成点数</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-plus-circle"></i> 添加记录
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 业务员管理卡片 -->
+                <div class="card">
+                    <div class="card-header" onclick="toggleSection('salespersonSection')">
+                        <span><i class="fas fa-users"></i> 业务员管理</span>
+                        <span class="toggle-icon">
+                            <i class="fas fa-chevron-down"></i>
+                        </span>
+                    </div>
+                    <div class="collapsible-section collapsed" id="salespersonSection">
+                        <div class="card-body">
                             <div class="row mb-3">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">提成 (元)</label>
-                                    <input type="number" class="form-control calculated-field" id="commissionPreview" readonly>
-                                    <div class="formula-hint">计算公式: (总收 - 平台成本 - 渠道成本) × 提成点数</div>
+                                <div class="col-md-8 mb-3">
+                                    <label class="form-label">新增业务员</label>
+                                    <input type="text" class="form-control" id="newSalesperson" placeholder="请输入业务员姓名">
+                                </div>
+                                <div class="col-md-4 mb-3 d-flex align-items-end">
+                                    <button type="button" class="btn btn-primary w-100" id="addSalespersonBtn">
+                                        <i class="fas fa-plus"></i> 添加
+                                    </button>
                                 </div>
                             </div>
                             
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-plus-circle"></i> 添加记录
-                                </button>
+                            <div class="salesperson-management">
+                                <label class="form-label">当前业务员列表</label>
+                                <div class="salesperson-list" id="salespersonList">
+                                    <!-- 业务员列表将通过JS动态生成 -->
+                                </div>
                             </div>
-                        </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 产品管理卡片 -->
+                <div class="card">
+                    <div class="card-header" onclick="toggleSection('productSection')">
+                        <span><i class="fas fa-box"></i> 产品管理</span>
+                        <span class="toggle-icon">
+                            <i class="fas fa-chevron-down"></i>
+                        </span>
+                    </div>
+                    <div class="collapsible-section collapsed" id="productSection">
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-md-8 mb-3">
+                                    <label class="form-label">新增产品</label>
+                                    <input type="text" class="form-control" id="newProduct" placeholder="请输入产品名称">
+                                </div>
+                                <div class="col-md-4 mb-3 d-flex align-items-end">
+                                    <button type="button" class="btn btn-primary w-100" id="addProductBtn">
+                                        <i class="fas fa-plus"></i> 添加
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="product-management">
+                                <label class="form-label">当前产品列表</label>
+                                <div class="product-list" id="productList">
+                                    <!-- 产品列表将通过JS动态生成 -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 数据管理卡片 -->
+                <div class="card save-section">
+                    <div class="card-header" onclick="toggleSection('dataManagementSection')">
+                        <span><i class="fas fa-hard-drive"></i> 数据管理</span>
+                        <span class="toggle-icon">
+                            <i class="fas fa-chevron-down"></i>
+                        </span>
+                    </div>
+                    <div class="collapsible-section collapsed" id="dataManagementSection">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <button type="button" class="btn btn-outline w-100" id="backupDataBtn">
+                                        <i class="fas fa-file-export"></i> 备份数据
+                                    </button>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <input type="file" id="restoreFileInput" accept=".json" style="display: none;">
+                                    <button type="button" class="btn btn-outline w-100" id="importDataBtn">
+                                        <i class="fas fa-file-import"></i> 导入数据
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="form-text">
+                                数据已安全保存到设备存储，清除浏览器数据不会丢失
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -815,48 +976,173 @@
         </div>
     </div>
 
-    <!-- Toast 提示容器 -->
-    <div class="toast-container" id="toastContainer"></div>
-
+    <!-- 详情模态框 -->
+    <div class="details-modal" id="detailsModal">
+        <div class="details-content">
+            <div class="details-header">
+                <div class="details-title">记录详情</div>
+                <button class="details-close" onclick="hideDetails()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="detail-grid" id="detailsGrid">
+                <!-- 详情内容将通过JS动态生成 -->
+            </div>
+        </div>
+    </div>
+<!-- 引入我们新建的、用于和GitHub交互的JS文件 -->
+<!-- 这行代码要放在你原有JS代码的前面 -->
+<script src="github-data.js"></script>
     <script>
+// 就放在你所有JS代码的第一行！
+let myIncomeData = [];
         // 初始化数据
         let dataRecords = [];
-        let lastAddedRecordIndex = -1;
+        let currentDetailRecord = null;
+        let salespersonList = ['蔡建荣', '吴嘉莹', '陈建凤', '邓映红'];
+        let productList = ['信用贷', '抵押贷', '企业经营贷', '消费贷'];
 
         // DOM加载完成后执行
         document.addEventListener('DOMContentLoaded', function() {
-            console.log("开始系统初始化...");
-            
-            try {
-                // 显示加载中
-                document.getElementById('loading').style.display = 'block';
-                
-                // 从localStorage加载数据
-                loadDataFromStorage();
-                
-                initMonthSelector();
-                setTodayDate();
-                updateTable();
-                updateSummary();
-                setupEventListeners();
-                
-                console.log("系统初始化完成");
-                
-            } catch (error) {
-                console.error('初始化失败:', error);
-                alert('系统初始化失败，请刷新页面重试。');
-            } finally {
-                document.getElementById('loading').style.display = 'none';
-            }
+            loadDataFromStorage();
+            initMonthSelector();
+            setTodayDate();
+            initSalespersonOptions();
+            initProductOptions();
+            updateTable();
+            updateSummary();
+            setupEventListeners();
         });
+
+        // 切换折叠区域
+        function toggleSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            const icon = document.querySelector(`#${sectionId}`).previousElementSibling.querySelector('.toggle-icon i');
+            
+            section.classList.toggle('collapsed');
+            
+            if (section.classList.contains('collapsed')) {
+                icon.className = 'fas fa-chevron-down';
+            } else {
+                icon.className = 'fas fa-chevron-up';
+            }
+        }
+
+        // 初始化业务员选项
+        function initSalespersonOptions() {
+            const select = document.getElementById('salesperson');
+            select.innerHTML = '<option value="">请选择业务员</option>';
+            
+            salespersonList.forEach(salesperson => {
+                const option = document.createElement('option');
+                option.value = salesperson;
+                option.textContent = salesperson;
+                select.appendChild(option);
+            });
+            
+            updateSalespersonList();
+        }
+
+        // 初始化产品选项
+        function initProductOptions() {
+            const select = document.getElementById('product');
+            select.innerHTML = '<option value="">请选择产品</option>';
+            
+            productList.forEach(product => {
+                const option = document.createElement('option');
+                option.value = product;
+                option.textContent = product;
+                select.appendChild(option);
+            });
+            
+            updateProductList();
+        }
+
+        // 更新业务员列表显示
+        function updateSalespersonList() {
+            const container = document.getElementById('salespersonList');
+            container.innerHTML = '';
+            
+            salespersonList.forEach(salesperson => {
+                const tag = document.createElement('div');
+                tag.className = 'salesperson-tag';
+                tag.innerHTML = `
+                    ${salesperson}
+                    <span class="delete-btn" data-salesperson="${salesperson}">
+                        <i class="fas fa-times"></i>
+                    </span>
+                `;
+                container.appendChild(tag);
+            });
+            
+            // 添加删除事件
+            document.querySelectorAll('#salespersonList .delete-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const salesperson = this.getAttribute('data-salesperson');
+                    deleteSalesperson(salesperson);
+                });
+            });
+        }
+
+        // 更新产品列表显示
+        function updateProductList() {
+            const container = document.getElementById('productList');
+            container.innerHTML = '';
+            
+            productList.forEach(product => {
+                const tag = document.createElement('div');
+                tag.className = 'product-tag';
+                tag.innerHTML = `
+                    ${product}
+                    <span class="delete-btn" data-product="${product}">
+                        <i class="fas fa-times"></i>
+                    </span>
+                `;
+                container.appendChild(tag);
+            });
+            
+            // 添加删除事件
+            document.querySelectorAll('#productList .delete-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const product = this.getAttribute('data-product');
+                    deleteProduct(product);
+                });
+            });
+        }
+
+        // 删除业务员
+        function deleteSalesperson(salesperson) {
+            if (confirm(`确定要删除业务员 "${salesperson}" 吗？`)) {
+                salespersonList = salespersonList.filter(s => s !== salesperson);
+                initSalespersonOptions();
+                saveDataToStorage();
+            }
+        }
+
+        // 删除产品
+        function deleteProduct(product) {
+            if (confirm(`确定要删除产品 "${product}" 吗？`)) {
+                productList = productList.filter(p => p !== product);
+                initProductOptions();
+                saveDataToStorage();
+            }
+        }
 
         // 从localStorage加载数据
         function loadDataFromStorage() {
             try {
                 const savedData = localStorage.getItem('incomeData');
+                const savedSalespersons = localStorage.getItem('salespersonList');
+                const savedProducts = localStorage.getItem('productList');
+                
                 if (savedData) {
                     dataRecords = JSON.parse(savedData);
-                    console.log("从localStorage加载数据记录");
+                }
+                if (savedSalespersons) {
+                    salespersonList = JSON.parse(savedSalespersons);
+                }
+                if (savedProducts) {
+                    productList = JSON.parse(savedProducts);
                 }
             } catch (error) {
                 console.error('从localStorage加载数据失败:', error);
@@ -866,19 +1152,23 @@
         // 保存数据到localStorage
         function saveDataToStorage() {
             try {
+// 在原来的保存函数里添加这行代码
+myIncomeData = incomeList; // 假设你原来的变量叫 incomeList
+// 如果不知道原来的变量名，可以试着不加这行先测试
                 localStorage.setItem('incomeData', JSON.stringify(dataRecords));
-                console.log("数据保存到localStorage");
+                localStorage.setItem('salespersonList', JSON.stringify(salespersonList));
+                localStorage.setItem('productList', JSON.stringify(productList));
             } catch (error) {
                 console.error('保存到localStorage失败:', error);
             }
         }
 
-        // 初始化月份选择器 - 使用数字月份
+        // 初始化月份选择器
         function initMonthSelector() {
             const selector = document.getElementById('monthSelector');
             const currentDate = new Date();
             const currentYear = currentDate.getFullYear();
-            const currentMonth = currentDate.getMonth() + 1; // 月份从0开始，所以+1
+            const currentMonth = currentDate.getMonth() + 1;
             
             // 生成最近12个月的选项
             for (let i = 0; i < 12; i++) {
@@ -891,7 +1181,6 @@
                 option.value = `${year}-${month.toString().padStart(2, '0')}`;
                 option.textContent = `${year}年${month}月`;
                 
-                // 默认选中当前月
                 if (i === 0) {
                     option.selected = true;
                 }
@@ -946,22 +1235,17 @@
             
             tableBody.innerHTML = '';
             
-            sortedRecords.forEach((record, index) => {
+            sortedRecords.forEach((record) => {
                 const row = document.createElement('tr');
-                row.setAttribute('data-id', record.id);
-                
-                if (index === lastAddedRecordIndex) {
-                    row.classList.add('highlight-row');
-                }
                 
                 row.innerHTML = `
                     <td>${record.salesperson}</td>
                     <td>${record.client}</td>
                     <td>${record.commission.toFixed(2)}</td>
                     <td>
-                        <span class="toggle-details" onclick="toggleDetails('${record.id}')">
+                        <span class="toggle-details" onclick="showDetails('${record.id}')">
                             <span>查看详情</span>
-                            <i class="fas fa-chevron-down"></i>
+                            <i class="fas fa-eye"></i>
                         </span>
                         <span class="delete-btn" onclick="deleteRecord('${record.id}')">
                             <i class="fas fa-trash-alt"></i>
@@ -970,185 +1254,108 @@
                 `;
                 
                 tableBody.appendChild(row);
-                
-                // 添加详情行
-                const detailsRow = document.createElement('tr');
-                detailsRow.className = 'details-row';
-                detailsRow.setAttribute('data-id', record.id);
-                detailsRow.innerHTML = `
-                    <td colspan="4">
-                        <div class="details-panel" id="details-${record.id}">
-                            <div class="detail-grid">
-                                <div class="detail-item">
-                                    <div class="detail-icon">
-                                        <i class="fas fa-user"></i>
-                                    </div>
-                                    <div class="detail-content">
-                                        <div class="detail-label">业务员</div>
-                                        <div class="detail-value">${record.salesperson}</div>
-                                    </div>
-                                </div>
-                                <div class="detail-item">
-                                    <div class="detail-icon">
-                                        <i class="fas fa-users"></i>
-                                    </div>
-                                    <div class="detail-content">
-                                        <div class="detail-label">客户</div>
-                                        <div class="detail-value">${record.client}</div>
-                                    </div>
-                                </div>
-                                <div class="detail-item">
-                                    <div class="detail-icon">
-                                        <i class="fas fa-box"></i>
-                                    </div>
-                                    <div class="detail-content">
-                                        <div class="detail-label">产品</div>
-                                        <div class="detail-value">${record.product}</div>
-                                    </div>
-                                </div>
-                                <div class="detail-item">
-                                    <div class="detail-icon">
-                                        <i class="fas fa-calendar-day"></i>
-                                    </div>
-                                    <div class="detail-content">
-                                        <div class="detail-label">放款日期</div>
-                                        <div class="detail-value">${record.loanDate}</div>
-                                    </div>
-                                </div>
-                                <div class="detail-item">
-                                    <div class="detail-icon">
-                                        <i class="fas fa-money-bill-wave"></i>
-                                    </div>
-                                    <div class="detail-content">
-                                        <div class="detail-label">放款金额</div>
-                                        <div class="detail-value">${record.loanAmount.toFixed(2)} 元</div>
-                                    </div>
-                                </div>
-                                <div class="detail-item">
-                                    <div class="detail-icon">
-                                        <i class="fas fa-percent"></i>
-                                    </div>
-                                    <div class="detail-content">
-                                        <div class="detail-label">服务费率</div>
-                                        <div class="detail-value">${record.serviceRate}%</div>
-                                    </div>
-                                </div>
-                                <div class="detail-item">
-                                    <div class="detail-icon">
-                                        <i class="fas fa-hand-holding-usd"></i>
-                                    </div>
-                                    <div class="detail-content">
-                                        <div class="detail-label">返点金额</div>
-                                        <div class="detail-value">${record.rebateAmount.toFixed(2)} 元</div>
-                                    </div>
-                                </div>
-                                <div class="detail-item">
-                                    <div class="detail-icon">
-                                        <i class="fas fa-coins"></i>
-                                    </div>
-                                    <div class="detail-content">
-                                        <div class="detail-label">提成</div>
-                                        <div class="detail-value">${record.commission.toFixed(2)} 元</div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="cost-details">
-                                <div class="cost-details-title">
-                                    <i class="fas fa-receipt"></i> 成本明细
-                                </div>
-                                <div class="detail-grid">
-                                    <div class="detail-item">
-                                        <div class="detail-icon">
-                                            <i class="fas fa-laptop"></i>
-                                        </div>
-                                        <div class="detail-content">
-                                            <div class="detail-label">平台成本</div>
-                                            <div class="detail-value">${record.platformCost.toFixed(2)} 元</div>
-                                        </div>
-                                    </div>
-                                    <div class="detail-item">
-                                        <div class="detail-icon">
-                                            <i class="fas fa-road"></i>
-                                        </div>
-                                        <div class="detail-content">
-                                            <div class="detail-label">渠道成本</div>
-                                            <div class="detail-value">${record.channelCost.toFixed(2)} 元</div>
-                                        </div>
-                                    </div>
-                                    <div class="detail-item">
-                                        <div class="detail-icon">
-                                            <i class="fas fa-calculator"></i>
-                                        </div>
-                                        <div class="detail-content">
-                                            <div class="detail-label">总成本</div>
-                                            <div class="detail-value">${record.totalCost.toFixed(2)} 元</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="commission-details">
-                                <div class="commission-details-title">
-                                    <i class="fas fa-chart-pie"></i> 提成计算
-                                </div>
-                                <div class="detail-grid">
-                                    <div class="detail-item">
-                                        <div class="detail-icon">
-                                            <i class="fas fa-money-check"></i>
-                                        </div>
-                                        <div class="detail-content">
-                                            <div class="detail-label">总收</div>
-                                            <div class="detail-value">${record.totalIncome.toFixed(2)} 元</div>
-                                        </div>
-                                    </div>
-                                    <div class="detail-item">
-                                        <div class="detail-icon">
-                                            <i class="fas fa-percentage"></i>
-                                        </div>
-                                        <div class="detail-content">
-                                            <div class="detail-label">提成点数</div>
-                                            <div class="detail-value">${(record.points * 100).toFixed(0)}%</div>
-                                        </div>
-                                    </div>
-                                    <div class="detail-item">
-                                        <div class="detail-icon">
-                                            <i class="fas fa-hand-holding-usd"></i>
-                                        </div>
-                                        <div class="detail-content">
-                                            <div class="detail-label">提成金额</div>
-                                            <div class="detail-value">${record.commission.toFixed(2)} 元</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </td>
-                `;
-                
-                tableBody.appendChild(detailsRow);
             });
         }
 
-        // 切换详情显示 - 修复后的函数
-        function toggleDetails(recordId) {
-            const detailsPanel = document.getElementById(`details-${recordId}`);
-            const toggleElement = document.querySelector(`.toggle-details[onclick="toggleDetails('${recordId}')"]`);
+        // 显示详情模态框
+        function showDetails(recordId) {
+            const record = dataRecords.find(r => r.id === recordId);
+            if (!record) return;
             
-            if (detailsPanel) {
-                // 切换详情面板显示
-                detailsPanel.classList.toggle('show');
+            currentDetailRecord = record;
+            
+            // 更新详情内容
+            const detailsGrid = document.getElementById('detailsGrid');
+            detailsGrid.innerHTML = `
+                <div class="detail-item">
+                    <span class="detail-label">业务员</span>
+                    <span class="detail-value">${record.salesperson}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">客户</span>
+                    <span class="detail-value">${record.client}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">产品</span>
+                    <span class="detail-value">${record.product}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">放款日期</span>
+                    <span class="detail-value">${record.loanDate}</span>
+                </div>
                 
-                // 更新图标
-                const icon = toggleElement.querySelector('i');
-                if (detailsPanel.classList.contains('show')) {
-                    icon.className = 'fas fa-chevron-up';
-                    toggleElement.classList.add('expanded');
-                } else {
-                    icon.className = 'fas fa-chevron-down';
-                    toggleElement.classList.remove('expanded');
-                }
-            }
+                <div class="detail-section">
+                    <div class="detail-section-title">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span>金额信息</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">放款金额</span>
+                        <span class="detail-value">${record.loanAmount.toFixed(2)} 元</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">服务费率</span>
+                        <span class="detail-value">${record.serviceRate}%</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">返点</span>
+                        <span class="detail-value">${record.rebateRate}%</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">返点金额</span>
+                        <span class="detail-value">${record.rebateAmount.toFixed(2)} 元</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">总收</span>
+                        <span class="detail-value">${record.totalIncome.toFixed(2)} 元</span>
+                    </div>
+                </div>
+                
+                <div class="detail-section">
+                    <div class="detail-section-title">
+                        <i class="fas fa-receipt"></i>
+                        <span>成本明细</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">平台成本</span>
+                        <span class="detail-value">${record.platformCost.toFixed(2)} 元</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">渠道成本</span>
+                        <span class="detail-value">${record.channelCost.toFixed(2)} 元</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">总成本</span>
+                        <span class="detail-value">${record.totalCost.toFixed(2)} 元</span>
+                    </div>
+                </div>
+                
+                <div class="detail-section">
+                    <div class="detail-section-title">
+                        <i class="fas fa-chart-pie"></i>
+                        <span>提成计算</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">提成点数</span>
+                        <span class="detail-value">${(record.points * 100).toFixed(0)}%</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">提成金额</span>
+                        <span class="detail-value">${record.commission.toFixed(2)} 元</span>
+                    </div>
+                </div>
+            `;
+            
+            // 显示模态框
+            const modal = document.getElementById('detailsModal');
+            modal.classList.add('active');
+        }
+
+        // 隐藏详情模态框
+        function hideDetails() {
+            const modal = document.getElementById('detailsModal');
+            modal.classList.remove('active');
+            currentDetailRecord = null;
         }
 
         // 删除记录
@@ -1158,7 +1365,6 @@
                 updateTable();
                 updateSummary();
                 saveDataToStorage();
-                showToast('记录已删除');
             }
         }
 
@@ -1169,29 +1375,38 @@
             updateMonthlySummary();
         }
 
-        // 显示成功提示
-        function showToast(message) {
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.innerHTML = `
-                <i class="fas fa-check-circle"></i>
-                <span>${message}</span>
-            `;
-            
-            document.getElementById('toastContainer').appendChild(toast);
-            
-            // 3秒后自动消失
-            setTimeout(() => {
-                toast.remove();
-            }, 3000);
-        }
-
         // 设置事件监听器
         function setupEventListeners() {
             // 表单提交
             document.getElementById('dataForm').addEventListener('submit', function(e) {
                 e.preventDefault();
                 addRecord();
+            });
+            
+            // 添加业务员
+            document.getElementById('addSalespersonBtn').addEventListener('click', function() {
+                const newSalesperson = document.getElementById('newSalesperson').value.trim();
+                if (newSalesperson && !salespersonList.includes(newSalesperson)) {
+                    salespersonList.push(newSalesperson);
+                    document.getElementById('newSalesperson').value = '';
+                    initSalespersonOptions();
+                    saveDataToStorage();
+                } else if (salespersonList.includes(newSalesperson)) {
+                    alert('该业务员已存在');
+                }
+            });
+            
+            // 添加产品
+            document.getElementById('addProductBtn').addEventListener('click', function() {
+                const newProduct = document.getElementById('newProduct').value.trim();
+                if (newProduct && !productList.includes(newProduct)) {
+                    productList.push(newProduct);
+                    document.getElementById('newProduct').value = '';
+                    initProductOptions();
+                    saveDataToStorage();
+                } else if (productList.includes(newProduct)) {
+                    alert('该产品已存在');
+                }
             });
             
             // 清空数据
@@ -1201,13 +1416,26 @@
                     updateTable();
                     updateSummary();
                     saveDataToStorage();
-                    showToast('数据已清空');
                 }
             });
             
             // 导出CSV
             document.getElementById('exportDataBtn').addEventListener('click', function() {
                 exportToCSV();
+            });
+            
+            // 备份数据
+            document.getElementById('backupDataBtn').addEventListener('click', function() {
+                backupData();
+            });
+            
+            // 导入数据
+            document.getElementById('importDataBtn').addEventListener('click', function() {
+                document.getElementById('restoreFileInput').click();
+            });
+            
+            document.getElementById('restoreFileInput').addEventListener('change', function(e) {
+                restoreData(e.target.files[0]);
             });
             
             // 月份选择器变化
@@ -1220,6 +1448,13 @@
             document.getElementById('points').addEventListener('change', calculateFields);
             document.getElementById('channelCost').addEventListener('input', calculateFields);
             document.getElementById('product').addEventListener('change', calculateFields);
+            
+            // 点击模态框背景关闭
+            document.getElementById('detailsModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    hideDetails();
+                }
+            });
         }
 
         // 添加记录
@@ -1272,15 +1507,11 @@
                 channelCost,
                 totalCost,
                 points,
-                commission,
-                timestamp: new Date().getTime()
+                commission
             };
             
             // 添加到数据数组
             dataRecords.push(record);
-            
-            // 记录最后添加的记录的索引
-            lastAddedRecordIndex = dataRecords.length - 1;
             
             // 更新UI
             updateTable();
@@ -1288,17 +1519,6 @@
             
             // 保存数据
             saveDataToStorage();
-            
-            // 显示成功消息
-            showToast('记录添加成功');
-            
-            // 保持页面位置不变
-            setTimeout(() => {
-                const tableContainer = document.querySelector('.table-responsive');
-                if (tableContainer) {
-                    tableContainer.scrollTop = 0;
-                }
-            }, 100);
             
             // 重置表单
             document.getElementById('dataForm').reset();
@@ -1376,13 +1596,121 @@
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            
-            showToast('数据导出成功');
         }
 
-        // 全局函数声明（用于HTML中的onclick）
-        window.toggleDetails = toggleDetails;
+        // 备份数据
+        function backupData() {
+            const backupData = {
+                records: dataRecords,
+                salespersons: salespersonList,
+                products: productList,
+                backupDate: new Date().toISOString()
+            };
+            
+            const dataStr = JSON.stringify(backupData, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            link.setAttribute('download', `收入表备份_${new Date().toISOString().split('T')[0]}.json`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // 恢复数据
+        function restoreData(file) {
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const backupData = JSON.parse(e.target.result);
+                    
+                    if (backupData.records && Array.isArray(backupData.records)) {
+                        if (confirm('确定要导入备份数据吗？当前数据将被覆盖。')) {
+                            dataRecords = backupData.records;
+                            salespersonList = backupData.salespersons || salespersonList;
+                            productList = backupData.products || productList;
+                            
+                            initSalespersonOptions();
+                            initProductOptions();
+                            updateTable();
+                            updateSummary();
+                            saveDataToStorage();
+                        }
+                    } else {
+                        alert('无效的备份文件');
+                    }
+                } catch (error) {
+                    console.error('恢复数据失败:', error);
+                    alert('恢复数据失败，文件可能已损坏');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // 全局函数声明
+        window.showDetails = showDetails;
+        window.hideDetails = hideDetails;
         window.deleteRecord = deleteRecord;
+        window.toggleSection = toggleSection;
+// ========== 新增的云端操作函数 - 直接复制粘贴即可 ==========
+
+// 设置主密码
+function setMasterPassword() {
+    const password = document.getElementById('master-password-input').value;
+    if (!password) {
+        alert('请先输入加密密码！');
+        return;
+    }
+    window.masterPassword = password;
+    alert('加密密码已设置成功！');
+}
+
+// 保存数据到云端
+async function saveDataToCloud() {
+    if (!window.masterPassword) {
+        alert('请先设置加密密码！');
+        return;
+    }
+    
+    const token = prompt('请输入你的GitHub Token：');
+    if (!token) return;
+    
+    try {
+        // 重点：需要你把这里的 YOUR_DATA_VARIABLE 替换成你实际使用的变量名
+        await encryptAndSaveData(YOUR_DATA_VARIABLE, token);
+        alert('✅ 数据已保存到Git云端！');
+    } catch (error) {
+        alert('❌ 保存失败：' + error.message);
+    }
+}
+
+// 从云端加载数据
+async function loadDataFromCloud() {
+    if (!window.masterPassword) {
+        alert('请先设置加密密码！');
+        return;
+    }
+    
+    const token = prompt('请输入你的GitHub Token：');
+    if (!token) return;
+    
+    try {
+        const loadedData = await loadAndDecryptData(token);
+        if (loadedData) {
+            // 重点：需要你把这里的 YOUR_DATA_VARIABLE 替换成你实际使用的变量名
+            myIncomeData = loadedData;
+            alert('✅ 云端数据加载成功！');
+            // 如果页面需要刷新显示，请取消下面这行的注释
+            // updateTableDisplay(); 
+        }
+    } catch (error) {
+        alert('❌ 加载失败：' + error.message);
+    }
+}
     </script>
 </body>
 </html>
