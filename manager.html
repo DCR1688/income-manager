@@ -990,10 +990,159 @@
             </div>
         </div>
     </div>
-<!-- 引入我们新建的、用于和GitHub交互的JS文件 -->
-<!-- 这行代码要放在你原有JS代码的前面 -->
-<script src="./github-data.js"></script>
+
     <script>
+// ========== 云端存储功能函数 - 直接放在这里 ==========
+
+// 配置信息（需要修改成你的！）
+const GITHUB_OWNER = '你的GitHub用户名'; // 修改为你的GitHub用户名
+const GITHUB_REPO = '你的仓库名字';    // 修改为你的仓库名
+const GITHUB_PATH = 'encrypted-data.json';
+
+// 设置主密码
+function setMasterPassword() {
+    console.log('setMasterPassword函数被调用'); // 调试信息
+    const passwordInput = document.getElementById('master-password-input');
+    const password = passwordInput.value;
+    
+    if (!password) {
+        alert('请先输入加密密码！');
+        return;
+    }
+    
+    window.masterPassword = password;
+    alert('加密密码已设置成功！');
+    console.log('密码已设置为：', password);
+}
+
+// 加密函数
+function encryptData(dataString, password) {
+    try {
+        const encrypted = CryptoJS.AES.encrypt(dataString, password);
+        return encrypted.toString();
+    } catch (error) {
+        console.error('加密失败:', error);
+        alert('加密失败：' + error.message);
+        throw error;
+    }
+}
+
+// 解密函数
+function decryptData(encryptedString, password) {
+    try {
+        const bytes = CryptoJS.AES.decrypt(encryptedString, password);
+        const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+        if (!decrypted) {
+            throw new Error('解密失败，请检查密码是否正确');
+        }
+        return decrypted;
+    } catch (error) {
+        console.error('解密失败:', error);
+        alert('解密失败：' + error.message);
+        throw error;
+    }
+}
+
+// 保存到GitHub
+async function saveDataToGitHub(encryptedData, token) {
+    const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`;
+    const contentBase64 = btoa(unescape(encodeURIComponent(encryptedData)));
+
+    let fileSha = '';
+    try {
+        const response = await fetch(apiUrl, {
+            headers: { 'Authorization': `token ${token}` }
+        });
+        if (response.ok) {
+            const fileInfo = await response.json();
+            fileSha = fileInfo.sha;
+        }
+    } catch (error) {
+        console.log('创建新文件');
+    }
+
+    const body = {
+        message: '更新收入数据',
+        content: contentBase64,
+        sha: fileSha
+    };
+
+    const putResponse = await fetch(apiUrl, {
+        method: 'PUT',
+        headers: {
+            'Authorization': `token ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+    });
+
+    if (!putResponse.ok) {
+        throw new Error('保存到GitHub失败');
+    }
+
+    return await putResponse.json();
+}
+
+// 整合保存函数
+async function saveDataToCloud() {
+    if (!window.masterPassword) {
+        alert('请先设置加密密码！');
+        return;
+    }
+    
+    const token = prompt('请输入您的GitHub Token：');
+    if (!token) return;
+    
+    try {
+        // 这里需要你知道你的数据变量名，比如叫 incomeData
+        const dataToSave = window.incomeData || []; // 如果不知道变量名，先用空数组测试
+        const dataString = JSON.stringify(dataToSave);
+        const encryptedData = encryptData(dataString, window.masterPassword);
+        
+        await saveDataToGitHub(encryptedData, token);
+        alert('✅ 数据已加密保存到云端！');
+    } catch (error) {
+        alert('❌ 保存失败：' + error.message);
+    }
+}
+
+// 整合加载函数
+async function loadDataFromCloud() {
+    if (!window.masterPassword) {
+        alert('请先设置加密密码！');
+        return;
+    }
+    
+    const token = prompt('请输入您的GitHub Token：');
+    if (!token) return;
+    
+    try {
+        const response = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`, {
+            headers: { 'Authorization': `token ${token}` }
+        });
+        
+        if (response.status === 404) {
+            alert('没有找到云端数据！');
+            return;
+        }
+        
+        if (!response.ok) throw new Error('加载失败');
+        
+        const fileInfo = await response.json();
+        const encryptedData = atob(fileInfo.content);
+        const decryptedString = decryptData(encryptedData, window.masterPassword);
+        const loadedData = JSON.parse(decryptedString);
+        
+        // 这里需要你知道你的数据变量名
+        window.incomeData = loadedData; // 如果不知道变量名，先这样写
+        alert('✅ 云端数据加载成功！');
+        
+    } catch (error) {
+        alert('❌ 加载失败：' + error.message);
+    }
+}
+
+// ========== 云端函数结束 ==========
 // 就放在你所有JS代码的第一行！
 let myIncomeData = [];
         // 初始化数据
