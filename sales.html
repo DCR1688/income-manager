@@ -552,18 +552,6 @@
     </style>
 </head>
 <body>
-!-- ========== 新增的云端操作按钮 ========== -->
-<div style="border: 2px solid blue; padding: 10px; margin: 10px; background: #f0f8ff;">
-    <h3>🌩️ 云端存储功能</h3>
-    <p>首先设置密码：<input type="password" id="master-password-input" placeholder="输入加密密码"> 
-       <button onclick="alert">设置密码</button>
-    </p>
-    <p>然后使用下面按钮：</p>
-    <button onclick="alert" style="background: #4CAF50; color: white; padding: 10px;">💾 保存到云端</button>
-    <button onclick="alert" style="background: #2196F3; color: white; padding: 10px;">☁️ 从云端加载</button>
-    <p style="color: red; font-size: 12px;">注意：点击按钮后会弹窗要求输入GitHub Token，请输入你之前生成的那串字符</p>
-</div>
-<!-- ========== 新增结束 ========== -->
     <div class="container">
         <div class="header">
             <div class="logo">
@@ -1150,61 +1138,6 @@ myIncomeData = incomeList; // 假设你原来的变量叫 incomeList
             clearDataButton.addEventListener('click', clearAllData);
             exportDataButton.addEventListener('click', exportToCSV);
         });
-// ========== 新增的云端操作函数 - 直接复制粘贴即可 ==========
-
-// 设置主密码
-function setMasterPassword() {
-    const password = document.getElementById('master-password-input').value;
-    if (!password) {
-        alert('请先输入加密密码！');
-        return;
-    }
-    window.masterPassword = password;
-    alert('加密密码已设置成功！');
-}
-
-// 保存数据到云端
-async function saveDataToCloud() {
-    if (!window.masterPassword) {
-        alert('请先设置加密密码！');
-        return;
-    }
-    
-    const token = prompt('请输入你的GitHub Token：');
-    if (!token) return;
-    
-    try {
-        // 重点：需要你把这里的 YOUR_DATA_VARIABLE 替换成你实际使用的变量名
-        await encryptAndSaveData(YOUR_DATA_VARIABLE, token);
-        alert('✅ 数据已保存到Git云端！');
-    } catch (error) {
-        alert('❌ 保存失败：' + error.message);
-    }
-}
-
-// 从云端加载数据
-async function loadDataFromCloud() {
-    if (!window.masterPassword) {
-        alert('请先设置加密密码！');
-        return;
-    }
-    
-    const token = prompt('请输入你的GitHub Token：');
-    if (!token) return;
-    
-    try {
-        const loadedData = await loadAndDecryptData(token);
-        if (loadedData) {
-            // 重点：需要你把这里的 YOUR_DATA_VARIABLE 替换成你实际使用的变量名
-            myIncomeData = loadedData;
-            alert('✅ 云端数据加载成功！');
-            // 如果页面需要刷新显示，请取消下面这行的注释
-            // updateTableDisplay(); 
-        }
-    } catch (error) {
-        alert('❌ 加载失败：' + error.message);
-    }
-}
     </script>
 </body>
 </html>
