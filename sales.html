@@ -718,6 +718,45 @@
 
 
     <script>
+// ========== 云端存储核心函数 ==========
+// 确保这段代码在页面的所有其他JS代码之前！
+
+// 设置主密码
+function setMasterPassword() {
+    console.log('setMasterPassword函数开始执行');
+    const passwordInput = document.getElementById('master-password-input');
+    
+    if (!passwordInput) {
+        alert('错误：找不到密码输入框！');
+        return;
+    }
+    
+    const password = passwordInput.value;
+    console.log('输入的密码：', password);
+    
+    if (!password) {
+        alert('请先输入加密密码！');
+        return;
+    }
+    
+    // 保存密码到全局变量
+    window.masterPassword = password;
+    alert('加密密码已设置成功！');
+    console.log('密码已保存到window.masterPassword');
+}
+
+// 保存到云端函数
+function saveDataToCloud() {
+    console.log('saveDataToCloud函数开始执行');
+    alert('保存功能已点击！后续需要配置GitHub信息');
+}
+
+// 从云端加载函数  
+function loadDataFromCloud() {
+    console.log('loadDataFromCloud函数开始执行');
+    alert('加载功能已点击！后续需要配置GitHub信息');
+}
+// ========== 函数定义结束 ==========
 // ========== 云端存储功能函数 - 直接放在这里 ==========
 
 // 配置信息（需要修改成你的！）
