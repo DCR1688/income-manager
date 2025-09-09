@@ -1,0 +1,1428 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>贷款收入计算器 - 优化响应式版</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- 引入加密库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+        
+        body {
+            background: #f5f5f7;
+            color: #333;
+            padding: 15px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .header {
+            background: #ffffff;
+            color: #000;
+            padding: 20px;
+            text-align: center;
+            border-radius: 14px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        
+        .header h1 {
+            font-size: 22px;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        .header p {
+            opacity: 0.6;
+            font-size: 14px;
+        }
+        
+        .logo {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        
+        .logo-circle {
+            width: 70px;
+            height: 70px;
+            border-radius: 18px;
+            background: #007AFF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 30px;
+        }
+        
+        .main-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .input-section {
+            flex: 1;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .section-card {
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 18px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        
+        .section-title {
+            color: #000;
+            margin-bottom: 18px;
+            font-size: 17px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .section-title i {
+            color: #007AFF;
+        }
+        
+        .input-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .input-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #000;
+            font-size: 15px;
+            padding-left: 5px;
+        }
+        
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #e5e5ea;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.2s;
+            background: #ffffff;
+        }
+        
+        .input-group select {
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23007AFF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            background-size: 16px;
+            padding-right: 45px;
+        }
+        
+        .input-group input:focus, .input-group select:focus {
+            border-color: #007AFF;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.2);
+        }
+        
+        .commission-info {
+            background: #e6f2ff;
+            border-radius: 12px;
+            padding: 16px;
+            margin: 16px 0;
+            text-align: center;
+            font-size: 15px;
+            color: #007AFF;
+            border: 1px solid #b3d7ff;
+        }
+        
+        .btn {
+            padding: 14px 18px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: #007AFF;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+        
+        .btn-danger {
+            background: #FF3B30;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #d32f2f;
+        }
+        
+        .btn-secondary {
+            background: #34C759;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #2a9e48;
+        }
+
+        /* 云端存储按钮样式 */
+        .btn-cloud {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-cloud:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+            transform: translateY(-1px);
+        }
+        
+        .table-section {
+            flex: 2;
+            min-width: 300px;
+        }
+        
+        .table-container {
+            background: #ffffff;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 500px;
+        }
+        
+        th, td {
+            padding: 14px 12px;
+            text-align: left;
+            border-bottom: 1px solid #e5e5ea;
+            font-size: 14px;
+        }
+        
+        th {
+            background: #f9f9f9;
+            font-weight: 600;
+            color: #000;
+            position: sticky;
+            top: 0;
+        }
+        
+        .commission-high {
+            color: #34C759;
+            font-weight: 600;
+        }
+        
+        .commission-low {
+            color: #FF3B30;
+            font-weight: 600;
+        }
+        
+        .action-cell {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: #007AFF;
+            padding: 6px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .action-btn:hover {
+            background: #f0f0f0;
+        }
+        
+        .btn-delete {
+            color: #FF3B30;
+        }
+        
+        .summary-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-top: 10px;
+        }
+        
+        .summary-card {
+            flex: 1;
+            min-width: 180px;
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 18px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+        
+        .summary-card h3 {
+            color: #000;
+            margin-bottom: 12px;
+            font-size: 15px;
+            font-weight: 600;
+        }
+        
+        .summary-value {
+            font-size: 22px;
+            font-weight: 700;
+            color: #007AFF;
+        }
+        
+        .monthly-summary {
+            background: #34C759;
+            color: white;
+        }
+        
+        .monthly-summary h3 {
+            color: white;
+        }
+        
+        .monthly-summary .summary-value {
+            color: white;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #8e8e93;
+            font-size: 14px;
+            background: #ffffff;
+            border-radius: 14px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            margin-top: 20px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .action-buttons .btn {
+            flex: 1;
+            min-width: 150px;
+        }
+        
+        /* 详情弹窗样式 */
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .detail-icon {
+            width: 24px;
+            text-align: center;
+            color: #007AFF;
+        }
+        
+        .detail-label {
+            font-weight: 500;
+            min-width: 80px;
+            font-size: 14px;
+        }
+        
+        .detail-value {
+            flex: 1;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        /* 云端存储卡片样式 */
+        .cloud-storage-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .cloud-storage-card .section-title {
+            color: white;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .cloud-storage-card .section-title i {
+            color: white;
+        }
+        
+        .cloud-input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+        
+        .cloud-input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .cloud-input:focus {
+            border-color: white;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+        }
+        
+        /* 响应式设计 - 移动设备 */
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .input-group {
+                min-width: 100%;
+            }
+            
+            .action-buttons .btn {
+                min-width: 100%;
+            }
+            
+            .summary-card {
+                min-width: calc(50% - 10px);
+            }
+            
+            table {
+                min-width: 100%;
+            }
+            
+            th, td {
+                padding: 10px 8px;
+                font-size: 13px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 20px;
+            }
+            
+            .section-card {
+                padding: 15px;
+            }
+            
+            .summary-card {
+                min-width: 100%;
+            }
+            
+            .input-group input, .input-group select {
+                padding: 12px;
+            }
+            
+            .btn {
+                padding: 12px 15px;
+                font-size: 15px;
+            }
+            
+            th, td {
+                padding: 8px 6px;
+                font-size: 12px;
+            }
+            
+            .action-cell {
+                flex-direction: column;
+                gap: 5px;
+            }
+        }
+        
+        /* 超小屏幕设备 */
+        @media (max-width: 360px) {
+            .container {
+                gap: 15px;
+            }
+            
+            .header {
+                padding: 15px;
+            }
+            
+            .logo-circle {
+                width: 60px;
+                height: 60px;
+                font-size: 24px;
+            }
+            
+            .input-row {
+                gap: 12px;
+            }
+            
+            .section-title {
+                font-size: 16px;
+            }
+            
+            .commission-info {
+                font-size: 14px;
+                padding: 12px;
+            }
+            
+            .input-group label {
+                font-size: 14px;
+            }
+            
+            .summary-card h3 {
+                font-size: 14px;
+            }
+            
+            .summary-value {
+                font-size: 18px;
+            }
+            
+            th, td {
+                padding: 6px 4px;
+                font-size: 11px;
+            }
+        }
+        
+        /* 大屏幕设备优化 */
+        @media (min-width: 1400px) {
+            .container {
+                max-width: 1400px;
+            }
+            
+            .input-section {
+                flex: 0.8;
+            }
+            
+            .table-section {
+                flex: 2.2;
+            }
+        }
+        
+        /* 弹窗样式 */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+        
+        .popup-content {
+            background: white;
+            border-radius: 14px;
+            padding: 20px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e5e5ea;
+        }
+        
+        .popup-title {
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #8e8e93;
+        }
+        
+        /* 表格紧凑模式 */
+        .compact-table th, 
+        .compact-table td {
+            padding: 10px 8px;
+        }
+        
+        /* 移动设备上的表格滚动 */
+        .table-scroll {
+            overflow-x: auto;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <div class="logo-circle">
+                    <i class="fas fa-calculator"></i>
+                </div>
+            </div>
+            <h1>贷款收入计算器</h1>
+            <p>计算贷款提成，数据自动保存 - 优化响应式版</p>
+        </div>
+        
+        <div class="main-content">
+            <div class="input-section">
+                <div class="commission-info">
+                    <i class="fas fa-info-circle"></i> 提成计算公式: (放款金额 × 服务费率 - 渠道成本 - 平台成本 + 返点) × 30%
+                </div>
+                
+                <!-- 云端存储卡片 -->
+                <div class="section-card cloud-storage-card">
+                    <div class="section-title">
+                        <i class="fas fa-cloud"></i> 云端存储
+                    </div>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label for="cloudPassword"><i class="fas fa-key"></i> 加密密码</label>
+                            <input type="password" id="cloudPassword" class="cloud-input" placeholder="设置云端加密密码">
+                        </div>
+                    </div>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <button id="setPasswordBtn" class="btn btn-cloud w-100">
+                                <i class="fas fa-key"></i> 设置密码
+                            </button>
+                        </div>
+                        <div class="input-group">
+                            <button id="saveToCloudBtn" class="btn btn-cloud w-100">
+                                <i class="fas fa-cloud-upload-alt"></i> 保存到云端
+                            </button>
+                        </div>
+                    </div>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <button id="loadFromCloudBtn" class="btn btn-cloud w-100">
+                                <i class="fas fa-cloud-download-alt"></i> 从云端加载
+                            </button>
+                        </div>
+                        <div class="input-group">
+                            <button id="testCloudBtn" class="btn btn-cloud w-100">
+                                <i class="fas fa-wifi"></i> 测试连接
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 基本信息卡片 -->
+                <div class="section-card">
+                    <div class="section-title">
+                        <i class="fas fa-info-circle"></i> 基本信息
+                    </div>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label for="clientName"><i class="fas fa-user"></i> 客户名称</label>
+                            <input type="text" id="clientName" placeholder="请输入客户名称">
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="loanDate"><i class="fas fa-calendar-alt"></i> 放款日期</label>
+                            <input type="date" id="loanDate">
+                        </div>
+                    </div>
+                    
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label for="productType"><i class="fas fa-box"></i> 产品类型</label>
+                            <select id="productType">
+                                <option value="" disabled selected>-- 请选择产品类型 --</option>
+                                <option value="抵押">抵押贷</option>
+                                <option value="信用贷">信用贷</option>
+                                <option value="企业贷">企业贷</option>
+                            </select>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="loanAmount"><i class="fas fa-money-bill-wave"></i> 放款金额 (元)</label>
+                            <input type="number" id="loanAmount" placeholder="请输入放款金额" step="0.01">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 费率信息卡片 -->
+                <div class="section-card">
+                    <div class="section-title">
+                        <i class="fas fa-percent"></i> 费率信息
+                    </div>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label for="serviceRate"><i class="fas fa-hand-holding-usd"></i> 服务费率 (%)</label>
+                            <input type="number" id="serviceRate" placeholder="请输入服务费率" step="0.01">
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="rebateRate"><i class="fas fa-gift"></i> 返点费率 (%)</label>
+                            <input type="number" id="rebateRate" placeholder="请输入返点费率" step="0.01" value="0">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 成本信息卡片 -->
+                <div class="section-card">
+                    <div class="section-title">
+                        <i class="fas fa-money-bill-alt"></i> 成本信息
+                    </div>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label for="channelCost"><i class="fas fa-tag"></i> 渠道成本 (元)</label>
+                            <input type="number" id="channelCost" placeholder="请输入渠道成本" step="0.01">
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="platformCost"><i class="fas fa-server"></i> 平台成本 (元)</label>
+                            <input type="text" id="platformCost" placeholder="自动计算" readonly>
+                        </div>
+                    </div>
+                    
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label for="rebateAmount"><i class="fas fa-gift"></i> 返点金额 (元)</label>
+                            <input type="text" id="rebateAmount" placeholder="自动计算" readonly>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="commission"><i class="fas fa-coins"></i> 提成 (元)</label>
+                            <input type="text" id="commission" placeholder="自动计算" readonly>
+                        </div>
+                    </div>
+                </div>
+                
+                <button id="addRow" class="btn btn-primary">
+                    <i class="fas fa-plus-circle"></i> 添加新行
+                </button>
+                
+                <div class="summary-section">
+                    <div class="summary-card">
+                        <h3><i class="fas fa-chart-pie"></i> 总提成汇总</h3>
+                        <div class="summary-value" id="totalCommission">0</div>
+                    </div>
+                    
+                    <div class="summary-card monthly-summary">
+                        <h3><i class="fas fa-calendar-check"></i> 月度提成汇总</h3>
+                        <div class="summary-value" id="monthlyCommission">0</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="table-section">
+                <div class="table-container">
+                    <div class="table-scroll">
+                        <table id="dataTable">
+                            <thead>
+                                <tr>
+                                    <th>客户名称</th>
+                                    <th>放款金额</th>
+                                    <th>提成</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- 数据行将通过JavaScript动态添加 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button id="clearData" class="btn btn-danger">
+                        <i class="fas fa-trash-alt"></i> 清除数据
+                    </button>
+                    <button id="exportData" class="btn btn-secondary">
+                        <i class="fas fa-file-export"></i> 导出CSV
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>© 2023 贷款收入计算器 - 优化响应式版 | 支持返点与平台成本计算</p>
+        </div>
+    </div>
+
+    <script>
+        // ========== 云端存储配置 ==========
+        const GITHUB_OWNER = 'DCR1688'; // 请修改为您的GitHub用户名
+        const GITHUB_REPO = 'income-manager';      // 请修改为您的仓库名
+        const GITHUB_PATH = 'loan-data.enc';
+        let masterPassword = '';
+
+        // ========== 云端存储功能函数 ==========
+        function setMasterPassword() {
+            const passwordInput = document.getElementById('cloudPassword');
+            const password = passwordInput.value;
+            
+            if (!password) {
+                alert('请先输入加密密码！');
+                return;
+            }
+            
+            masterPassword = password;
+            alert('✅ 加密密码设置成功！');
+            console.log('密码已设置');
+        }
+
+        function encryptData(dataString, password) {
+            try {
+                const encrypted = CryptoJS.AES.encrypt(dataString, password);
+                return encrypted.toString();
+            } catch (error) {
+                console.error('加密失败:', error);
+                throw new Error('数据加密失败');
+            }
+        }
+
+        function decryptData(encryptedString, password) {
+            try {
+                const bytes = CryptoJS.AES.decrypt(encryptedString, password);
+                const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+                if (!decrypted) {
+                    throw new Error('解密失败，密码可能错误');
+                }
+                return decrypted;
+            } catch (error) {
+                console.error('解密失败:', error);
+                throw new Error('数据解密失败');
+            }
+        }
+
+        async function saveDataToGitHub(encryptedData, token) {
+            const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`;
+            const contentBase64 = btoa(unescape(encodeURIComponent(encryptedData)));
+
+            let fileSha = '';
+            try {
+                const response = await fetch(apiUrl, {
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'User-Agent': 'LoanCalculatorApp'
+                    }
+                });
+                if (response.ok) {
+                    const fileInfo = await response.json();
+                    fileSha = fileInfo.sha;
+                }
+            } catch (error) {
+                console.log('创建新文件');
+            }
+
+            const body = {
+                message: '更新贷款数据',
+                content: contentBase64,
+                sha: fileSha
+            };
+
+            const response = await fetch(apiUrl, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `token ${token}`,
+                    'Content-Type': 'application/json',
+                    'User-Agent': 'LoanCalculatorApp'
+                },
+                body: JSON.stringify(body)
+            });
+
+            if (!response.ok) {
+                throw new Error('保存到GitHub失败');
+            }
+
+            return await response.json();
+        }
+
+        async function loadDataFromGitHub(token) {
+            const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'User-Agent': 'LoanCalculatorApp'
+                    }
+                });
+
+                if (response.status === 404) {
+                    return null;
+                }
+
+                if (!response.ok) {
+                    throw new Error('从GitHub加载数据失败');
+                }
+
+                const fileInfo = await response.json();
+                const encryptedContent = atob(fileInfo.content);
+                return encryptedContent;
+
+            } catch (error) {
+                console.error('读取数据失败:', error);
+                throw error;
+            }
+        }
+
+        async function saveDataToCloud() {
+            if (!masterPassword) {
+                alert('请先设置加密密码！');
+                return;
+            }
+            
+            const token = prompt('请输入您的GitHub Personal Access Token：');
+            if (!token) {
+                alert('请输入Token才能保存到云端！');
+                return;
+            }
+
+            try {
+                const dataToSave = {
+                    records: getTableData(),
+                    backupDate: new Date().toISOString()
+                };
+
+                const dataString = JSON.stringify(dataToSave);
+                const encryptedData = encryptData(dataString, masterPassword);
+                
+                await saveDataToGitHub(encryptedData, token);
+                alert('✅ 数据已加密保存到云端GitHub仓库！');
+            } catch (error) {
+                console.error('保存失败:', error);
+                alert('❌ 保存失败: ' + error.message);
+            }
+        }
+
+        async function loadDataFromCloud() {
+            if (!masterPassword) {
+                alert('请先设置加密密码！');
+                return;
+            }
+            
+            const token = prompt('请输入您的GitHub Personal Access Token：');
+            if (!token) {
+                alert('请输入Token才能从云端加载数据！');
+                return;
+            }
+
+            try {
+                const encryptedData = await loadDataFromGitHub(token);
+                if (!encryptedData) {
+                    alert('没有找到云端数据！');
+                    return;
+                }
+
+                const decryptedString = decryptData(encryptedData, masterPassword);
+                const loadedData = JSON.parse(decryptedString);
+
+                // 更新表格数据
+                loadDataIntoTable(loadedData.records || []);
+                updateSummary();
+
+                alert('✅ 云端数据加载成功！');
+            } catch (error) {
+                console.error('加载失败:', error);
+                alert('❌ 加载失败: ' + error.message);
+            }
+        }
+
+        function testCloudConnection() {
+            alert('🔗 测试云端连接功能\n\n请确保：\n1. 已创建GitHub私有仓库\n2. 已生成Personal Access Token\n3. 已设置加密密码');
+        }
+
+        // ========== 原有的业务逻辑函数 ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取DOM元素
+            const clientNameInput = document.getElementById('clientName');
+            const loanDateInput = document.getElementById('loanDate');
+            const productTypeInput = document.getElementById('productType');
+            const loanAmountInput = document.getElementById('loanAmount');
+            const serviceRateInput = document.getElementById('serviceRate');
+            const channelCostInput = document.getElementById('channelCost');
+            const rebateRateInput = document.getElementById('rebateRate');
+            const rebateAmountInput = document.getElementById('rebateAmount');
+            const platformCostInput = document.getElementById('platformCost');
+            const commissionInput = document.getElementById('commission');
+            const addRowButton = document.getElementById('addRow');
+            const clearDataButton = document.getElementById('clearData');
+            const exportDataButton = document.getElementById('exportData');
+            const totalCommissionElement = document.getElementById('totalCommission');
+            const monthlyCommissionElement = document.getElementById('monthlyCommission');
+            const tableBody = document.querySelector('#dataTable tbody');
+            const setPasswordBtn = document.getElementById('setPasswordBtn');
+            const saveToCloudBtn = document.getElementById('saveToCloudBtn');
+            const loadFromCloudBtn = document.getElementById('loadFromCloudBtn');
+            const testCloudBtn = document.getElementById('testCloudBtn');
+            
+            // 设置默认日期为今天
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            loanDateInput.value = `${yyyy}-${mm}-${dd}`;
+            
+            // 从本地存储加载数据
+            loadData();
+            
+            // 格式化数字显示，整数不显示小数部分
+            function formatNumber(value) {
+                const num = parseFloat(value);
+                if (isNaN(num)) return "0";
+                
+                // 检查是否为整数
+                if (Number.isInteger(num)) {
+                    return num.toString();
+                }
+                
+                // 保留两位小数
+                return num.toFixed(2);
+            }
+            
+            // 格式化日期显示 (YYYY-MM-DD)
+            function formatDate(dateString) {
+                if (!dateString) return "";
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) return dateString;
+                
+                const yyyy = date.getFullYear();
+                const mm = String(date.getMonth() + 1).padStart(2, '0');
+                const dd = String(date.getDate()).padStart(2, '0');
+                
+                return `${yyyy}-${mm}-${dd}`;
+            }
+            
+            // 计算返点金额
+            function calculateRebate() {
+                const loanAmount = parseFloat(loanAmountInput.value) || 0;
+                const rebateRate = parseFloat(rebateRateInput.value) || 0;
+                
+                const rebateAmount = (loanAmount * rebateRate / 100);
+                rebateAmountInput.value = formatNumber(rebateAmount);
+                
+                return rebateAmount;
+            }
+            
+            // 计算平台成本
+            function calculatePlatformCost() {
+                const loanAmount = parseFloat(loanAmountInput.value) || 0;
+                const productType = productTypeInput.value;
+                
+                // 如果未选择产品类型，返回0
+                if (!productType) return 0;
+                
+                let platformCostRate = 0.01; // 默认1%
+                if (productType === "信用贷") {
+                    platformCostRate = 0.02; // 信用贷2%
+                }
+                
+                const platformCost = (loanAmount * platformCostRate);
+                platformCostInput.value = formatNumber(platformCost);
+                
+                return platformCost;
+            }
+            
+            // 计算提成 - 修改为 (放款金额*服务费率-渠道成本-平台成本+返点)*30%
+            function calculateCommission() {
+                const loanAmount = parseFloat(loanAmountInput.value) || 0;
+                const serviceRate = parseFloat(serviceRateInput.value) || 0;
+                const channelCost = parseFloat(channelCostInput.value) || 0;
+                const platformCost = calculatePlatformCost();
+                const rebateAmount = calculateRebate();
+                
+                const commission = ((loanAmount * serviceRate / 100 - channelCost - platformCost + rebateAmount) * 0.3);
+                commissionInput.value = formatNumber(commission);
+                
+                return commission;
+            }
+            
+            // 自动计算
+            function setupAutoCalculation() {
+                const inputsToWatch = [loanAmountInput, serviceRateInput, channelCostInput, rebateRateInput];
+                
+                inputsToWatch.forEach(input => {
+                    input.addEventListener('input', calculateCommission);
+                });
+                
+                productTypeInput.addEventListener('change', calculateCommission);
+            }
+            
+            // 初始化自动计算
+            setupAutoCalculation();
+            
+            // 更新总汇总
+            function updateSummary() {
+                let total = 0;
+                let monthlyTotal = 0;
+                const currentMonth = new Date().getMonth();
+                const currentYear = new Date().getFullYear();
+                const rows = tableBody.querySelectorAll('tr');
+                
+                rows.forEach(row => {
+                    const commission = parseFloat(row.getAttribute('data-commission')) || 0;
+                    total += commission;
+                    
+                    // 计算月度汇总
+                    const dateStr = row.getAttribute('data-date');
+                    if (dateStr) {
+                        const date = new Date(dateStr);
+                        if (date.getMonth() === currentMonth && date.getFullYear() === currentYear) {
+                            monthlyTotal += commission;
+                        }
+                    }
+                });
+                
+                totalCommissionElement.textContent = formatNumber(total);
+                monthlyCommissionElement.textContent = formatNumber(monthlyTotal);
+            }
+            
+            // 获取表格数据
+            function getTableData() {
+                const rows = tableBody.querySelectorAll('tr');
+                const data = [];
+                
+                rows.forEach(row => {
+                    data.push(JSON.parse(row.getAttribute('data-details')));
+                });
+                
+                return data;
+            }
+            
+            // 加载数据到表格
+            function loadDataIntoTable(data) {
+                tableBody.innerHTML = '';
+                
+                data.forEach(item => {
+                    const newRow = document.createElement('tr');
+                    newRow.setAttribute('data-date', item.loanDate);
+                    newRow.setAttribute('data-commission', item.commission);
+                    newRow.setAttribute('data-details', JSON.stringify(item));
+                    
+                    newRow.innerHTML = `
+                        <td>${item.clientName}</td>
+                        <td>${formatNumber(item.loanAmount)}</td>
+                        <td class="${parseFloat(item.commission) >= 1000 ? 'commission-high' : 'commission-low'}">${formatNumber(item.commission)}</td>
+                        <td class="action-cell">
+                            <button class="action-btn expand-btn" title="查看详情">
+                                <i class="fas fa-info-circle"></i>
+                            </button>
+                            <button class="action-btn btn-delete delete-row" title="删除">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </td>
+                    `;
+                    
+                    tableBody.appendChild(newRow);
+                    
+                    // 添加删除行的事件监听器
+                    newRow.querySelector('.delete-row').addEventListener('click', function() {
+                        if (confirm('确定要删除这一行吗？')) {
+                            newRow.remove();
+                            saveDataToLocalStorage();
+                            updateSummary();
+                        }
+                    });
+                    
+                    // 添加查看详情的事件监听器
+                    newRow.querySelector('.expand-btn').addEventListener('click', function() {
+                        showDetailsPopup(item);
+                    });
+                });
+                
+                saveDataToLocalStorage();
+                updateSummary();
+            }
+            
+            // 添加新行
+            function addRow() {
+                const clientName = clientNameInput.value.trim();
+                const loanDate = loanDateInput.value;
+                const productType = productTypeInput.value;
+                const loanAmount = parseFloat(loanAmountInput.value) || 0;
+                const serviceRate = parseFloat(serviceRateInput.value) || 0;
+                const channelCost = parseFloat(channelCostInput.value) || 0;
+                const rebateRate = parseFloat(rebateRateInput.value) || 0;
+                const rebateAmount = parseFloat(rebateAmountInput.value) || 0;
+                const platformCost = parseFloat(platformCostInput.value) || 0;
+                const commission = parseFloat(commissionInput.value) || 0;
+                
+                // 验证必填字段
+                if (!clientName || !productType || !loanAmount || !serviceRate) {
+                    alert('请填写必填字段：客户名称、产品类型、放款金额和服务费率');
+                    return;
+                }
+                
+                const newRow = document.createElement('tr');
+                newRow.setAttribute('data-date', loanDate);
+                newRow.setAttribute('data-commission', commission);
+                newRow.setAttribute('data-details', JSON.stringify({
+                    clientName,
+                    productType,
+                    loanDate,
+                    loanAmount,
+                    serviceRate,
+                    channelCost,
+                    rebateAmount,
+                    platformCost,
+                    commission
+                }));
+                
+                newRow.innerHTML = `
+                    <td>${clientName}</td>
+                    <td>${formatNumber(loanAmount)}</td>
+                    <td class="${commission >= 1000 ? 'commission-high' : 'commission-low'}">${formatNumber(commission)}</td>
+                    <td class="action-cell">
+                        <button class="action-btn expand-btn" title="查看详情">
+                            <i class="fas fa-info-circle"></i>
+                        </button>
+                        <button class="action-btn btn-delete delete-row" title="删除">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </td>
+                `;
+                
+                // 添加到表格
+                tableBody.appendChild(newRow);
+                
+                // 添加删除行的事件监听器
+                newRow.querySelector('.delete-row').addEventListener('click', function() {
+                    if (confirm('确定要删除这一行吗？')) {
+                        newRow.remove();
+                        saveDataToLocalStorage();
+                        updateSummary();
+                    }
+                });
+                
+                // 添加查看详情的事件监听器
+                newRow.querySelector('.expand-btn').addEventListener('click', function() {
+                    const details = JSON.parse(newRow.getAttribute('data-details'));
+                    showDetailsPopup(details);
+                });
+                
+                // 清除表单
+                clearForm();
+                
+                // 保存数据到本地存储
+                saveDataToLocalStorage();
+                
+                // 更新汇总
+                updateSummary();
+            }
+            
+            // 显示详情弹窗
+            function showDetailsPopup(details) {
+                // 创建弹窗
+                const popupOverlay = document.createElement('div');
+                popupOverlay.className = 'popup-overlay';
+                
+                const popupContent = document.createElement('div');
+                popupContent.className = 'popup-content';
+                
+                popupContent.innerHTML = `
+                    <div class="popup-header">
+                        <div class="popup-title">
+                            <i class="fas fa-info-circle" style="color: #007AFF;"></i> 
+                            <span>贷款详情 - ${details.clientName}</span>
+                        </div>
+                        <button class="close-btn">&times;</button>
+                    </div>
+                    <div>
+                        <div class="detail-item">
+                            <div class="detail-icon"><i class="fas fa-user"></i></div>
+                            <div class="detail-label">客户名称:</div>
+                            <div class="detail-value">${details.clientName}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-icon"><i class="fas fa-calendar-alt"></i></div>
+                            <div class="detail-label">放款日期:</div>
+                            <div class="detail-value">${formatDate(details.loanDate)}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-icon"><i class="fas fa-money-bill-wave"></i></div>
+                            <div class="detail-label">放款金额:</div>
+                            <div class="detail-value">${formatNumber(details.loanAmount)} 元</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-icon"><i class="fas fa-hand-holding-usd"></i></div>
+                            <div class="detail-label">服务费率:</div>
+                            <div class="detail-value">${details.serviceRate}%</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-icon"><i class="fas fa-tag"></i></div>
+                            <div class="detail-label">渠道成本:</div>
+                            <div class="detail-value">${formatNumber(details.channelCost)} 元</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-icon"><i class="fas fa-gift"></i></div>
+                            <div class="detail-label">返点金额:</div>
+                            <div class="detail-value">${formatNumber(details.rebateAmount)} 元</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-icon"><i class="fas fa-server"></i></div>
+                            <div class="detail-label">平台成本:</div>
+                            <div class="detail-value">${formatNumber(details.platformCost)} 元</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-icon"><i class="fas fa-coins"></i></div>
+                            <div class="detail-label">提成:</div>
+                            <div class="detail-value" style="font-weight: bold; color: ${details.commission >= 1000 ? '#34C759' : '#FF3B30'};">${formatNumber(details.commission)} 元</div>
+                        </div>
+                    </div>
+                `;
+                
+                popupOverlay.appendChild(popupContent);
+                document.body.appendChild(popupOverlay);
+                
+                // 添加关闭事件
+                const closeBtn = popupContent.querySelector('.close-btn');
+                closeBtn.addEventListener('click', function() {
+                    document.body.removeChild(popupOverlay);
+                });
+                
+                // 点击外部关闭
+                popupOverlay.addEventListener('click', function(e) {
+                    if (e.target === popupOverlay) {
+                        document.body.removeChild(popupOverlay);
+                    }
+                });
+            }
+            
+            // 清除表单
+            function clearForm() {
+                clientNameInput.value = '';
+                productTypeInput.selectedIndex = 0;
+                loanAmountInput.value = '';
+                serviceRateInput.value = '';
+                channelCostInput.value = '';
+                rebateRateInput.value = '0';
+            }
+            
+            // 保存数据到本地存储
+            function saveDataToLocalStorage() {
+                const rows = tableBody.querySelectorAll('tr');
+                const data = [];
+                
+                rows.forEach(row => {
+                    data.push(JSON.parse(row.getAttribute('data-details')));
+                });
+                
+                localStorage.setItem('loanData', JSON.stringify(data));
+            }
+            
+            // 从本地存储加载数据
+            function loadData() {
+                const savedData = localStorage.getItem('loanData');
+                
+                if (savedData) {
+                    try {
+                        const data = JSON.parse(savedData);
+                        loadDataIntoTable(data);
+                    } catch (e) {
+                        console.error('加载数据失败:', e);
+                    }
+                }
+            }
+            
+            // 清除所有数据
+            function clearAllData() {
+                if (confirm('确定要清除所有数据吗？此操作不可恢复！')) {
+                    tableBody.innerHTML = '';
+                    localStorage.removeItem('loanData');
+                    updateSummary();
+                }
+            }
+            
+            // 导出CSV
+            function exportToCSV() {
+                const rows = tableBody.querySelectorAll('tr');
+                
+                if (rows.length === 0) {
+                    alert('没有数据可导出！');
+                    return;
+                }
+                
+                let csvContent = "客户名称,产品类型,放款日期,放款金额,服务费率(%),渠道成本,返点金额,平台成本,提成\n";
+                
+                rows.forEach(row => {
+                    const details = JSON.parse(row.getAttribute('data-details'));
+                    const rowData = [
+                        details.clientName,
+                        details.productType,
+                        formatDate(details.loanDate),
+                        details.loanAmount,
+                        details.serviceRate,
+                        details.channelCost,
+                        details.rebateAmount,
+                        details.platformCost,
+                        details.commission
+                    ];
+                    
+                    // 处理可能包含逗号的内容
+                    const escapedData = rowData.map(item => `"${item}"`);
+                    csvContent += escapedData.join(',') + '\n';
+                });
+                
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `loan_data_${new Date().toISOString().slice(0, 10)}.csv`;
+                document.body.appendChild(a);
+                a.click();
+                
+                // 清理
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 100);
+            }
+            
+            // 事件监听器
+            addRowButton.addEventListener('click', addRow);
+            clearDataButton.addEventListener('click', clearAllData);
+            exportDataButton.addEventListener('click', exportToCSV);
+            setPasswordBtn.addEventListener('click', setMasterPassword);
+            saveToCloudBtn.addEventListener('click', saveDataToCloud);
+            loadFromCloudBtn.addEventListener('click', loadDataFromCloud);
+            testCloudBtn.addEventListener('click', testCloudConnection);
+        });
+    </script>
+</body>
+</html>
