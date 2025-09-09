@@ -13,6 +13,7 @@
             padding: 0;
             box-sizing: border-box;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
         
         body {
@@ -134,6 +135,9 @@
             font-size: 16px;
             transition: all 0.2s;
             background: #ffffff;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
         }
         
         .input-group select {
@@ -562,6 +566,8 @@
             margin-bottom: 20px;
             padding-bottom: 15px;
             border-bottom: 1px solid #e5e5ea;
+            position: relative;
+            z-index: 1001;
         }
         
         .popup-title {
@@ -578,6 +584,8 @@
             font-size: 20px;
             cursor: pointer;
             color: #8e8e93;
+            position: relative;
+            z-index: 1002;
         }
         
         /* 表格紧凑模式 */
@@ -590,6 +598,36 @@
         .table-scroll {
             overflow-x: auto;
             width: 100%;
+        }
+
+        /* 同步状态指示器 */
+        .sync-indicator {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .sync-indicator.syncing {
+            background: #e6f3ff;
+            color: #007AFF;
+        }
+        
+        .sync-indicator.synced {
+            background: #e6f4ea;
+            color: #137333;
+        }
+        
+        .sync-indicator.error {
+            background: #fce8e6;
+            color: #c5221f;
         }
     </style>
 </head>
@@ -783,192 +821,41 @@
         </div>
     </div>
 
+    <!-- 同步状态指示器 -->
+    <div class="sync-indicator" id="syncIndicator" style="display: none;">
+        <i class="fas fa-sync"></i>
+        <span>同步中...</span>
+    </div>
+
     <script>
         // ========== 云端存储配置 ==========
         const GITHUB_OWNER = 'DCR1688'; // 请修改为您的GitHub用户名
         const GITHUB_REPO = 'income-manager';      // 请修改为您的仓库名
         const GITHUB_PATH = 'loan-data.enc';
         let masterPassword = '';
+        let cloudConfig = {};
+        let autoSaveTimeout = null;
 
-        // ========== 云端存储功能函数 ==========
-        function setMasterPassword() {
-            const passwordInput = document.getElementById('cloudPassword');
-            const password = passwordInput.value;
-            
-            if (!password) {
-                alert('请先输入加密密码！');
-                return;
-            }
-            
-            masterPassword = password;
-            alert('✅ 加密密码设置成功！');
-            console.log('密码已设置');
-        }
-
-        function encryptData(dataString, password) {
-            try {
-                const encrypted = CryptoJS.AES.encrypt(dataString, password);
-                return encrypted.toString();
-            } catch (error) {
-                console.error('加密失败:', error);
-                throw new Error('数据加密失败');
-            }
-        }
-
-        function decryptData(encryptedString, password) {
-            try {
-                const bytes = CryptoJS.AES.decrypt(encryptedString, password);
-                const decrypted = bytes.toString(CryptoJS.enc.Utf8);
-                if (!decrypted) {
-                    throw new Error('解密失败，密码可能错误');
-                }
-                return decrypted;
-            } catch (error) {
-                console.error('解密失败:', error);
-                throw new Error('数据解密失败');
-            }
-        }
-
-        async function saveDataToGitHub(encryptedData, token) {
-            const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`;
-            const contentBase64 = btoa(unescape(encodeURIComponent(encryptedData)));
-
-            let fileSha = '';
-            try {
-                const response = await fetch(apiUrl, {
-                    headers: {
-                        'Authorization': `token ${token}`,
-                        'User-Agent': 'LoanCalculatorApp'
-                    }
-                });
-                if (response.ok) {
-                    const fileInfo = await response.json();
-                    fileSha = fileInfo.sha;
-                }
-            } catch (error) {
-                console.log('创建新文件');
-            }
-
-            const body = {
-                message: '更新贷款数据',
-                content: contentBase64,
-                sha: fileSha
-            };
-
-            const response = await fetch(apiUrl, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `token ${token}`,
-                    'Content-Type': 'application/json',
-                    'User-Agent': 'LoanCalculatorApp'
-                },
-                body: JSON.stringify(body)
-            });
-
-            if (!response.ok) {
-                throw new Error('保存到GitHub失败');
-            }
-
-            return await response.json();
-        }
-
-        async function loadDataFromGitHub(token) {
-            const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`;
-
-            try {
-                const response = await fetch(apiUrl, {
-                    headers: {
-                        'Authorization': `token ${token}`,
-                        'User-Agent': 'LoanCalculatorApp'
-                    }
-                });
-
-                if (response.status === 404) {
-                    return null;
-                }
-
-                if (!response.ok) {
-                    throw new Error('从GitHub加载数据失败');
-                }
-
-                const fileInfo = await response.json();
-                const encryptedContent = atob(fileInfo.content);
-                return encryptedContent;
-
-            } catch (error) {
-                console.error('读取数据失败:', error);
-                throw error;
-            }
-        }
-
-        async function saveDataToCloud() {
-            if (!masterPassword) {
-                alert('请先设置加密密码！');
-                return;
-            }
-            
-            const token = prompt('请输入您的GitHub Personal Access Token：');
-            if (!token) {
-                alert('请输入Token才能保存到云端！');
-                return;
-            }
-
-            try {
-                const dataToSave = {
-                    records: getTableData(),
-                    backupDate: new Date().toISOString()
-                };
-
-                const dataString = JSON.stringify(dataToSave);
-                const encryptedData = encryptData(dataString, masterPassword);
-                
-                await saveDataToGitHub(encryptedData, token);
-                alert('✅ 数据已加密保存到云端GitHub仓库！');
-            } catch (error) {
-                console.error('保存失败:', error);
-                alert('❌ 保存失败: ' + error.message);
-            }
-        }
-
-        async function loadDataFromCloud() {
-            if (!masterPassword) {
-                alert('请先设置加密密码！');
-                return;
-            }
-            
-            const token = prompt('请输入您的GitHub Personal Access Token：');
-            if (!token) {
-                alert('请输入Token才能从云端加载数据！');
-                return;
-            }
-
-            try {
-                const encryptedData = await loadDataFromGitHub(token);
-                if (!encryptedData) {
-                    alert('没有找到云端数据！');
-                    return;
-                }
-
-                const decryptedString = decryptData(encryptedData, masterPassword);
-                const loadedData = JSON.parse(decryptedString);
-
-                // 更新表格数据
-                loadDataIntoTable(loadedData.records || []);
-                updateSummary();
-
-                alert('✅ 云端数据加载成功！');
-            } catch (error) {
-                console.error('加载失败:', error);
-                alert('❌ 加载失败: ' + error.message);
-            }
-        }
-
-        function testCloudConnection() {
-            alert('🔗 测试云端连接功能\n\n请确保：\n1. 已创建GitHub私有仓库\n2. 已生成Personal Access Token\n3. 已设置加密密码');
-        }
-
-        // ========== 原有的业务逻辑函数 ==========
+        // ========== 页面加载初始化 ==========
         document.addEventListener('DOMContentLoaded', function() {
+            // 获取云端配置
+            try {
+                const configStr = sessionStorage.getItem('cloudConfig');
+                if (configStr) {
+                    cloudConfig = JSON.parse(configStr);
+                    GITHUB_OWNER = cloudConfig.username;
+                    GITHUB_REPO = cloudConfig.repo || 'income-manager';
+                    masterPassword = cloudConfig.password;
+                    
+                    // 自动从云端加载数据
+                    setTimeout(() => {
+                        autoLoadFromCloud(cloudConfig.token);
+                    }, 1000);
+                }
+            } catch (e) {
+                console.error('加载云端配置失败:', e);
+            }
+            
             // 获取DOM元素
             const clientNameInput = document.getElementById('clientName');
             const loanDateInput = document.getElementById('loanDate');
@@ -1156,6 +1043,8 @@
                             newRow.remove();
                             saveDataToLocalStorage();
                             updateSummary();
+                            // 触发自动保存
+                            triggerAutoSave();
                         }
                     });
                     
@@ -1226,6 +1115,8 @@
                         newRow.remove();
                         saveDataToLocalStorage();
                         updateSummary();
+                        // 触发自动保存
+                        triggerAutoSave();
                     }
                 });
                 
@@ -1243,6 +1134,9 @@
                 
                 // 更新汇总
                 updateSummary();
+                
+                // 触发自动保存
+                triggerAutoSave();
             }
             
             // 显示详情弹窗
@@ -1365,6 +1259,8 @@
                     tableBody.innerHTML = '';
                     localStorage.removeItem('loanData');
                     updateSummary();
+                    // 触发自动保存
+                    triggerAutoSave();
                 }
             }
             
@@ -1414,12 +1310,251 @@
                 }, 100);
             }
             
+            // ========== 自动同步功能 ==========
+            
+            // 自动从云端加载数据
+            async function autoLoadFromCloud(token) {
+                if (!token || !masterPassword) return;
+                
+                try {
+                    showSyncStatus('syncing', '正在从云端加载数据...');
+                    
+                    const encryptedData = await loadDataFromGitHub(token);
+                    
+                    if (!encryptedData) {
+                        showSyncStatus('synced', '已加载本地数据（云端无数据）');
+                        return;
+                    }
+
+                    const decryptedString = decryptData(encryptedData, masterPassword);
+                    const loadedData = JSON.parse(decryptedString);
+
+                    // 更新数据
+                    loadDataIntoTable(loadedData.records || []);
+                    
+                    showSyncStatus('synced', '云端数据加载成功！');
+                } catch (error) {
+                    console.error('从云端加载数据失败:', error);
+                    showSyncStatus('error', '云端加载失败: ' + error.message);
+                }
+            }
+            
+            // 触发自动保存
+            function triggerAutoSave() {
+                if (!cloudConfig.token) return;
+                
+                clearTimeout(autoSaveTimeout);
+                autoSaveTimeout = setTimeout(() => {
+                    saveDataToCloud(cloudConfig.token);
+                }, 3000); // 3秒后保存
+            }
+            
+            // 显示同步状态
+            function showSyncStatus(status, message) {
+                const indicator = document.getElementById('syncIndicator');
+                indicator.style.display = 'flex';
+                indicator.className = 'sync-indicator ' + status;
+                indicator.innerHTML = `<i class="fas fa-${getSyncIcon(status)}"></i><span>${message}</span>`;
+                
+                // 5秒后隐藏
+                if (status !== 'syncing') {
+                    setTimeout(() => {
+                        indicator.style.display = 'none';
+                    }, 5000);
+                }
+            }
+            
+            // 获取同步状态图标
+            function getSyncIcon(status) {
+                switch(status) {
+                    case 'syncing': return 'sync-alt';
+                    case 'synced': return 'check-circle';
+                    case 'error': return 'exclamation-circle';
+                    default: return 'info-circle';
+                }
+            }
+            
+            // ========== 云端存储功能函数 ==========
+            function setMasterPassword() {
+                const passwordInput = document.getElementById('cloudPassword');
+                const password = passwordInput.value;
+                
+                if (!password) {
+                    alert('请先输入加密密码！');
+                    return;
+                }
+                
+                masterPassword = password;
+                alert('✅ 加密密码设置成功！');
+                console.log('密码已设置');
+            }
+
+            function encryptData(dataString, password) {
+                try {
+                    const encrypted = CryptoJS.AES.encrypt(dataString, password);
+                    return encrypted.toString();
+                } catch (error) {
+                    console.error('加密失败:', error);
+                    throw new Error('数据加密失败');
+                }
+            }
+
+            function decryptData(encryptedString, password) {
+                try {
+                    const bytes = CryptoJS.AES.decrypt(encryptedString, password);
+                    const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+                    if (!decrypted) {
+                        throw new Error('解密失败，密码可能错误');
+                    }
+                    return decrypted;
+                } catch (error) {
+                    console.error('解密失败:', error);
+                    throw new Error('数据解密失败');
+                }
+            }
+
+            async function saveDataToGitHub(encryptedData, token) {
+                const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`;
+                const contentBase64 = btoa(unescape(encodeURIComponent(encryptedData)));
+
+                let fileSha = '';
+                try {
+                    const response = await fetch(apiUrl, {
+                        headers: {
+                            'Authorization': `token ${token}`,
+                            'User-Agent': 'LoanCalculatorApp'
+                        }
+                    });
+                    if (response.ok) {
+                        const fileInfo = await response.json();
+                        fileSha = fileInfo.sha;
+                    }
+                } catch (error) {
+                    console.log('创建新文件');
+                }
+
+                const body = {
+                    message: '更新贷款数据',
+                    content: contentBase64,
+                    sha: fileSha
+                };
+
+                const response = await fetch(apiUrl, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Content-Type': 'application/json',
+                        'User-Agent': 'LoanCalculatorApp'
+                    },
+                    body: JSON.stringify(body)
+                });
+
+                if (!response.ok) {
+                    throw new Error('保存到GitHub失败');
+                }
+
+                return await response.json();
+            }
+
+            async function loadDataFromGitHub(token) {
+                const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`;
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        headers: {
+                            'Authorization': `token ${token}`,
+                            'User-Agent': 'LoanCalculatorApp'
+                        }
+                    });
+
+                    if (response.status === 404) {
+                        return null;
+                    }
+
+                    if (!response.ok) {
+                        throw new Error('从GitHub加载数据失败');
+                    }
+
+                    const fileInfo = await response.json();
+                    const encryptedContent = atob(fileInfo.content);
+                    return encryptedContent;
+
+                } catch (error) {
+                    console.error('读取数据失败:', error);
+                    throw error;
+                }
+            }
+
+            async function saveDataToCloud(token) {
+                if (!masterPassword) {
+                    console.error('请先设置加密密码！');
+                    return;
+                }
+                
+                showSyncStatus('syncing', '正在保存到云端...');
+                
+                try {
+                    const dataToSave = {
+                        records: getTableData(),
+                        backupDate: new Date().toISOString()
+                    };
+
+                    const dataString = JSON.stringify(dataToSave);
+                    const encryptedData = encryptData(dataString, masterPassword);
+                    
+                    await saveDataToGitHub(encryptedData, token);
+                    showSyncStatus('synced', '数据已保存到云端！');
+                } catch (error) {
+                    console.error('保存失败:', error);
+                    showSyncStatus('error', '保存失败: ' + error.message);
+                }
+            }
+
+            async function loadDataFromCloud() {
+                if (!masterPassword) {
+                    alert('请先设置加密密码！');
+                    return;
+                }
+                
+                const token = prompt('请输入您的GitHub Personal Access Token：');
+                if (!token) {
+                    alert('请输入Token才能从云端加载数据！');
+                    return;
+                }
+
+                try {
+                    showSyncStatus('syncing', '正在从云端加载数据...');
+                    
+                    const encryptedData = await loadDataFromGitHub(token);
+                    if (!encryptedData) {
+                        showSyncStatus('synced', '没有找到云端数据！');
+                        return;
+                    }
+
+                    const decryptedString = decryptData(encryptedData, masterPassword);
+                    const loadedData = JSON.parse(decryptedString);
+
+                    // 更新表格数据
+                    loadDataIntoTable(loadedData.records || []);
+                    updateSummary();
+
+                    showSyncStatus('synced', '云端数据加载成功！');
+                } catch (error) {
+                    console.error('加载失败:', error);
+                    showSyncStatus('error', '加载失败: ' + error.message);
+                }
+            }
+
+            function testCloudConnection() {
+                alert('🔗 测试云端连接功能\n\n请确保：\n1. 已创建GitHub私有仓库\n2. 已生成Personal Access Token\n3. 已设置加密密码');
+            }
+            
             // 事件监听器
             addRowButton.addEventListener('click', addRow);
             clearDataButton.addEventListener('click', clearAllData);
             exportDataButton.addEventListener('click', exportToCSV);
             setPasswordBtn.addEventListener('click', setMasterPassword);
-            saveToCloudBtn.addEventListener('click', saveDataToCloud);
+            saveToCloudBtn.addEventListener('click', () => saveDataToCloud(cloudConfig.token));
             loadFromCloudBtn.addEventListener('click', loadDataFromCloud);
             testCloudBtn.addEventListener('click', testCloudConnection);
         });
