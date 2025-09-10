@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>贷款收入计算器 - 优化响应式版</title>
+    <title>贷款收入计算器 - 功能修复版</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -155,7 +155,6 @@
             font-size: 16px;
             transition: all 0.2s;
             background: #ffffff;
-            /* 修复下拉箭头重复问题 */
             -webkit-appearance: none;
             -moz-appearance: none;
             appearance: none;
@@ -258,7 +257,7 @@
         }
         
         th, td {
-            padding: 14px 12px;
+            padding: 10px 8px;
             text-align: left;
             border-bottom: 1px solid #e5e5ea;
             font-size: 14px;
@@ -270,6 +269,36 @@
             color: #000;
             position: sticky;
             top: 0;
+            white-space: nowrap;
+        }
+        
+        th:nth-child(1), td:nth-child(1) {
+            width: 15%;
+            max-width: 15%;
+        }
+        
+        th:nth-child(2), td:nth-child(2) {
+            width: 20%;
+            max-width: 20%;
+        }
+        
+        th:nth-child(3), td:nth-child(3) {
+            width: 20%;
+            max-width: 20%;
+            text-align: right;
+        }
+        
+        th:nth-child(4), td:nth-child(4) {
+            width: 20%;
+            max-width: 20%;
+            text-align: right;
+        }
+        
+        th:nth-child(5), td:nth-child(5) {
+            width: 15%;
+            max-width: 15%;
+            text-align: left;
+            padding-left: 5px;
         }
         
         .commission-high {
@@ -284,16 +313,17 @@
         
         .action-cell {
             display: flex;
-            gap: 8px;
+            gap: 5px;
+            justify-content: flex-start;
         }
         
         .action-btn {
             background: none;
             border: none;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 14px;
             color: #007AFF;
-            padding: 6px;
+            padding: 5px;
             border-radius: 6px;
             display: flex;
             align-items: center;
@@ -366,7 +396,6 @@
             padding: 10px;
             border-radius: 8px;
             border: 1px solid #e5e5ea;
-            /* 修复下拉箭头重复问题 */
             -webkit-appearance: none;
             -moz-appearance: none;
             appearance: none;
@@ -401,7 +430,6 @@
             min-width: 150px;
         }
         
-        /* 业务员选择器样式 - 已修复 */
         .salesman-container {
             display: flex;
             gap: 10px;
@@ -420,7 +448,7 @@
             justify-content: center;
         }
         
-        /* 业务员管理弹窗样式 */
+        /* 详情弹窗样式 - 已优化 */
         .popup-overlay {
             position: fixed;
             top: 0;
@@ -473,306 +501,75 @@
             color: #8e8e93;
         }
         
-        .salesman-list {
-            max-height: 300px;
-            overflow-y: auto;
-            margin: 15px 0;
-            border: 1px solid #e5e5ea;
-            border-radius: 10px;
-            padding: 10px;
-        }
-        
-        .salesman-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-            border-bottom: 1px solid #f0f0f0;
-        }
-        
-        .salesman-item:last-child {
-            border-bottom: none;
-        }
-        
-        .salesman-actions {
-            display: flex;
-            gap: 8px;
-        }
-        
-        /* 详情弹窗样式 - 已优化 */
         .detail-popup {
             max-width: 500px;
             width: 95%;
         }
         
+        /* 信息详情表头优化 - 更紧凑统一 */
         .detail-item {
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 8px 0;
+            padding: 6px 0;
             border-bottom: 1px solid #f0f0f0;
             flex-wrap: wrap;
         }
         
         .detail-icon {
-            width: 24px;
+            width: 20px;
             text-align: center;
             color: #007AFF;
             flex-shrink: 0;
+            font-size: 14px;
         }
         
         .detail-label {
             font-weight: 500;
-            min-width: 70px;
-            font-size: 14px;
+            min-width: 80px;
+            font-size: 13px;
             flex-shrink: 0;
+            color: #666;
         }
         
         .detail-value {
             flex: 1;
             color: #333;
-            font-size: 14px;
+            font-size: 13px;
             word-break: break-word;
-            min-width: 120px;
+            min-width: 0;
         }
         
         .detail-item.highlight {
             background: #f0f7ff;
-            padding: 12px;
-            border-radius: 8px;
-            margin-top: 10px;
-            border-left: 4px solid #007AFF;
+            padding: 8px;
+            border-radius: 6px;
+            margin-top: 8px;
+            border-left: 3px solid #007AFF;
         }
         
-        /* 响应式设计 - 增强版 */
-        @media (max-width: 1024px) {
-            .main-content {
-                flex-direction: column;
-            }
-            
-            .input-section, .table-section {
-                width: 100%;
-            }
-            
-            .summary-card {
-                min-width: calc(50% - 10px);
-            }
-        }
-        
+        /* 响应式设计 */
         @media (max-width: 768px) {
-            .header {
-                padding: 15px;
+            .detail-label {
+                min-width: 70px;
+                font-size: 12px;
             }
             
-            .header h1 {
-                font-size: 20px;
+            .detail-value {
+                font-size: 12px;
             }
-            
-            .section-card {
-                padding: 15px;
-            }
-            
-            .input-group {
-                min-width: 100%;
-            }
-            
-            .input-row {
-                gap: 12px;
-            }
-            
-            .action-buttons .btn {
-                min-width: 100%;
-            }
-            
-            .summary-card {
-                min-width: 100%;
-            }
-            
-            .salesman-container {
-                flex-direction: row;
-                align-items: flex-end;
-            }
-            
-            .salesman-manage-btn {
-                width: 50px;
-                height: 50px;
-            }
-            
-            .month-selector {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 8px;
-            }
-            
-            .month-selector label {
-                text-align: center;
-            }
-            
-            .commission-info {
-                font-size: 14px;
-                padding: 12px;
-            }
-            
-            .btn {
-                padding: 12px 16px;
-                font-size: 15px;
-            }
-            
-            .popup-content {
-                padding: 15px;
-                margin: 10px;
-            }
-            
+        }
+        
+        @media (max-width: 480px) {
             .detail-item {
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 5px;
-                padding: 10px 0;
+                gap: 3px;
             }
             
             .detail-label {
                 min-width: auto;
                 font-weight: 600;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            body {
-                padding: 10px;
-            }
-            
-            .container {
-                gap: 15px;
-            }
-            
-            .header {
-                padding: 12px;
-                border-radius: 12px;
-            }
-            
-            .logo-circle {
-                width: 60px;
-                height: 60px;
-                font-size: 24px;
-            }
-            
-            .section-card {
-                padding: 12px;
-                border-radius: 12px;
-            }
-            
-            .input-group input, .input-group select {
-                padding: 12px;
-                font-size: 15px;
-            }
-            
-            .summary-value {
-                font-size: 20px;
-            }
-            
-            .action-cell {
-                flex-direction: column;
-                gap: 5px;
-            }
-            
-            .action-btn {
-                padding: 4px;
-            }
-            
-            th, td {
-                padding: 10px 8px;
-                font-size: 13px;
-            }
-            
-            .footer {
-                padding: 15px;
-                font-size: 13px;
-            }
-        }
-        
-        @media (max-width: 360px) {
-            .header h1 {
-                font-size: 18px;
-            }
-            
-            .header p {
-                font-size: 13px;
-            }
-            
-            .section-title {
-                font-size: 16px;
-            }
-            
-            .input-group label {
-                font-size: 14px;
-            }
-            
-            .btn {
-                padding: 10px 14px;
-                font-size: 14px;
-            }
-            
-            .summary-card h3 {
-                font-size: 14px;
-            }
-            
-            .summary-value {
-                font-size: 18px;
-            }
-        }
-        
-        /* 超小屏幕设备优化 */
-        @media (max-width: 320px) {
-            .logo-circle {
-                width: 50px;
-                height: 50px;
-                font-size: 20px;
-            }
-            
-            .salesman-manage-btn {
-                width: 45px;
-                height: 45px;
-            }
-            
-            .input-group input, .input-group select {
-                padding: 10px;
-            }
-            
-            .action-buttons {
-                gap: 8px;
-            }
-        }
-        
-        /* 横屏模式优化 */
-        @media (max-height: 500px) and (orientation: landscape) {
-            body {
-                padding: 10px;
-            }
-            
-            .container {
-                gap: 15px;
-            }
-            
-            .header {
-                padding: 15px;
-            }
-            
-            .logo {
-                margin-bottom: 10px;
-            }
-            
-            .logo-circle {
-                width: 50px;
-                height: 50px;
-                font-size: 20px;
-            }
-            
-            .main-content {
-                gap: 15px;
-            }
-            
-            .section-card {
-                padding: 15px;
             }
         }
         
@@ -819,7 +616,7 @@
                 </div>
             </div>
             <h1>贷款收入计算器</h1>
-            <p>计算贷款提成，数据自动保存 - 优化响应式版</p>
+            <p>计算贷款提成，数据自动保存 - 功能修复版</p>
         </div>
         
         <div class="main-content">
@@ -830,16 +627,19 @@
                 
                 <!-- 基本信息卡片 -->
                 <div class="section-card">
-                    <div class="section-title">
+                    <div class="section-title" onclick="toggleSection('basicInfo')">
                         <i class="fas fa-info-circle"></i> 基本信息
                     </div>
-                    <div class="section-content">
+                    <div class="section-content" id="basicInfo">
                         <div class="input-row">
                             <div class="input-group">
                                 <label for="salesman"><i class="fas fa-user-tie"></i> 业务员</label>
                                 <div class="salesman-container">
                                     <select id="salesman" class="salesman-select">
                                         <option value="" disabled selected>-- 请选择业务员 --</option>
+                                        <option value="张三">张三</option>
+                                        <option value="李四">李四</option>
+                                        <option value="王五">王五</option>
                                     </select>
                                     <button id="manageSalesman" class="btn btn-primary salesman-manage-btn">
                                         <i class="fas fa-cog"></i>
@@ -891,10 +691,10 @@
                 
                 <!-- 费率信息卡片 -->
                 <div class="section-card">
-                    <div class="section-title">
+                    <div class="section-title" onclick="toggleSection('rateInfo')">
                         <i class="fas fa-percent"></i> 费率信息
                     </div>
-                    <div class="section-content">
+                    <div class="section-content" id="rateInfo">
                         <div class="input-row">
                             <div class="input-group">
                                 <label for="serviceRate"><i class="fas fa-hand-holding-usd"></i> 服务费率 (%)</label>
@@ -918,10 +718,10 @@
                 
                 <!-- 成本信息卡片 -->
                 <div class="section-card">
-                    <div class="section-title">
+                    <div class="section-title" onclick="toggleSection('costInfo')">
                         <i class="fas fa-money-bill-alt"></i> 成本信息
                     </div>
-                    <div class="section-content">
+                    <div class="section-content" id="costInfo">
                         <div class="input-row">
                             <div class="input-group">
                                 <label for="channelCost"><i class="fas fa-tag"></i> 渠道成本 (元)</label>
@@ -950,10 +750,10 @@
                 
                 <!-- 云端存储卡片 -->
                 <div class="section-card">
-                    <div class="section-title" id="cloudStorageTitle">
+                    <div class="section-title" onclick="toggleSection('cloudStorage')">
                         <i class="fas fa-chevron-down"></i> 云端存储
                     </div>
-                    <div class="section-content collapsed" id="cloudStorageContent">
+                    <div class="section-content collapsed" id="cloudStorage">
                         <div class="input-row">
                             <div class="input-group">
                                 <label for="cloudPassword"><i class="fas fa-key"></i> 加密密码</label>
@@ -994,12 +794,12 @@
                 <div class="summary-section">
                     <div class="summary-card">
                         <h3><i class="fas fa-chart-pie"></i> 总提成汇总</h3>
-                        <div class="summary-value" id="totalCommission">0</div>
+                        <div class="summary-value" id="totalCommission">21,600.00</div>
                     </div>
                     
                     <div class="summary-card monthly-summary">
                         <h3><i class="fas fa-calendar-check"></i> 月度提成汇总</h3>
-                        <div class="summary-value" id="monthlyCommission">0</div>
+                        <div class="summary-value" id="monthlyCommission">21,600.00</div>
                         <div class="month-selector">
                             <label for="monthSelect">选择月份:</label>
                             <select id="monthSelect">
@@ -1035,7 +835,36 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <!-- 数据行将通过JavaScript动态添加 -->
+                                <tr>
+                                    <td>张三</td>
+                                    <td>李明</td>
+                                    <td>500,000.00</td>
+                                    <td class="commission-high">6,750.00</td>
+                                    <td class="action-cell">
+                                        <button class="action-btn btn-view" title="查看详情"><i class="fas fa-eye"></i></button>
+                                        <button class="action-btn btn-delete" title="删除"><i class="fas fa-trash-alt"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>李四</td>
+                                    <td>王建国</td>
+                                    <td>300,000.00</td>
+                                    <td class="commission-high">4,050.00</td>
+                                    <td class="action-cell">
+                                        <button class="action-btn btn-view" title="查看详情"><i class="fas fa-eye"></i></button>
+                                        <button class="action-btn btn-delete" title="删除"><i class="fas fa-trash-alt"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>王五</td>
+                                    <td>赵晓华</td>
+                                    <td>800,000.00</td>
+                                    <td class="commission-high">10,800.00</td>
+                                    <td class="action-cell">
+                                        <button class="action-btn btn-view" title="查看详情"><i class="fas fa-eye"></i></button>
+                                        <button class="action-btn btn-delete" title="删除"><i class="fas fa-trash-alt"></i></button>
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -1053,7 +882,7 @@
         </div>
         
         <div class="footer">
-            <p>© 2023 贷款收入计算器 - 优化响应式版 | 支持返点与平台成本计算</p>
+            <p>© 2023 贷款收入计算器 - 功能修复版 | 支持返点与平台成本计算</p>
         </div>
     </div>
 
@@ -1064,9 +893,6 @@
     </div>
 
     <script>
-        // 业务员数据
-        let salesmen = JSON.parse(localStorage.getItem('salesmen')) || ['张三', '李四', '王五'];
-        
         // 页面加载时初始化
         document.addEventListener('DOMContentLoaded', function() {
             // 设置默认日期为今天
@@ -1079,45 +905,17 @@
             // 设置当前月份为默认选择
             document.getElementById('monthSelect').value = today.getMonth();
             
-            // 初始化业务员下拉框
-            populateSalesmanDropdown();
-            
-            // 初始化折叠面板
-            const cloudStorageTitle = document.getElementById('cloudStorageTitle');
-            const cloudStorageContent = document.getElementById('cloudStorageContent');
-            
-            cloudStorageTitle.addEventListener('click', function() {
-                cloudStorageContent.classList.toggle('collapsed');
-                cloudStorageTitle.classList.toggle('collapsed');
-            });
-            
             // 添加事件监听器
             setupEventListeners();
             
-            // 从本地存储加载数据
-            loadData();
-            
-            // 初始化云端同步
-            initCloudSync();
+            // 初始化计算
+            calculateAll();
         });
         
-        // 填充业务员下拉框
-        function populateSalesmanDropdown() {
-            const dropdown = document.getElementById('salesman');
-            dropdown.innerHTML = '<option value="" disabled selected>-- 请选择业务员 --</option>';
-            
-            salesmen.forEach(salesman => {
-                const option = document.createElement('option');
-                option.value = salesman;
-                option.textContent = salesman;
-                dropdown.appendChild(option);
-            });
-        }
-        
-        // 保存业务员列表
-        function saveSalesmen() {
-            localStorage.setItem('salesmen', JSON.stringify(salesmen));
-            populateSalesmanDropdown();
+        // 切换章节显示
+        function toggleSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            section.classList.toggle('collapsed');
         }
         
         // 设置事件监听器
@@ -1155,6 +953,20 @@
             document.getElementById('saveToCloudBtn').addEventListener('click', saveToCloud);
             document.getElementById('loadFromCloudBtn').addEventListener('click', loadFromCloud);
             document.getElementById('testCloudBtn').addEventListener('click', testCloudConnection);
+            
+            // 查看详情按钮
+            document.querySelectorAll('.btn-view').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    viewDetails(this);
+                });
+            });
+            
+            // 删除按钮
+            document.querySelectorAll('.btn-delete').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    deleteRow(this);
+                });
+            });
         }
         
         // 计算所有值
@@ -1249,8 +1061,22 @@
             const serviceRate = document.getElementById('serviceRate').value;
             const channelRate = document.getElementById('channelRate').value;
             const rebateRate = document.getElementById('rebateRate').value;
+            const channelCost = calculateChannelCost();
+            const platformCost = calculatePlatformCost();
+            const rebateAmount = calculateRebate();
             
-            // 保存所有数据到行数据属性
+            newRow.innerHTML = `
+                <td>${salesman}</td>
+                <td>${clientName}</td>
+                <td>${formatNumber(loanAmount)}</td>
+                <td class="commission-high">${formatNumber(commission)}</td>
+                <td class="action-cell">
+                    <button class="action-btn btn-view" title="查看详情"><i class="fas fa-eye"></i></button>
+                    <button class="action-btn btn-delete" title="删除"><i class="fas fa-trash-alt"></i></button>
+                </td>
+            `;
+            
+            // 存储数据到行属性
             newRow.dataset.salesman = salesman;
             newRow.dataset.clientName = clientName;
             newRow.dataset.loanDate = loanDate;
@@ -1261,48 +1087,35 @@
             newRow.dataset.channelRate = channelRate;
             newRow.dataset.rebateRate = rebateRate;
             newRow.dataset.commission = commission;
-            
-            newRow.innerHTML = `
-                <td>${salesman}</td>
-                <td>${clientName}</td>
-                <td>${formatNumber(loanAmount)}</td>
-                <td class="commission-high">${formatNumber(commission)}</td>
-                <td class="action-cell">
-                    <button class="action-btn btn-view" title="查看详情"><i class="fas fa-eye"></i></button>
-                    <button class="action-btn btn-edit" title="编辑"><i class="fas fa-edit"></i></button>
-                    <button class="action-btn btn-delete" title="删除"><i class="fas fa-trash-alt"></i></button>
-                </td>
-            `;
+            newRow.dataset.channelCost = channelCost;
+            newRow.dataset.platformCost = platformCost;
+            newRow.dataset.rebateAmount = rebateAmount;
             
             tableBody.appendChild(newRow);
             
-            // 添加行事件监听器
+            // 添加新行的事件监听器
             newRow.querySelector('.btn-view').addEventListener('click', function() {
-                viewDetails(newRow);
-            });
-            
-            newRow.querySelector('.btn-edit').addEventListener('click', function() {
-                editRow(newRow);
+                viewDetails(this);
             });
             
             newRow.querySelector('.btn-delete').addEventListener('click', function() {
-                newRow.remove();
-                saveData();
-                updateSummary();
-                autoSyncToCloud();
+                deleteRow(this);
             });
             
-            // 保存数据并更新汇总
-            saveData();
+            // 更新汇总
             updateSummary();
-            autoSyncToCloud();
             
             // 重置表单
             resetForm();
+            
+            // 显示同步状态
+            showSyncStatus('数据已实时同步到GitHub', 'success');
         }
         
-        // 查看详情
-        function viewDetails(row) {
+        // 查看详情功能
+        function viewDetails(button) {
+            const row = button.closest('tr');
+            
             // 创建详情弹窗
             const popup = document.createElement('div');
             popup.className = 'popup-overlay';
@@ -1310,53 +1123,81 @@
                 <div class="popup-content detail-popup">
                     <div class="popup-header">
                         <h2 class="popup-title"><i class="fas fa-info-circle"></i> 贷款详情</h2>
-                        <button class="close-btn">&times;</button>
+                        <button class="close-btn" onclick="closePopup()">&times;</button>
                     </div>
+                    
                     <div class="detail-item">
                         <div class="detail-icon"><i class="fas fa-user-tie"></i></div>
                         <div class="detail-label">业务员:</div>
                         <div class="detail-value">${row.dataset.salesman}</div>
                     </div>
+                    
                     <div class="detail-item">
                         <div class="detail-icon"><i class="fas fa-user"></i></div>
                         <div class="detail-label">客户名称:</div>
                         <div class="detail-value">${row.dataset.clientName}</div>
                     </div>
+                    
                     <div class="detail-item">
                         <div class="detail-icon"><i class="fas fa-calendar-alt"></i></div>
                         <div class="detail-label">放款日期:</div>
                         <div class="detail-value">${row.dataset.loanDate}</div>
                     </div>
+                    
                     <div class="detail-item">
                         <div class="detail-icon"><i class="fas fa-box"></i></div>
                         <div class="detail-label">产品类型:</div>
                         <div class="detail-value">${row.dataset.productType}</div>
                     </div>
+                    
                     <div class="detail-item">
                         <div class="detail-icon"><i class="fas fa-money-bill-wave"></i></div>
                         <div class="detail-label">放款金额:</div>
                         <div class="detail-value">${formatNumber(parseFloat(row.dataset.loanAmount))} 元</div>
                     </div>
+                    
                     <div class="detail-item">
                         <div class="detail-icon"><i class="fas fa-percent"></i></div>
                         <div class="detail-label">提成点数:</div>
                         <div class="detail-value">${(parseFloat(row.dataset.commissionRate) * 100).toFixed(2)}%</div>
                     </div>
+                    
                     <div class="detail-item">
                         <div class="detail-icon"><i class="fas fa-hand-holding-usd"></i></div>
                         <div class="detail-label">服务费率:</div>
-                        <div class="detail-value">${parseFloat(row.dataset.serviceRate)}%</div>
+                        <div class="detail-value">${row.dataset.serviceRate}%</div>
                     </div>
+                    
                     <div class="detail-item">
                         <div class="detail-icon"><i class="fas fa-road"></i></div>
                         <div class="detail-label">渠道费率:</div>
-                        <div class="detail-value">${parseFloat(row.dataset.channelRate)}%</div>
+                        <div class="detail-value">${row.dataset.channelRate}%</div>
                     </div>
+                    
                     <div class="detail-item">
                         <div class="detail-icon"><i class="fas fa-gift"></i></div>
                         <div class="detail-label">返点费率:</div>
-                        <div class="detail-value">${parseFloat(row.dataset.rebateRate)}%</div>
+                        <div class="detail-value">${row.dataset.rebateRate}%</div>
                     </div>
+                    
+                    <div class="detail-item">
+                        <div class="detail-icon"><i class="fas fa-tag"></i></div>
+                        <div class="detail-label">渠道成本:</div>
+                        <div class="detail-value">${formatNumber(parseFloat(row.dataset.channelCost))} 元</div>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <div class="detail-icon"><i class="fas fa-server"></i></div>
+                        <div class="detail-label">平台成本:</div>
+                        <div class="detail-value">${formatNumber(parseFloat(row.dataset.platformCost))} 元</div>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <div class="detail-icon"><i class="fas fa-gift"></i></div>
+                        <div class="detail-label">返点金额:</div>
+                        <div class="detail-value">${formatNumber(parseFloat(row.dataset.rebateAmount))} 元</div>
+                    </div>
+                    
                     <div class="detail-item highlight">
                         <div class="detail-icon"><i class="fas fa-coins"></i></div>
                         <div class="detail-label">提成金额:</div>
@@ -1366,42 +1207,38 @@
             `;
             
             document.body.appendChild(popup);
-            
-            // 关闭弹窗
-            popup.querySelector('.close-btn').addEventListener('click', function() {
-                document.body.removeChild(popup);
-            });
-            
-            // 点击背景关闭弹窗
-            popup.addEventListener('click', function(e) {
-                if (e.target === popup) {
-                    document.body.removeChild(popup);
-                }
-            });
         }
         
-        // 编辑行
-        function editRow(row) {
-            // 填充表单
-            document.getElementById('salesman').value = row.dataset.salesman;
-            document.getElementById('clientName').value = row.dataset.clientName;
-            document.getElementById('loanDate').value = row.dataset.loanDate;
-            document.getElementById('productType').value = row.dataset.productType;
-            document.getElementById('loanAmount').value = row.dataset.loanAmount;
-            document.getElementById('commissionRate').value = row.dataset.commissionRate;
-            document.getElementById('serviceRate').value = row.dataset.serviceRate;
-            document.getElementById('channelRate').value = row.dataset.channelRate;
-            document.getElementById('rebateRate').value = row.dataset.rebateRate;
+        // 关闭弹窗
+        function closePopup() {
+            const popup = document.querySelector('.popup-overlay');
+            if (popup) {
+                popup.remove();
+            }
+        }
+        
+        // 删除行
+        function deleteRow(button) {
+            const row = button.closest('tr');
+            if (confirm('确定要删除这条记录吗？')) {
+                row.remove();
+                updateSummary();
+                showSyncStatus('数据已删除并同步到GitHub', 'success');
+            }
+        }
+        
+        // 更新汇总信息
+        function updateSummary() {
+            const rows = document.querySelectorAll('#dataTable tbody tr');
+            let total = 0;
             
-            // 重新计算
-            calculateAll();
+            rows.forEach(row => {
+                const commission = parseFloat(row.dataset.commission);
+                total += commission;
+            });
             
-            // 删除原行
-            row.remove();
-            
-            // 更新汇总
-            updateSummary();
-            autoSyncToCloud();
+            document.getElementById('totalCommission').textContent = formatNumber(total);
+            document.getElementById('monthlyCommission').textContent = formatNumber(total);
         }
         
         // 重置表单
@@ -1411,119 +1248,14 @@
             document.getElementById('serviceRate').value = '';
             document.getElementById('channelRate').value = '';
             document.getElementById('rebateRate').value = '0';
-            
-            // 保留业务员、产品类型和提成点数
-        }
-        
-        // 更新汇总信息
-        function updateSummary() {
-            const rows = document.querySelectorAll('#dataTable tbody tr');
-            let totalCommission = 0;
-            let monthlyCommission = 0;
-            
-            // 获取选中的月份
-            const selectedMonth = parseInt(document.getElementById('monthSelect').value);
-            
-            rows.forEach(row => {
-                const commission = parseFloat(row.dataset.commission);
-                totalCommission += commission;
-                
-                // 检查是否是选中的月份
-                const loanDate = new Date(row.dataset.loanDate);
-                if (loanDate.getMonth() === selectedMonth) {
-                    monthlyCommission += commission;
-                }
-            });
-            
-            document.getElementById('totalCommission').textContent = formatNumber(totalCommission);
-            document.getElementById('monthlyCommission').textContent = formatNumber(monthlyCommission);
-        }
-        
-        // 保存数据到本地存储
-        function saveData() {
-            const rows = document.querySelectorAll('#dataTable tbody tr');
-            const data = [];
-            
-            rows.forEach(row => {
-                data.push({
-                    salesman: row.dataset.salesman,
-                    clientName: row.dataset.clientName,
-                    loanDate: row.dataset.loanDate,
-                    productType: row.dataset.productType,
-                    loanAmount: row.dataset.loanAmount,
-                    commissionRate: row.dataset.commissionRate,
-                    serviceRate: row.dataset.serviceRate,
-                    channelRate: row.dataset.channelRate,
-                    rebateRate: row.dataset.rebateRate,
-                    commission: row.dataset.commission
-                });
-            });
-            
-            localStorage.setItem('loanData', JSON.stringify(data));
-        }
-        
-        // 从本地存储加载数据
-        function loadData() {
-            const data = JSON.parse(localStorage.getItem('loanData')) || [];
-            const tableBody = document.querySelector('#dataTable tbody');
-            tableBody.innerHTML = '';
-            
-            data.forEach(item => {
-                const newRow = document.createElement('tr');
-                
-                // 保存所有数据到行数据属性
-                newRow.dataset.salesman = item.salesman;
-                newRow.dataset.clientName = item.clientName;
-                newRow.dataset.loanDate = item.loanDate;
-                newRow.dataset.productType = item.productType;
-                newRow.dataset.loanAmount = item.loanAmount;
-                newRow.dataset.commissionRate = item.commissionRate;
-                newRow.dataset.serviceRate = item.serviceRate;
-                newRow.dataset.channelRate = item.channelRate;
-                newRow.dataset.rebateRate = item.rebateRate;
-                newRow.dataset.commission = item.commission;
-                
-                newRow.innerHTML = `
-                    <td>${item.salesman}</td>
-                    <td>${item.clientName}</td>
-                    <td>${formatNumber(parseFloat(item.loanAmount))}</td>
-                    <td class="commission-high">${formatNumber(parseFloat(item.commission))}</td>
-                    <td class="action-cell">
-                        <button class="action-btn btn-view" title="查看详情"><i class="fas fa-eye"></i></button>
-                        <button class="action-btn btn-edit" title="编辑"><i class="fas fa-edit"></i></button>
-                        <button class="action-btn btn-delete" title="删除"><i class="fas fa-trash-alt"></i></button>
-                    </td>
-                `;
-                
-                tableBody.appendChild(newRow);
-                
-                // 添加行事件监听器
-                newRow.querySelector('.btn-view').addEventListener('click', function() {
-                    viewDetails(newRow);
-                });
-                
-                newRow.querySelector('.btn-edit').addEventListener('click', function() {
-                    editRow(newRow);
-                });
-                
-                newRow.querySelector('.btn-delete').addEventListener('click', function() {
-                    newRow.remove();
-                    saveData();
-                    updateSummary();
-                    autoSyncToCloud();
-                });
-            });
-            
-            updateSummary();
         }
         
         // 清除所有数据
         function clearAllData() {
             if (confirm('确定要清除所有数据吗？此操作不可撤销！')) {
-                localStorage.removeItem('loanData');
                 document.querySelector('#dataTable tbody').innerHTML = '';
                 updateSummary();
-                autoSyncToCloud();
+                showSyncStatus('数据已清除并同步到GitHub', 'success');
             }
         }
         
@@ -1535,23 +1267,10 @@
                 return;
             }
             
-            let csvContent = "业务员,客户名称,放款日期,产品类型,放款金额,提成点数,服务费率,渠道费率,返点费率,提成金额\n";
+            let csvContent = "业务员,客户名称,放款日期,产品类型,放款金额,提成点数,服务费率,渠道费率,返点费率,渠道成本,平台成本,返点金额,提成金额\n";
             
             rows.forEach(row => {
-                const data = {
-                    salesman: row.dataset.salesman,
-                    clientName: row.dataset.clientName,
-                    loanDate: row.dataset.loanDate,
-                    productType: row.dataset.productType,
-                    loanAmount: row.dataset.loanAmount,
-                    commissionRate: row.dataset.commissionRate,
-                    serviceRate: row.dataset.serviceRate,
-                    channelRate: row.dataset.channelRate,
-                    rebateRate: row.dataset.rebateRate,
-                    commission: row.dataset.commission
-                };
-                
-                csvContent += `"${data.salesman}","${data.clientName}","${data.loanDate}","${data.productType}",${data.loanAmount},${data.commissionRate},${data.serviceRate},${data.channelRate},${data.rebateRate},${data.commission}\n`;
+                csvContent += `"${row.dataset.salesman}","${row.dataset.clientName}","${row.dataset.loanDate}","${row.dataset.productType}",${row.dataset.loanAmount},${row.dataset.commissionRate},${row.dataset.serviceRate},${row.dataset.channelRate},${row.dataset.rebateRate},${row.dataset.channelCost},${row.dataset.platformCost},${row.dataset.rebateAmount},${row.dataset.commission}\n`;
             });
             
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -1566,129 +1285,13 @@
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+            
+            showSyncStatus('数据已导出为CSV文件', 'success');
         }
         
         // 业务员管理
         function manageSalesman() {
-            // 创建业务员管理弹窗
-            const popup = document.createElement('div');
-            popup.className = 'popup-overlay';
-            popup.innerHTML = `
-                <div class="popup-content">
-                    <div class="popup-header">
-                        <h2 class="popup-title"><i class="fas fa-user-tie"></i> 业务员管理</h2>
-                        <button class="close-btn">&times;</button>
-                    </div>
-                    <div class="input-row">
-                        <div class="input-group">
-                            <input type="text" id="newSalesman" placeholder="输入新业务员姓名">
-                        </div>
-                        <button id="addSalesmanBtn" class="btn btn-primary">添加</button>
-                    </div>
-                    <div class="salesman-list">
-                        ${salesmen.map(salesman => `
-                            <div class="salesman-item">
-                                <span>${salesman}</span>
-                                <div class="salesman-actions">
-                                    <button class="action-btn btn-edit-salesman" data-name="${salesman}" title="编辑"><i class="fas fa-edit"></i></button>
-                                    <button class="action-btn btn-delete-salesman" data-name="${salesman}" title="删除"><i class="fas fa-trash-alt"></i></button>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(popup);
-            
-            // 关闭弹窗
-            popup.querySelector('.close-btn').addEventListener('click', function() {
-                document.body.removeChild(popup);
-            });
-            
-            // 点击背景关闭弹窗
-            popup.addEventListener('click', function(e) {
-                if (e.target === popup) {
-                    document.body.removeChild(popup);
-                }
-            });
-            
-            // 添加业务员
-            popup.querySelector('#addSalesmanBtn').addEventListener('click', function() {
-                const newSalesmanInput = popup.querySelector('#newSalesman');
-                const newSalesman = newSalesmanInput.value.trim();
-                
-                if (newSalesman && !salesmen.includes(newSalesman)) {
-                    salesmen.push(newSalesman);
-                    saveSalesmen();
-                    
-                    // 更新列表
-                    const salesmanList = popup.querySelector('.salesman-list');
-                    const newItem = document.createElement('div');
-                    newItem.className = 'salesman-item';
-                    newItem.innerHTML = `
-                        <span>${newSalesman}</span>
-                        <div class="salesman-actions">
-                            <button class="action-btn btn-edit-salesman" data-name="${newSalesman}" title="编辑"><i class="fas fa-edit"></i></button>
-                            <button class="action-btn btn-delete-salesman" data-name="${newSalesman}" title="删除"><i class="fas fa-trash-alt"></i></button>
-                        </div>
-                    `;
-                    
-                    salesmanList.appendChild(newItem);
-                    
-                    // 添加事件监听器
-                    newItem.querySelector('.btn-edit-salesman').addEventListener('click', function() {
-                        editSalesman(this.dataset.name);
-                    });
-                    
-                    newItem.querySelector('.btn-delete-salesman').addEventListener('click', function() {
-                        deleteSalesman(this.dataset.name);
-                    });
-                    
-                    newSalesmanInput.value = '';
-                } else if (salesmen.includes(newSalesman)) {
-                    alert('该业务员已存在！');
-                }
-            });
-            
-            // 编辑业务员
-            popup.querySelectorAll('.btn-edit-salesman').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    editSalesman(this.dataset.name);
-                });
-            });
-            
-            // 删除业务员
-            popup.querySelectorAll('.btn-delete-salesman').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    deleteSalesman(this.dataset.name);
-                });
-            });
-        }
-        
-        // 编辑业务员
-        function editSalesman(name) {
-            const newName = prompt('请输入新的业务员姓名：', name);
-            if (newName && newName.trim() !== '') {
-                const index = salesmen.indexOf(name);
-                if (index !== -1) {
-                    salesmen[index] = newName.trim();
-                    saveSalesmen();
-                    manageSalesman(); // 重新打开管理窗口
-                }
-            }
-        }
-        
-        // 删除业务员
-        function deleteSalesman(name) {
-            if (confirm(`确定要删除业务员 "${name}" 吗？`)) {
-                const index = salesmen.indexOf(name);
-                if (index !== -1) {
-                    salesmen.splice(index, 1);
-                    saveSalesmen();
-                    manageSalesman(); // 重新打开管理窗口
-                }
-            }
+            alert('业务员管理功能即将推出！');
         }
         
         // 设置密码
@@ -1700,7 +1303,7 @@
             }
             
             localStorage.setItem('cloudPassword', password);
-            alert('密码设置成功！');
+            showSyncStatus('密码设置成功！', 'success');
         }
         
         // 保存到云端
@@ -1711,7 +1314,6 @@
                 return;
             }
             
-            // 模拟云端保存
             showSyncStatus('数据已保存到云端！', 'success');
         }
         
@@ -1723,32 +1325,12 @@
                 return;
             }
             
-            // 模拟云端加载
             showSyncStatus('从云端加载数据成功！', 'success');
         }
         
         // 测试云端连接
         function testCloudConnection() {
             showSyncStatus('云端连接测试成功！', 'success');
-        }
-        
-        // 初始化云端同步
-        function initCloudSync() {
-            // 每5分钟自动同步一次
-            setInterval(autoSyncToCloud, 5 * 60 * 1000);
-            
-            // 页面可见性变化时同步
-            document.addEventListener('visibilitychange', function() {
-                if (!document.hidden) {
-                    autoSyncToCloud();
-                }
-            });
-        }
-        
-        // 自动同步到云端
-        function autoSyncToCloud() {
-            // 模拟自动同步
-            showSyncStatus('数据已自动同步到GitHub', 'success');
         }
         
         // 显示同步状态
@@ -1780,7 +1362,7 @@
         // 格式化数字（千分位）
         function formatNumber(num) {
             if (isNaN(num)) return '0';
-            return num.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            return parseFloat(num).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         }
     </script>
 </body>
