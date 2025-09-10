@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>贷款收入计算器 - 功能修复版</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- 添加CryptoJS库用于加密 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -968,12 +970,12 @@
                 <div class="summary-section">
                     <div class="summary-card">
                         <h3><i class="fas fa-chart-pie"></i> 总提成汇总</h3>
-                        <div class="summary-value" id="totalCommission">21,600.00</div>
+                        <div class="summary-value" id="totalCommission">0.00</div>
                     </div>
                     
                     <div class="summary-card monthly-summary">
                         <h3><i class="fas fa-calendar-check"></i> 月度提成汇总</h3>
-                        <div class="summary-value" id="monthlyCommission">21,600.00</div>
+                        <div class="summary-value" id="monthlyCommission">0.00</div>
                         <div class="month-selector">
                             <label for="monthSelect">选择月份:</label>
                             <select id="monthSelect">
@@ -1008,33 +1010,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td>张三</td>
-                                    <td>李明</td>
-                                    <td class="commission-high">6,750.00</td>
-                                    <td class="action-cell">
-                                        <button class="action-btn btn-view" title="查看详情"><i class="fas fa-eye"></i></button>
-                                        <button class="action-btn btn-delete" title="删除"><i class="fas fa-trash-alt"></i></button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>李四</td>
-                                    <td>王建国</td>
-                                    <td class="commission-high">4,050.00</td>
-                                    <td class="action-cell">
-                                        <button class="action-btn btn-view" title="查看详情"><i class="fas fa-eye"></i></button>
-                                        <button class="action-btn btn-delete" title="删除"><i class="fas fa-trash-alt"></i></button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>王五</td>
-                                    <td>赵晓华</td>
-                                    <td class="commission-high">10,800.00</td>
-                                    <td class="action-cell">
-                                        <button class="action-btn btn-view" title="查看详情"><i class="fas fa-eye"></i></button>
-                                        <button class="action-btn btn-delete" title="删除"><i class="fas fa-trash-alt"></i></button>
-                                    </td>
-                                </tr>
+                                <!-- 数据行将通过JavaScript动态添加 -->
                             </tbody>
                         </table>
                     </div>
@@ -1063,11 +1039,37 @@
     </div>
 
     <script>
+        // ========== 云端存储配置 ==========
+        let GITHUB_OWNER = '';
+        let GITHUB_REPO = 'income-manager';
+        const GITHUB_PATH = 'income-data.enc';
+        let masterPassword = '';
+        let cloudConfig = {};
+        let autoSaveTimeout = null;
+
         // 业务员数据
         let salesmen = ['张三', '李四', '王五'];
         
         // 页面加载时初始化
         document.addEventListener('DOMContentLoaded', function() {
+            // 获取云端配置
+            try {
+                const configStr = sessionStorage.getItem('cloudConfig');
+                if (configStr) {
+                    cloudConfig = JSON.parse(configStr);
+                    GITHUB_OWNER = cloudConfig.username;
+                    GITHUB_REPO = cloudConfig.repo || 'income-manager';
+                    masterPassword = cloudConfig.password;
+                    
+                    // 自动从云端加载数据
+                    setTimeout(() => {
+                        autoLoadFromCloud(cloudConfig.token);
+                    }, 1000);
+                }
+            } catch (e) {
+                console.error('加载云端配置失败:', e);
+            }
+            
             // 设置默认日期为今天
             const today = new Date();
             const yyyy = today.getFullYear();
@@ -1086,6 +1088,15 @@
             
             // 初始化计算
             calculateAll();
+            
+            // 从本地存储加载数据
+            loadData();
+            
+            // 云端存储按钮事件监听
+            document.getElementById('setPasswordBtn').addEventListener('click', setPassword);
+            document.getElementById('saveToCloudBtn').addEventListener('click', saveToCloud);
+            document.getElementById('loadFromCloudBtn').addEventListener('click', loadFromCloud);
+            document.getElementById('testCloudBtn').addEventListener('click', testCloudConnection);
         });
         
         // 更新业务员下拉框
@@ -1115,44 +1126,44 @@
         
         // 设置事件监听器
         function setupEventListeners() {
-            // 输入变化时重新计算
+            // 输入变化时自动计算
             document.getElementById('loanAmount').addEventListener('input', calculateAll);
             document.getElementById('serviceRate').addEventListener('input', calculateAll);
             document.getElementById('channelRate').addEventListener('input', calculateAll);
             document.getElementById('rebateRate').addEventListener('input', calculateAll);
             document.getElementById('commissionRate').addEventListener('change', calculateAll);
             
-            // 添加新行按钮
-            document.getElementById('addRow').addEventListener('click', addTableRow);
+            // 添加行按钮
+            document.getElementById('addRow').addEventListener('click', addRow);
             
             // 清除数据按钮
-            document.getElementById('clearData').addEventListener('click', clearAllData);
+            document.getElementById('clearData').addEventListener('click', clearData);
             
-            // 导出CSV按钮
-            document.getElementById('exportData').addEventListener('click', exportToCSV);
+            // 导出数据按钮
+            document.getElementById('exportData').addEventListener('click', exportData);
+            
+            // 月份选择变化
+            document.getElementById('monthSelect').addEventListener('change', updateMonthlySummary);
             
             // 业务员管理按钮
-            document.getElementById('manageSalesman').addEventListener('click', openSalesmanManager);
+            document.getElementById('manageSalesman').addEventListener('click', manageSalesmen);
+        }
+        
+        // 切换区域展开/折叠
+        function toggleSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            const title = section.previousElementSibling;
             
-            // 查看详情按钮（使用事件委托）
-            document.getElementById('dataTable').addEventListener('click', function(e) {
-                if (e.target.closest('.btn-view')) {
-                    const row = e.target.closest('tr');
-                    const cells = row.querySelectorAll('td');
-                    const detailData = {
-                        salesman: cells[0].textContent,
-                        clientName: cells[1].textContent,
-                        commission: cells[2].textContent
-                    };
-                    showDetailPopup(detailData);
-                }
-                
-                if (e.target.closest('.btn-delete')) {
-                    const row = e.target.closest('tr');
-                    row.remove();
-                    updateSummary();
-                }
-            });
+            section.classList.toggle('collapsed');
+            title.classList.toggle('collapsed');
+            
+            // 更新图标
+            const icon = title.querySelector('i');
+            if (section.classList.contains('collapsed')) {
+                icon.className = 'fas fa-chevron-down';
+            } else {
+                icon.className = 'fas fa-chevron-up';
+            }
         }
         
         // 计算所有值
@@ -1163,121 +1174,101 @@
             const rebateRate = parseFloat(document.getElementById('rebateRate').value) || 0;
             const commissionRate = parseFloat(document.getElementById('commissionRate').value) || 0;
             
-            // 计算各项费用
-            const serviceFee = loanAmount * (serviceRate / 100);
+            // 计算渠道成本
             const channelCost = loanAmount * (channelRate / 100);
+            document.getElementById('channelCost').value = channelCost.toFixed(2);
+            
+            // 计算平台成本（假设为放款金额的0.5%）
+            const platformCost = loanAmount * 0.005;
+            document.getElementById('platformCost').value = platformCost.toFixed(2);
+            
+            // 计算返点金额
             const rebateAmount = loanAmount * (rebateRate / 100);
-            const platformCost = serviceFee * 0.1; // 假设平台成本是服务费的10%
+            document.getElementById('rebateAmount').value = rebateAmount.toFixed(2);
             
             // 计算提成
-            const commission = (serviceFee + rebateAmount - channelCost - platformCost) * commissionRate;
-            
-            // 更新UI
-            document.getElementById('channelCost').value = channelCost.toFixed(2);
-            document.getElementById('platformCost').value = platformCost.toFixed(2);
-            document.getElementById('rebateAmount').value = rebateAmount.toFixed(2);
+            const serviceIncome = loanAmount * (serviceRate / 100);
+            const commission = (serviceIncome + rebateAmount - channelCost - platformCost) * commissionRate;
             document.getElementById('commission').value = commission.toFixed(2);
         }
         
-        // 添加新行到表格
-        function addTableRow() {
+        // 添加新行
+        function addRow() {
             const salesman = document.getElementById('salesman').value;
             const clientName = document.getElementById('clientName').value;
-            const commission = document.getElementById('commission').value;
+            const loanDate = document.getElementById('loanDate').value;
+            const productType = document.getElementById('productType').value;
+            const loanAmount = parseFloat(document.getElementById('loanAmount').value) || 0;
+            const commission = parseFloat(document.getElementById('commission').value) || 0;
             
-            if (!salesman || !clientName || commission === '0.00') {
-                alert('请填写完整信息并确保提成不为零！');
+            if (!salesman || !clientName || !loanDate || !productType || loanAmount <= 0) {
+                alert('请填写所有必填字段，且放款金额必须大于0！');
                 return;
             }
             
             const table = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
             const newRow = table.insertRow();
             
-            // 添加单元格
+            // 添加数据单元格
             newRow.insertCell(0).textContent = salesman;
             newRow.insertCell(1).textContent = clientName;
+            newRow.insertCell(2).textContent = commission.toFixed(2);
             
-            const commissionCell = newRow.insertCell(2);
-            commissionCell.textContent = parseFloat(commission).toFixed(2);
-            commissionCell.className = 'commission-high';
-            
-            // 操作单元格
+            // 添加操作单元格
             const actionCell = newRow.insertCell(3);
             actionCell.className = 'action-cell';
-            actionCell.innerHTML = `
-                <button class="action-btn btn-view" title="查看详情"><i class="fas fa-eye"></i></button>
-                <button class="action-btn btn-delete" title="删除"><i class="fas fa-trash-alt"></i></button>
-            `;
+            
+            const viewBtn = document.createElement('button');
+            viewBtn.className = 'action-btn';
+            viewBtn.innerHTML = '<i class="fas fa-eye"></i> 查看';
+            viewBtn.onclick = function() {
+                viewRowDetails(this);
+            };
+            actionCell.appendChild(viewBtn);
+            
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'action-btn btn-delete';
+            deleteBtn.innerHTML = '<i class="fas fa-trash"></i> 删除';
+            deleteBtn.onclick = function() {
+                deleteRow(this);
+            };
+            actionCell.appendChild(deleteBtn);
+            
+            // 存储完整数据
+            newRow.dataset.salesman = salesman;
+            newRow.dataset.clientName = clientName;
+            newRow.dataset.loanDate = loanDate;
+            newRow.dataset.productType = productType;
+            newRow.dataset.loanAmount = loanAmount;
+            newRow.dataset.serviceRate = document.getElementById('serviceRate').value;
+            newRow.dataset.channelRate = document.getElementById('channelRate').value;
+            newRow.dataset.rebateRate = document.getElementById('rebateRate').value;
+            newRow.dataset.commissionRate = document.getElementById('commissionRate').value;
+            newRow.dataset.commission = commission;
             
             // 更新汇总
             updateSummary();
             
-            // 清空输入
+            // 保存数据到本地存储
+            saveData();
+            
+            // 自动保存到云端
+            autoSaveToCloud();
+            
+            // 清空表单
             document.getElementById('clientName').value = '';
             document.getElementById('loanAmount').value = '';
             document.getElementById('serviceRate').value = '';
             document.getElementById('channelRate').value = '';
-            document.getElementById('rebateRate').value = '0';
-            document.getElementById('commissionRate').selectedIndex = 0;
-            
-            // 触发GitHub同步
-            simulateGitHubSync();
+            document.getElementById('rebateRate').value = '';
+            document.getElementById('commission').value = '';
         }
         
-        // 更新汇总数据
-        function updateSummary() {
-            const rows = document.querySelectorAll('#dataTable tbody tr');
-            let totalCommission = 0;
+        // 查看行详情
+        function viewRowDetails(button) {
+            const row = button.closest('tr');
             
-            rows.forEach(row => {
-                const commission = parseFloat(row.cells[2].textContent);
-                totalCommission += commission;
-            });
-            
-            document.getElementById('totalCommission').textContent = totalCommission.toFixed(2);
-            document.getElementById('monthlyCommission').textContent = totalCommission.toFixed(2);
-        }
-        
-        // 清除所有数据
-        function clearAllData() {
-            if (confirm('确定要清除所有数据吗？此操作不可撤销！')) {
-                const table = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
-                table.innerHTML = '';
-                updateSummary();
-            }
-        }
-        
-        // 导出到CSV
-        function exportToCSV() {
-            const rows = document.querySelectorAll('#dataTable tr');
-            let csv = [];
-            
-            for (let i = 0; i < rows.length; i++) {
-                let row = [], cols = rows[i].querySelectorAll('td, th');
-                
-                for (let j = 0; j < cols.length - 1; j++) { // 跳过操作列
-                    let data = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, "").replace(/(\s\s)/gm, " ");
-                    data = data.replace(/"/g, '""');
-                    row.push('"' + data + '"');
-                }
-                csv.push(row.join(','));
-            }
-            
-            // 下载CSV文件
-            const csvString = csv.join('\n');
-            const a = document.createElement('a');
-            const blob = new Blob([csvString], {type: 'text/csv'});
-            const url = URL.createObjectURL(blob);
-            a.href = url;
-            a.download = '贷款收入数据.csv';
-            a.click();
-            setTimeout(() => {
-                URL.revokeObjectURL(url);
-            }, 100);
-        }
-        
-        // 显示详情弹窗
-        function showDetailPopup(data) {
+            // 创建详情弹窗
             const popup = document.createElement('div');
             popup.className = 'popup-overlay';
             popup.innerHTML = `
@@ -1286,78 +1277,254 @@
                         <div class="popup-title">
                             <i class="fas fa-info-circle"></i> 贷款详情
                         </div>
-                        <button class="close-btn">&times;</button>
+                        <button class="close-btn" onclick="this.closest('.popup-overlay').remove()">&times;</button>
                     </div>
                     <div class="detail-item">
                         <div class="detail-icon"><i class="fas fa-user-tie"></i></div>
                         <div class="detail-label">业务员:</div>
-                        <div class="detail-value">${data.salesman}</div>
+                        <div class="detail-value">${row.dataset.salesman}</div>
                     </div>
                     <div class="detail-item">
                         <div class="detail-icon"><i class="fas fa-user"></i></div>
                         <div class="detail-label">客户名称:</div>
-                        <div class="detail-value">${data.clientName}</div>
+                        <div class="detail-value">${row.dataset.clientName}</div>
                     </div>
                     <div class="detail-item">
-                        <div class="detail-icon"><i class="fas fa-coins"></i></div>
-                        <div class="detail-label">提成金额:</div>
-                        <div class="detail-value">${data.commission}</div>
-                    </div>
-                    <div class="detail-item highlight">
                         <div class="detail-icon"><i class="fas fa-calendar-alt"></i></div>
                         <div class="detail-label">放款日期:</div>
-                        <div class="detail-value">${new Date().toLocaleDateString()}</div>
+                        <div class="detail-value">${row.dataset.loanDate}</div>
                     </div>
                     <div class="detail-item">
                         <div class="detail-icon"><i class="fas fa-box"></i></div>
                         <div class="detail-label">产品类型:</div>
-                        <div class="detail-value">抵押贷</div>
+                        <div class="detail-value">${row.dataset.productType}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-icon"><i class="fas fa-money-bill-wave"></i></div>
+                        <div class="detail-label">放款金额:</div>
+                        <div class="detail-value">${parseFloat(row.dataset.loanAmount).toFixed(2)} 元</div>
                     </div>
                     <div class="detail-item">
                         <div class="detail-icon"><i class="fas fa-hand-holding-usd"></i></div>
                         <div class="detail-label">服务费率:</div>
-                        <div class="detail-value">2.5%</div>
+                        <div class="detail-value">${row.dataset.serviceRate}%</div>
                     </div>
                     <div class="detail-item">
                         <div class="detail-icon"><i class="fas fa-road"></i></div>
                         <div class="detail-label">渠道费率:</div>
-                        <div class="detail-value">1.2%</div>
+                        <div class="detail-value">${row.dataset.channelRate}%</div>
                     </div>
                     <div class="detail-item">
                         <div class="detail-icon"><i class="fas fa-gift"></i></div>
                         <div class="detail-label">返点费率:</div>
-                        <div class="detail-value">0.5%</div>
+                        <div class="detail-value">${row.dataset.rebateRate}%</div>
                     </div>
                     <div class="detail-item">
-                        <div class="detail-icon"><i class="fas fa-tag"></i></div>
-                        <div class="detail-label">渠道成本:</div>
-                        <div class="detail-value">${(parseFloat(data.commission) * 0.3).toFixed(2)}</div>
+                        <div class="detail-icon"><i class="fas fa-percent"></i></div>
+                        <div class="detail-label">提成点数:</div>
+                        <div class="detail-value">${(parseFloat(row.dataset.commissionRate) * 100).toFixed(1)}%</div>
                     </div>
-                    <div class="detail-item">
-                        <div class="detail-icon"><i class="fas fa-server"></i></div>
-                        <div class="detail-label">平台成本:</div>
-                        <div class="detail-value">${(parseFloat(data.commission) * 0.1).toFixed(2)}</div>
+                    <div class="detail-item highlight">
+                        <div class="detail-icon"><i class="fas fa-coins"></i></div>
+                        <div class="detail-label">提成金额:</div>
+                        <div class="detail-value">${parseFloat(row.dataset.commission).toFixed(2)} 元</div>
                     </div>
                 </div>
             `;
             
-            // 关闭按钮事件
-            popup.querySelector('.close-btn').addEventListener('click', () => {
-                document.body.removeChild(popup);
-            });
-            
-            // 点击背景关闭
-            popup.addEventListener('click', (e) => {
-                if (e.target === popup) {
-                    document.body.removeChild(popup);
-                }
-            });
-            
             document.body.appendChild(popup);
         }
         
-        // 打开业务员管理弹窗
-        function openSalesmanManager() {
+        // 删除行
+        function deleteRow(button) {
+            if (confirm('确定要删除这条记录吗？')) {
+                const row = button.closest('tr');
+                row.remove();
+                
+                // 更新汇总
+                updateSummary();
+                
+                // 保存数据到本地存储
+                saveData();
+                
+                // 自动保存到云端
+                autoSaveToCloud();
+            }
+        }
+        
+        // 更新汇总信息
+        function updateSummary() {
+            const table = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
+            const rows = table.rows;
+            
+            let totalCommission = 0;
+            
+            for (let i = 0; i < rows.length; i++) {
+                totalCommission += parseFloat(rows[i].dataset.commission) || 0;
+            }
+            
+            document.getElementById('totalCommission').textContent = totalCommission.toFixed(2);
+            
+            // 更新月度汇总
+            updateMonthlySummary();
+        }
+        
+        // 更新月度汇总
+        function updateMonthlySummary() {
+            const selectedMonth = parseInt(document.getElementById('monthSelect').value);
+            const table = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
+            const rows = table.rows;
+            
+            let monthlyCommission = 0;
+            
+            for (let i = 0; i < rows.length; i++) {
+                const loanDate = rows[i].dataset.loanDate;
+                if (loanDate) {
+                    const date = new Date(loanDate);
+                    if (date.getMonth() === selectedMonth) {
+                        monthlyCommission += parseFloat(rows[i].dataset.commission) || 0;
+                    }
+                }
+            }
+            
+            document.getElementById('monthlyCommission').textContent = monthlyCommission.toFixed(2);
+        }
+        
+        // 保存数据到本地存储
+        function saveData() {
+            const table = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
+            const rows = table.rows;
+            
+            const data = [];
+            
+            for (let i = 0; i < rows.length; i++) {
+                data.push({
+                    salesman: rows[i].dataset.salesman,
+                    clientName: rows[i].dataset.clientName,
+                    loanDate: rows[i].dataset.loanDate,
+                    productType: rows[i].dataset.productType,
+                    loanAmount: rows[i].dataset.loanAmount,
+                    serviceRate: rows[i].dataset.serviceRate,
+                    channelRate: rows[i].dataset.channelRate,
+                    rebateRate: rows[i].dataset.rebateRate,
+                    commissionRate: rows[i].dataset.commissionRate,
+                    commission: rows[i].dataset.commission
+                });
+            }
+            
+            localStorage.setItem('loanData', JSON.stringify(data));
+            localStorage.setItem('salesmen', JSON.stringify(salesmen));
+        }
+        
+        // 从本地存储加载数据
+        function loadData() {
+            const savedData = localStorage.getItem('loanData');
+            const savedSalesmen = localStorage.getItem('salesmen');
+            
+            if (savedSalesmen) {
+                salesmen = JSON.parse(savedSalesmen);
+                updateSalesmanDropdown();
+            }
+            
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                const table = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
+                
+                // 清空现有表格
+                table.innerHTML = '';
+                
+                // 添加保存的数据行
+                data.forEach(item => {
+                    const newRow = table.insertRow();
+                    
+                    // 添加数据单元格
+                    newRow.insertCell(0).textContent = item.salesman;
+                    newRow.insertCell(1).textContent = item.clientName;
+                    newRow.insertCell(2).textContent = parseFloat(item.commission).toFixed(2);
+                    
+                    // 添加操作单元格
+                    const actionCell = newRow.insertCell(3);
+                    actionCell.className = 'action-cell';
+                    
+                    const viewBtn = document.createElement('button');
+                    viewBtn.className = 'action-btn';
+                    viewBtn.innerHTML = '<i class="fas fa-eye"></i> 查看';
+                    viewBtn.onclick = function() {
+                        viewRowDetails(this);
+                    };
+                    actionCell.appendChild(viewBtn);
+                    
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'action-btn btn-delete';
+                    deleteBtn.innerHTML = '<i class="fas fa-trash"></i> 删除';
+                    deleteBtn.onclick = function() {
+                        deleteRow(this);
+                    };
+                    actionCell.appendChild(deleteBtn);
+                    
+                    // 存储完整数据
+                    newRow.dataset.salesman = item.salesman;
+                    newRow.dataset.clientName = item.clientName;
+                    newRow.dataset.loanDate = item.loanDate;
+                    newRow.dataset.productType = item.productType;
+                    newRow.dataset.loanAmount = item.loanAmount;
+                    newRow.dataset.serviceRate = item.serviceRate;
+                    newRow.dataset.channelRate = item.channelRate;
+                    newRow.dataset.rebateRate = item.rebateRate;
+                    newRow.dataset.commissionRate = item.commissionRate;
+                    newRow.dataset.commission = item.commission;
+                });
+                
+                // 更新汇总
+                updateSummary();
+            }
+        }
+        
+        // 清除数据
+        function clearData() {
+            if (confirm('确定要清除所有数据吗？此操作不可恢复！')) {
+                localStorage.removeItem('loanData');
+                const table = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
+                table.innerHTML = '';
+                
+                // 更新汇总
+                updateSummary();
+                
+                // 自动保存到云端
+                autoSaveToCloud();
+            }
+        }
+        
+        // 导出数据为CSV
+        function exportData() {
+            const table = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
+            const rows = table.rows;
+            
+            if (rows.length === 0) {
+                alert('没有数据可导出！');
+                return;
+            }
+            
+            let csvContent = "业务员,客户名称,放款日期,产品类型,放款金额,服务费率(%),渠道费率(%),返点费率(%),提成点数(%),提成金额\n";
+            
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                csvContent += `"${row.dataset.salesman}","${row.dataset.clientName}","${row.dataset.loanDate}","${row.dataset.productType}",${row.dataset.loanAmount},${row.dataset.serviceRate},${row.dataset.channelRate},${row.dataset.rebateRate},${(parseFloat(row.dataset.commissionRate) * 100).toFixed(1)},${row.dataset.commission}\n`;
+            }
+            
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", "贷款收入数据.csv");
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        
+        // 管理业务员
+        function manageSalesmen() {
             const popup = document.createElement('div');
             popup.className = 'popup-overlay';
             popup.innerHTML = `
@@ -1366,15 +1533,15 @@
                         <div class="popup-title">
                             <i class="fas fa-user-tie"></i> 业务员管理
                         </div>
-                        <button class="close-btn">&times;</button>
+                        <button class="close-btn" onclick="this.closest('.popup-overlay').remove()">&times;</button>
                     </div>
                     <div class="salesman-list" id="salesmanList">
                         ${salesmen.map(salesman => `
                             <div class="salesman-item">
                                 <div class="salesman-name">${salesman}</div>
                                 <div class="salesman-actions">
-                                    <button class="action-btn btn-delete" data-name="${salesman}" title="删除">
-                                        <i class="fas fa-trash-alt"></i>
+                                    <button class="action-btn btn-delete" onclick="deleteSalesman('${salesman}')">
+                                        <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
                             </div>
@@ -1382,96 +1549,456 @@
                     </div>
                     <div class="salesman-input-row">
                         <input type="text" id="newSalesman" class="salesman-input" placeholder="输入新业务员姓名">
-                        <button id="addSalesman" class="btn btn-primary">添加</button>
+                        <button class="btn btn-primary" onclick="addNewSalesman()">
+                            <i class="fas fa-plus"></i> 添加
+                        </button>
                     </div>
                 </div>
             `;
             
-            // 关闭按钮事件
-            popup.querySelector('.close-btn').addEventListener('click', () => {
-                document.body.removeChild(popup);
-            });
-            
-            // 点击背景关闭
-            popup.addEventListener('click', (e) => {
-                if (e.target === popup) {
-                    document.body.removeChild(popup);
-                }
-            });
-            
-            // 添加业务员按钮事件
-            popup.querySelector('#addSalesman').addEventListener('click', () => {
-                const newSalesmanInput = popup.querySelector('#newSalesman');
-                const newSalesman = newSalesmanInput.value.trim();
-                
-                if (newSalesman && !salesmen.includes(newSalesman)) {
-                    salesmen.push(newSalesman);
-                    updateSalesmanDropdown();
-                    
-                    // 更新弹窗中的列表
-                    const salesmanList = popup.querySelector('#salesmanList');
-                    const newItem = document.createElement('div');
-                    newItem.className = 'salesman-item';
-                    newItem.innerHTML = `
-                        <div class="salesman-name">${newSalesman}</div>
-                        <div class="salesman-actions">
-                            <button class="action-btn btn-delete" data-name="${newSalesman}" title="删除">
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
-                        </div>
-                    `;
-                    salesmanList.appendChild(newItem);
-                    
-                    // 添加删除事件
-                    newItem.querySelector('.btn-delete').addEventListener('click', function() {
-                        const name = this.getAttribute('data-name');
-                        salesmen = salesmen.filter(s => s !== name);
-                        updateSalesmanDropdown();
-                        salesmanList.removeChild(newItem);
-                    });
-                    
-                    newSalesmanInput.value = '';
-                } else if (salesmen.includes(newSalesman)) {
-                    alert('该业务员已存在！');
-                }
-            });
-            
-            // 删除按钮事件
-            popup.querySelectorAll('.btn-delete').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const name = this.getAttribute('data-name');
-                    salesmen = salesmen.filter(s => s !== name);
-                    updateSalesmanDropdown();
-                    this.closest('.salesman-item').remove();
-                });
-            });
-            
             document.body.appendChild(popup);
         }
         
-        // 模拟GitHub同步
-        function simulateGitHubSync() {
-            const syncStatus = document.getElementById('syncStatus');
-            syncStatus.className = 'sync-status syncing visible';
-            syncStatus.innerHTML = '<i class="fas fa-sync fa-spin"></i> <span>正在同步到GitHub...</span>';
+        // 添加新业务员
+        function addNewSalesman() {
+            const newSalesmanInput = document.getElementById('newSalesman');
+            const newSalesman = newSalesmanInput.value.trim();
             
-            setTimeout(() => {
-                syncStatus.className = 'sync-status visible';
-                syncStatus.innerHTML = '<i class="fas fa-check-circle"></i> <span>数据已同步到GitHub</span>';
-                
-                setTimeout(() => {
-                    syncStatus.className = 'sync-status';
-                }, 3000);
-            }, 1500);
+            if (!newSalesman) {
+                alert('请输入业务员姓名！');
+                return;
+            }
+            
+            if (salesmen.includes(newSalesman)) {
+                alert('该业务员已存在！');
+                return;
+            }
+            
+            salesmen.push(newSalesman);
+            updateSalesmanDropdown();
+            saveData();
+            
+            // 更新业务员列表显示
+            const salesmanList = document.getElementById('salesmanList');
+            const newItem = document.createElement('div');
+            newItem.className = 'salesman-item';
+            newItem.innerHTML = `
+                <div class="salesman-name">${newSalesman}</div>
+                <div class="salesman-actions">
+                    <button class="action-btn btn-delete" onclick="deleteSalesman('${newSalesman}')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            salesmanList.appendChild(newItem);
+            
+            newSalesmanInput.value = '';
         }
         
-        // 切换部分折叠/展开
-        function toggleSection(sectionId) {
-            const section = document.getElementById(sectionId);
-            const title = section.previousElementSibling;
+        // 删除业务员
+        function deleteSalesman(salesman) {
+            if (confirm(`确定要删除业务员"${salesman}"吗？`)) {
+                salesmen = salesmen.filter(s => s !== salesman);
+                updateSalesmanDropdown();
+                saveData();
+                
+                // 重新加载业务员管理弹窗
+                document.querySelector('.popup-overlay').remove();
+                manageSalesmen();
+            }
+        }
+        
+        // ========== 云端存储功能 ==========
+        
+        // 设置密码
+        function setPassword() {
+            const password = document.getElementById('cloudPassword').value;
+            if (!password) {
+                alert('请输入加密密码！');
+                return;
+            }
             
-            section.classList.toggle('collapsed');
-            title.classList.toggle('collapsed');
+            masterPassword = password;
+            
+            // 保存到云端配置
+            cloudConfig.password = password;
+            sessionStorage.setItem('cloudConfig', JSON.stringify(cloudConfig));
+            
+            alert('密码设置成功！');
+        }
+        
+        // 加密数据
+        function encryptData(data, password) {
+            return CryptoJS.AES.encrypt(JSON.stringify(data), password).toString();
+        }
+        
+        // 解密数据
+        function decryptData(encryptedData, password) {
+            try {
+                const bytes = CryptoJS.AES.decrypt(encryptedData, password);
+                return JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+            } catch (e) {
+                console.error('解密失败:', e);
+                return null;
+            }
+        }
+        
+        // 显示同步状态
+        function showSyncStatus(message, isError = false, isSyncing = false) {
+            const statusElement = document.getElementById('syncStatus');
+            statusElement.querySelector('span').textContent = message;
+            
+            statusElement.className = 'sync-status';
+            if (isError) {
+                statusElement.classList.add('error');
+            } else if (isSyncing) {
+                statusElement.classList.add('syncing');
+            }
+            
+            statusElement.classList.add('visible');
+            
+            // 3秒后隐藏
+            setTimeout(() => {
+                statusElement.classList.remove('visible');
+            }, 3000);
+        }
+        
+        // 自动保存到云端
+        function autoSaveToCloud() {
+            if (autoSaveTimeout) {
+                clearTimeout(autoSaveTimeout);
+            }
+            
+            autoSaveTimeout = setTimeout(() => {
+                saveToCloud(true);
+            }, 2000);
+        }
+        
+        // 自动从云端加载
+        function autoLoadFromCloud(token) {
+            if (!token || !masterPassword) return;
+            
+            // 从云端加载数据
+            loadFromGitHub(token, true);
+        }
+        
+        // 保存到云端
+        async function saveToCloud(isAuto = false) {
+            const token = prompt('请输入GitHub个人访问令牌:');
+            if (!token) return;
+            
+            const username = prompt('请输入GitHub用户名:');
+            if (!username) return;
+            
+            const repo = prompt('请输入仓库名称:', 'income-manager');
+            if (!repo) return;
+            
+            // 保存配置
+            GITHUB_OWNER = username;
+            GITHUB_REPO = repo;
+            cloudConfig = { 
+                username, 
+                repo, 
+                token,
+                password: masterPassword 
+            };
+            sessionStorage.setItem('cloudConfig', JSON.stringify(cloudConfig));
+            
+            // 获取数据
+            const table = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
+            const rows = table.rows;
+            
+            const data = [];
+            
+            for (let i = 0; i < rows.length; i++) {
+                data.push({
+                    salesman: rows[i].dataset.salesman,
+                    clientName: rows[i].dataset.clientName,
+                    loanDate: rows[i].dataset.loanDate,
+                    productType: rows[i].dataset.productType,
+                    loanAmount: rows[i].dataset.loanAmount,
+                    serviceRate: rows[i].dataset.serviceRate,
+                    channelRate: rows[i].dataset.channelRate,
+                    rebateRate: rows[i].dataset.rebateRate,
+                    commissionRate: rows[i].dataset.commissionRate,
+                    commission: rows[i].dataset.commission
+                });
+            }
+            
+            // 加密数据
+            if (!masterPassword) {
+                alert('请先设置加密密码！');
+                return;
+            }
+            
+            const encryptedData = encryptData({
+                data,
+                salesmen,
+                timestamp: new Date().toISOString()
+            }, masterPassword);
+            
+            // 保存到GitHub
+            try {
+                showSyncStatus('正在同步到云端...', false, true);
+                
+                // 检查文件是否存在
+                const existingFile = await getGitHubFile(token, username, repo);
+                
+                let sha = null;
+                if (existingFile) {
+                    sha = existingFile.sha;
+                }
+                
+                // 创建或更新文件
+                const response = await saveToGitHub(token, username, repo, encryptedData, sha);
+                
+                if (response.ok) {
+                    showSyncStatus('数据已成功同步到GitHub！');
+                    if (!isAuto) {
+                        alert('数据已成功保存到云端！');
+                    }
+                } else {
+                    const error = await response.json();
+                    showSyncStatus('同步失败: ' + error.message, true);
+                    if (!isAuto) {
+                        alert('保存失败: ' + error.message);
+                    }
+                }
+            } catch (error) {
+                console.error('保存到GitHub失败:', error);
+                showSyncStatus('同步失败: ' + error.message, true);
+                if (!isAuto) {
+                    alert('保存失败: ' + error.message);
+                }
+            }
+        }
+        
+        // 从云端加载
+        async function loadFromCloud() {
+            const token = prompt('请输入GitHub个人访问令牌:');
+            if (!token) return;
+            
+            const username = prompt('请输入GitHub用户名:');
+            if (!username) return;
+            
+            const repo = prompt('请输入仓库名称:', 'income-manager');
+            if (!repo) return;
+            
+            // 保存配置
+            GITHUB_OWNER = username;
+            GITHUB_REPO = repo;
+            cloudConfig = { 
+                username, 
+                repo, 
+                token,
+                password: masterPassword 
+            };
+            sessionStorage.setItem('cloudConfig', JSON.stringify(cloudConfig));
+            
+            // 从GitHub加载数据
+            loadFromGitHub(token);
+        }
+        
+        // 测试云端连接
+        async function testCloudConnection() {
+            const token = prompt('请输入GitHub个人访问令牌:');
+            if (!token) return;
+            
+            const username = prompt('请输入GitHub用户名:');
+            if (!username) return;
+            
+            const repo = prompt('请输入仓库名称:', 'income-manager');
+            if (!repo) return;
+            
+            try {
+                showSyncStatus('正在测试连接...', false, true);
+                
+                // 尝试获取仓库信息
+                const response = await fetch(`https://api.github.com/repos/${username}/${repo}`, {
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+                
+                if (response.ok) {
+                    showSyncStatus('云端连接测试成功！');
+                    alert('云端连接测试成功！');
+                    
+                    // 保存配置
+                    cloudConfig = { 
+                        username, 
+                        repo, 
+                        token 
+                    };
+                    sessionStorage.setItem('cloudConfig', JSON.stringify(cloudConfig));
+                } else {
+                    const error = await response.json();
+                    showSyncStatus('连接测试失败: ' + error.message, true);
+                    alert('连接测试失败: ' + error.message);
+                }
+            } catch (error) {
+                console.error('测试连接失败:', error);
+                showSyncStatus('连接测试失败: ' + error.message, true);
+                alert('连接测试失败: ' + error.message);
+            }
+        }
+        
+        // 从GitHub获取文件
+        async function getGitHubFile(token, username, repo) {
+            try {
+                const response = await fetch(`https://api.github.com/repos/${username}/${repo}/contents/${GITHUB_PATH}`, {
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+                
+                if (response.status === 404) {
+                    // 文件不存在
+                    return null;
+                }
+                
+                if (!response.ok) {
+                    throw new Error('获取文件失败: ' + response.statusText);
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error('获取GitHub文件失败:', error);
+                throw error;
+            }
+        }
+        
+        // 保存到GitHub
+        async function saveToGitHub(token, username, repo, content, sha = null) {
+            const message = sha ? '更新贷款收入数据' : '添加贷款收入数据';
+            
+            return await fetch(`https://api.github.com/repos/${username}/${repo}/contents/${GITHUB_PATH}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `token ${token}`,
+                    'Accept': 'application/vnd.github.v3+json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: message,
+                    content: btoa(unescape(encodeURIComponent(content))),
+                    sha: sha
+                })
+            });
+        }
+        
+        // 从GitHub加载数据
+        async function loadFromGitHub(token, isAuto = false) {
+            try {
+                if (!isAuto) {
+                    showSyncStatus('正在从云端加载...', false, true);
+                }
+                
+                // 获取文件
+                const file = await getGitHubFile(token, GITHUB_OWNER, GITHUB_REPO);
+                
+                if (!file) {
+                    if (!isAuto) {
+                        showSyncStatus('云端没有找到数据', true);
+                        alert('云端没有找到数据文件');
+                    }
+                    return;
+                }
+                
+                // 解码内容
+                const content = atob(file.content);
+                
+                // 解密数据
+                if (!masterPassword) {
+                    const password = prompt('请输入加密密码:');
+                    if (!password) return;
+                    
+                    masterPassword = password;
+                    cloudConfig.password = password;
+                    sessionStorage.setItem('cloudConfig', JSON.stringify(cloudConfig));
+                }
+                
+                const decryptedData = decryptData(content, masterPassword);
+                
+                if (!decryptedData) {
+                    showSyncStatus('解密失败，密码可能错误', true);
+                    alert('解密失败，请检查密码是否正确');
+                    return;
+                }
+                
+                // 加载数据
+                const data = decryptedData.data;
+                salesmen = decryptedData.salesmen || salesmen;
+                
+                const table = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
+                
+                // 清空现有表格
+                table.innerHTML = '';
+                
+                // 添加保存的数据行
+                data.forEach(item => {
+                    const newRow = table.insertRow();
+                    
+                    // 添加数据单元格
+                    newRow.insertCell(0).textContent = item.salesman;
+                    newRow.insertCell(1).textContent = item.clientName;
+                    newRow.insertCell(2).textContent = parseFloat(item.commission).toFixed(2);
+                    
+                    // 添加操作单元格
+                    const actionCell = newRow.insertCell(3);
+                    actionCell.className = 'action-cell';
+                    
+                    const viewBtn = document.createElement('button');
+                    viewBtn.className = 'action-btn';
+                    viewBtn.innerHTML = '<i class="fas fa-eye"></i> 查看';
+                    viewBtn.onclick = function() {
+                        viewRowDetails(this);
+                    };
+                    actionCell.appendChild(viewBtn);
+                    
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'action-btn btn-delete';
+                    deleteBtn.innerHTML = '<i class="fas fa-trash"></i> 删除';
+                    deleteBtn.onclick = function() {
+                        deleteRow(this);
+                    };
+                    actionCell.appendChild(deleteBtn);
+                    
+                    // 存储完整数据
+                    newRow.dataset.salesman = item.salesman;
+                    newRow.dataset.clientName = item.clientName;
+                    newRow.dataset.loanDate = item.loanDate;
+                    newRow.dataset.productType = item.productType;
+                    newRow.dataset.loanAmount = item.loanAmount;
+                    newRow.dataset.serviceRate = item.serviceRate;
+                    newRow.dataset.channelRate = item.channelRate;
+                    newRow.dataset.rebateRate = item.rebateRate;
+                    newRow.dataset.commissionRate = item.commissionRate;
+                    newRow.dataset.commission = item.commission;
+                });
+                
+                // 更新业务员下拉框
+                updateSalesmanDropdown();
+                
+                // 更新汇总
+                updateSummary();
+                
+                // 保存到本地存储
+                saveData();
+                
+                if (!isAuto) {
+                    showSyncStatus('数据已从云端加载成功！');
+                    alert('数据已从云端加载成功！');
+                }
+            } catch (error) {
+                console.error('从GitHub加载数据失败:', error);
+                if (!isAuto) {
+                    showSyncStatus('加载失败: ' + error.message, true);
+                    alert('加载失败: ' + error.message);
+                }
+            }
         }
     </script>
 </body>
