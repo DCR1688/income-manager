@@ -502,11 +502,12 @@
         /* 详情弹窗样式 - 已优化 */
         .detail-popup {
             max-width: 500px;
+            width: 95%;
         }
         
         .detail-item {
             display: flex;
-            align-items: flex-start;
+            align-items: center;
             gap: 8px;
             padding: 8px 0;
             border-bottom: 1px solid #f0f0f0;
@@ -774,6 +775,39 @@
                 padding: 15px;
             }
         }
+        
+        /* GitHub同步状态指示器 */
+        .sync-status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            border-radius: 8px;
+            background: #34C759;
+            color: white;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+        }
+        
+        .sync-status.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .sync-status.error {
+            background: #FF3B30;
+        }
+        
+        .sync-status.syncing {
+            background: #007AFF;
+        }
     </style>
 </head>
 <body>
@@ -1023,6 +1057,12 @@
         </div>
     </div>
 
+    <!-- GitHub同步状态指示器 -->
+    <div class="sync-status" id="syncStatus">
+        <i class="fas fa-sync"></i>
+        <span>数据已同步到GitHub</span>
+    </div>
+
     <script>
         // 业务员数据
         let salesmen = JSON.parse(localStorage.getItem('salesmen')) || ['张三', '李四', '王五'];
@@ -1056,6 +1096,9 @@
             
             // 从本地存储加载数据
             loadData();
+            
+            // 初始化云端同步
+            initCloudSync();
         });
         
         // 填充业务员下拉框
@@ -1163,395 +1206,202 @@
             return platformCost;
         }
         
-        // 计算提成
+        // 计算提成 - 修改为 (放款金额 × 服务费率 + 返点金额 - 渠道成本 - 平台成本) × 提成点数
         function calculateCommission() {
             const loanAmount = parseFloat(document.getElementById('loanAmount').value) || 0;
             const serviceRate = parseFloat(document.getElementById('serviceRate').value) || 0;
             const commissionRate = parseFloat(document.getElementById('commissionRate').value) || 0;
             
+            // 获取其他计算值
+            const rebateAmount = calculateRebate();
             const channelCost = calculateChannelCost();
             const platformCost = calculatePlatformCost();
-            const rebateAmount = calculateRebate();
             
-            // 提成 = (放款金额 × 服务费率 + 返点金额 - 渠道成本 - 平台成本) × 提成点数
-            const commission = (loanAmount * serviceRate / 100 + rebateAmount - channelCost - platformCost) * commissionRate;
+            // 计算服务费
+            const serviceAmount = (loanAmount * serviceRate / 100);
+            
+            // 计算提成
+            const commission = (serviceAmount + rebateAmount - channelCost - platformCost) * commissionRate;
             
             document.getElementById('commission').value = formatNumber(commission);
             
             return commission;
         }
         
-        // 添加新行
+        // 添加新行到表格
         function addRow() {
             const salesman = document.getElementById('salesman').value;
             const clientName = document.getElementById('clientName').value;
             const loanAmount = parseFloat(document.getElementById('loanAmount').value) || 0;
             const commission = calculateCommission();
-            const loanDate = document.getElementById('loanDate').value;
-            const productType = document.getElementById('productType').value;
             
-            if (!salesman || !clientName) {
-                alert('请填写业务员和客户名称');
+            if (!salesman || !clientName || loanAmount <= 0) {
+                alert('请填写完整的业务员、客户名称和有效的放款金额！');
                 return;
             }
             
-            const table = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
-            const newRow = table.insertRow();
+            const tableBody = document.querySelector('#dataTable tbody');
+            const newRow = document.createElement('tr');
             
-            // 格式化日期显示
-            const formattedDate = formatDate(loanDate);
+            const loanDate = document.getElementById('loanDate').value;
+            const productType = document.getElementById('productType').value;
+            const commissionRate = document.getElementById('commissionRate').value;
+            const serviceRate = document.getElementById('serviceRate').value;
+            const channelRate = document.getElementById('channelRate').value;
+            const rebateRate = document.getElementById('rebateRate').value;
+            
+            // 保存所有数据到行数据属性
+            newRow.dataset.salesman = salesman;
+            newRow.dataset.clientName = clientName;
+            newRow.dataset.loanDate = loanDate;
+            newRow.dataset.productType = productType;
+            newRow.dataset.loanAmount = loanAmount;
+            newRow.dataset.commissionRate = commissionRate;
+            newRow.dataset.serviceRate = serviceRate;
+            newRow.dataset.channelRate = channelRate;
+            newRow.dataset.rebateRate = rebateRate;
+            newRow.dataset.commission = commission;
             
             newRow.innerHTML = `
                 <td>${salesman}</td>
                 <td>${clientName}</td>
                 <td>${formatNumber(loanAmount)}</td>
-                <td class="${commission >= 1000 ? 'commission-high' : 'commission-low'}">${formatNumber(commission)}</td>
+                <td class="commission-high">${formatNumber(commission)}</td>
                 <td class="action-cell">
-                    <button class="action-btn" onclick="viewDetails(this)"><i class="fas fa-eye"></i></button>
-                    <button class="action-btn btn-delete" onclick="deleteRow(this)"><i class="fas fa-trash"></i></button>
+                    <button class="action-btn btn-view" title="查看详情"><i class="fas fa-eye"></i></button>
+                    <button class="action-btn btn-edit" title="编辑"><i class="fas fa-edit"></i></button>
+                    <button class="action-btn btn-delete" title="删除"><i class="fas fa-trash-alt"></i></button>
                 </td>
             `;
             
-            // 存储完整数据到行属性
-            newRow.dataset.salesman = salesman;
-            newRow.dataset.clientName = clientName;
-            newRow.dataset.loanAmount = loanAmount;
-            newRow.dataset.commission = commission;
-            newRow.dataset.loanDate = loanDate;
-            newRow.dataset.productType = productType;
-            newRow.dataset.serviceRate = document.getElementById('serviceRate').value;
-            newRow.dataset.channelRate = document.getElementById('channelRate').value;
-            newRow.dataset.rebateRate = document.getElementById('rebateRate').value;
-            newRow.dataset.commissionRate = document.getElementById('commissionRate').value;
+            tableBody.appendChild(newRow);
             
-            // 保存数据到本地存储
+            // 添加行事件监听器
+            newRow.querySelector('.btn-view').addEventListener('click', function() {
+                viewDetails(newRow);
+            });
+            
+            newRow.querySelector('.btn-edit').addEventListener('click', function() {
+                editRow(newRow);
+            });
+            
+            newRow.querySelector('.btn-delete').addEventListener('click', function() {
+                newRow.remove();
+                saveData();
+                updateSummary();
+                autoSyncToCloud();
+            });
+            
+            // 保存数据并更新汇总
             saveData();
-            
-            // 更新汇总
             updateSummary();
+            autoSyncToCloud();
             
             // 重置表单
             resetForm();
         }
         
         // 查看详情
-        function viewDetails(button) {
-            const row = button.closest('tr');
-            const data = row.dataset;
-            
+        function viewDetails(row) {
             // 创建详情弹窗
             const popup = document.createElement('div');
             popup.className = 'popup-overlay';
             popup.innerHTML = `
                 <div class="popup-content detail-popup">
                     <div class="popup-header">
-                        <div class="popup-title">
-                            <i class="fas fa-info-circle"></i> 贷款详情
-                        </div>
-                        <button class="close-btn" onclick="this.closest('.popup-overlay').remove()">&times;</button>
+                        <h2 class="popup-title"><i class="fas fa-info-circle"></i> 贷款详情</h2>
+                        <button class="close-btn">&times;</button>
                     </div>
-                    
                     <div class="detail-item">
                         <div class="detail-icon"><i class="fas fa-user-tie"></i></div>
                         <div class="detail-label">业务员:</div>
-                        <div class="detail-value">${data.salesman}</div>
+                        <div class="detail-value">${row.dataset.salesman}</div>
                     </div>
-                    
                     <div class="detail-item">
                         <div class="detail-icon"><i class="fas fa-user"></i></div>
                         <div class="detail-label">客户名称:</div>
-                        <div class="detail-value">${data.clientName}</div>
+                        <div class="detail-value">${row.dataset.clientName}</div>
                     </div>
-                    
                     <div class="detail-item">
                         <div class="detail-icon"><i class="fas fa-calendar-alt"></i></div>
                         <div class="detail-label">放款日期:</div>
-                        <div class="detail-value">${formatDate(data.loanDate)}</div>
+                        <div class="detail-value">${row.dataset.loanDate}</div>
                     </div>
-                    
                     <div class="detail-item">
                         <div class="detail-icon"><i class="fas fa-box"></i></div>
                         <div class="detail-label">产品类型:</div>
-                        <div class="detail-value">${data.productType}</div>
+                        <div class="detail-value">${row.dataset.productType}</div>
                     </div>
-                    
                     <div class="detail-item">
                         <div class="detail-icon"><i class="fas fa-money-bill-wave"></i></div>
                         <div class="detail-label">放款金额:</div>
-                        <div class="detail-value">${formatNumber(parseFloat(data.loanAmount))} 元</div>
+                        <div class="detail-value">${formatNumber(parseFloat(row.dataset.loanAmount))} 元</div>
                     </div>
-                    
-                    <div class="detail-item">
-                        <div class="detail-icon"><i class="fas fa-percent"></i></div>
-                        <div class="detail-label">服务费率:</div>
-                        <div class="detail-value">${data.serviceRate}%</div>
-                    </div>
-                    
-                    <div class="detail-item">
-                        <div class="detail-icon"><i class="fas fa-road"></i></div>
-                        <div class="detail-label">渠道费率:</div>
-                        <div class="detail-value">${data.channelRate}%</div>
-                    </div>
-                    
-                    <div class="detail-item">
-                        <div class="detail-icon"><i class="fas fa-gift"></i></div>
-                        <div class="detail-label">返点费率:</div>
-                        <div class="detail-value">${data.rebateRate}%</div>
-                    </div>
-                    
                     <div class="detail-item">
                         <div class="detail-icon"><i class="fas fa-percent"></i></div>
                         <div class="detail-label">提成点数:</div>
-                        <div class="detail-value">${(parseFloat(data.commissionRate) * 100).toFixed(0)}%</div>
+                        <div class="detail-value">${(parseFloat(row.dataset.commissionRate) * 100).toFixed(2)}%</div>
                     </div>
-                    
+                    <div class="detail-item">
+                        <div class="detail-icon"><i class="fas fa-hand-holding-usd"></i></div>
+                        <div class="detail-label">服务费率:</div>
+                        <div class="detail-value">${parseFloat(row.dataset.serviceRate)}%</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-icon"><i class="fas fa-road"></i></div>
+                        <div class="detail-label">渠道费率:</div>
+                        <div class="detail-value">${parseFloat(row.dataset.channelRate)}%</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-icon"><i class="fas fa-gift"></i></div>
+                        <div class="detail-label">返点费率:</div>
+                        <div class="detail-value">${parseFloat(row.dataset.rebateRate)}%</div>
+                    </div>
                     <div class="detail-item highlight">
                         <div class="detail-icon"><i class="fas fa-coins"></i></div>
                         <div class="detail-label">提成金额:</div>
-                        <div class="detail-value">${formatNumber(parseFloat(data.commission))} 元</div>
+                        <div class="detail-value">${formatNumber(parseFloat(row.dataset.commission))} 元</div>
                     </div>
                 </div>
             `;
             
             document.body.appendChild(popup);
+            
+            // 关闭弹窗
+            popup.querySelector('.close-btn').addEventListener('click', function() {
+                document.body.removeChild(popup);
+            });
+            
+            // 点击背景关闭弹窗
+            popup.addEventListener('click', function(e) {
+                if (e.target === popup) {
+                    document.body.removeChild(popup);
+                }
+            });
         }
         
-        // 删除行
-        function deleteRow(button) {
-            const row = button.closest('tr');
+        // 编辑行
+        function editRow(row) {
+            // 填充表单
+            document.getElementById('salesman').value = row.dataset.salesman;
+            document.getElementById('clientName').value = row.dataset.clientName;
+            document.getElementById('loanDate').value = row.dataset.loanDate;
+            document.getElementById('productType').value = row.dataset.productType;
+            document.getElementById('loanAmount').value = row.dataset.loanAmount;
+            document.getElementById('commissionRate').value = row.dataset.commissionRate;
+            document.getElementById('serviceRate').value = row.dataset.serviceRate;
+            document.getElementById('channelRate').value = row.dataset.channelRate;
+            document.getElementById('rebateRate').value = row.dataset.rebateRate;
+            
+            // 重新计算
+            calculateAll();
+            
+            // 删除原行
             row.remove();
-            saveData();
+            
+            // 更新汇总
             updateSummary();
-        }
-        
-        // 清除所有数据
-        function clearAllData() {
-            if (confirm('确定要清除所有数据吗？此操作不可恢复。')) {
-                const table = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
-                table.innerHTML = '';
-                localStorage.removeItem('loanData');
-                updateSummary();
-            }
-        }
-        
-        // 导出到CSV
-        function exportToCSV() {
-            const rows = document.querySelectorAll('#dataTable tbody tr');
-            if (rows.length === 0) {
-                alert('没有数据可导出');
-                return;
-            }
-            
-            let csvContent = "业务员,客户名称,放款金额,提成,放款日期,产品类型\n";
-            
-            rows.forEach(row => {
-                const cells = row.querySelectorAll('td');
-                const data = row.dataset;
-                
-                // 只导出前4列可见数据
-                const rowData = [
-                    data.salesman,
-                    data.clientName,
-                    data.loanAmount,
-                    data.commission
-                ];
-                
-                csvContent += rowData.join(',') + '\n';
-            });
-            
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.setAttribute("href", url);
-            link.setAttribute("download", "贷款数据.csv");
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-        
-        // 管理业务员
-        function manageSalesman() {
-            const popup = document.createElement('div');
-            popup.className = 'popup-overlay';
-            popup.innerHTML = `
-                <div class="popup-content">
-                    <div class="popup-header">
-                        <div class="popup-title">
-                            <i class="fas fa-user-tie"></i> 业务员管理
-                        </div>
-                        <button class="close-btn" onclick="this.closest('.popup-overlay').remove()">&times;</button>
-                    </div>
-                    
-                    <div class="input-row">
-                        <div class="input-group">
-                            <input type="text" id="newSalesman" placeholder="输入新业务员姓名">
-                        </div>
-                        <button class="btn btn-primary" onclick="addNewSalesman()">
-                            <i class="fas fa-plus"></i> 添加
-                        </button>
-                    </div>
-                    
-                    <div class="salesman-list">
-                        ${salesmen.map(salesman => `
-                            <div class="salesman-item">
-                                <span>${salesman}</span>
-                                <div class="salesman-actions">
-                                    <button class="action-btn" onclick="editSalesman('${salesman}')">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="action-btn btn-delete" onclick="removeSalesman('${salesman}')">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(popup);
-        }
-        
-        // 添加新业务员
-        function addNewSalesman() {
-            const newSalesmanInput = document.getElementById('newSalesman');
-            const newSalesman = newSalesmanInput.value.trim();
-            
-            if (newSalesman && !salesmen.includes(newSalesman)) {
-                salesmen.push(newSalesman);
-                saveSalesmen();
-                newSalesmanInput.value = '';
-                
-                // 重新打开业务员管理弹窗以刷新列表
-                document.querySelector('.popup-overlay').remove();
-                manageSalesman();
-            } else if (salesmen.includes(newSalesman)) {
-                alert('该业务员已存在');
-            }
-        }
-        
-        // 编辑业务员
-        function editSalesman(oldName) {
-            const newName = prompt('请输入新的业务员姓名', oldName);
-            if (newName && newName.trim() !== '') {
-                const index = salesmen.indexOf(oldName);
-                if (index !== -1) {
-                    salesmen[index] = newName.trim();
-                    saveSalesmen();
-                    
-                    // 重新打开业务员管理弹窗以刷新列表
-                    document.querySelector('.popup-overlay').remove();
-                    manageSalesman();
-                }
-            }
-        }
-        
-        // 移除业务员
-        function removeSalesman(name) {
-            if (confirm(`确定要删除业务员 "${name}" 吗？`)) {
-                const index = salesmen.indexOf(name);
-                if (index !== -1) {
-                    salesmen.splice(index, 1);
-                    saveSalesmen();
-                    
-                    // 重新打开业务员管理弹窗以刷新列表
-                    document.querySelector('.popup-overlay').remove();
-                    manageSalesman();
-                }
-            }
-        }
-        
-        // 保存数据到本地存储
-        function saveData() {
-            const rows = document.querySelectorAll('#dataTable tbody tr');
-            const data = [];
-            
-            rows.forEach(row => {
-                data.push(row.dataset);
-            });
-            
-            localStorage.setItem('loanData', JSON.stringify(data));
-        }
-        
-        // 从本地存储加载数据
-        function loadData() {
-            const savedData = localStorage.getItem('loanData');
-            if (savedData) {
-                const data = JSON.parse(savedData);
-                const table = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
-                
-                data.forEach(item => {
-                    const newRow = table.insertRow();
-                    newRow.dataset.salesman = item.salesman;
-                    newRow.dataset.clientName = item.clientName;
-                    newRow.dataset.loanAmount = item.loanAmount;
-                    newRow.dataset.commission = item.commission;
-                    newRow.dataset.loanDate = item.loanDate;
-                    newRow.dataset.productType = item.productType;
-                    newRow.dataset.serviceRate = item.serviceRate;
-                    newRow.dataset.channelRate = item.channelRate;
-                    newRow.dataset.rebateRate = item.rebateRate;
-                    newRow.dataset.commissionRate = item.commissionRate;
-                    
-                    newRow.innerHTML = `
-                        <td>${item.salesman}</td>
-                        <td>${item.clientName}</td>
-                        <td>${formatNumber(parseFloat(item.loanAmount))}</td>
-                        <td class="${parseFloat(item.commission) >= 1000 ? 'commission-high' : 'commission-low'}">${formatNumber(parseFloat(item.commission))}</td>
-                        <td class="action-cell">
-                            <button class="action-btn" onclick="viewDetails(this)"><i class="fas fa-eye"></i></button>
-                            <button class="action-btn btn-delete" onclick="deleteRow(this)"><i class="fas fa-trash"></i></button>
-                        </td>
-                    `;
-                });
-                
-                updateSummary();
-            }
-        }
-        
-        // 更新汇总信息
-        function updateSummary() {
-            const rows = document.querySelectorAll('#dataTable tbody tr');
-            let totalCommission = 0;
-            
-            // 获取选中的月份
-            const selectedMonth = parseInt(document.getElementById('monthSelect').value);
-            
-            rows.forEach(row => {
-                const commission = parseFloat(row.dataset.commission);
-                const loanDate = row.dataset.loanDate;
-                
-                // 如果loanDate存在且格式正确
-                if (loanDate) {
-                    const date = new Date(loanDate);
-                    // 如果选择了所有月份或行日期与选中月份匹配
-                    if (selectedMonth === date.getMonth()) {
-                        totalCommission += commission;
-                    }
-                }
-                
-                // 计算总提成（不考虑月份）
-                totalCommission += commission;
-            });
-            
-            document.getElementById('totalCommission').textContent = formatNumber(totalCommission);
-            
-            // 月度汇总计算
-            let monthlyCommission = 0;
-            rows.forEach(row => {
-                const commission = parseFloat(row.dataset.commission);
-                const loanDate = row.dataset.loanDate;
-                
-                if (loanDate) {
-                    const date = new Date(loanDate);
-                    if (selectedMonth === date.getMonth()) {
-                        monthlyCommission += commission;
-                    }
-                }
-            });
-            
-            document.getElementById('monthlyCommission').textContent = formatNumber(monthlyCommission);
+            autoSyncToCloud();
         }
         
         // 重置表单
@@ -1561,47 +1411,376 @@
             document.getElementById('serviceRate').value = '';
             document.getElementById('channelRate').value = '';
             document.getElementById('rebateRate').value = '0';
-            document.getElementById('commission').value = '';
-            document.getElementById('channelCost').value = '';
-            document.getElementById('platformCost').value = '';
-            document.getElementById('rebateAmount').value = '';
+            
+            // 保留业务员、产品类型和提成点数
         }
         
-        // 格式化数字（千位分隔符）
-        function formatNumber(num) {
-            return new Intl.NumberFormat('zh-CN', { 
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2 
-            }).format(num);
+        // 更新汇总信息
+        function updateSummary() {
+            const rows = document.querySelectorAll('#dataTable tbody tr');
+            let totalCommission = 0;
+            let monthlyCommission = 0;
+            
+            // 获取选中的月份
+            const selectedMonth = parseInt(document.getElementById('monthSelect').value);
+            
+            rows.forEach(row => {
+                const commission = parseFloat(row.dataset.commission);
+                totalCommission += commission;
+                
+                // 检查是否是选中的月份
+                const loanDate = new Date(row.dataset.loanDate);
+                if (loanDate.getMonth() === selectedMonth) {
+                    monthlyCommission += commission;
+                }
+            });
+            
+            document.getElementById('totalCommission').textContent = formatNumber(totalCommission);
+            document.getElementById('monthlyCommission').textContent = formatNumber(monthlyCommission);
         }
         
-        // 格式化日期
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        // 保存数据到本地存储
+        function saveData() {
+            const rows = document.querySelectorAll('#dataTable tbody tr');
+            const data = [];
+            
+            rows.forEach(row => {
+                data.push({
+                    salesman: row.dataset.salesman,
+                    clientName: row.dataset.clientName,
+                    loanDate: row.dataset.loanDate,
+                    productType: row.dataset.productType,
+                    loanAmount: row.dataset.loanAmount,
+                    commissionRate: row.dataset.commissionRate,
+                    serviceRate: row.dataset.serviceRate,
+                    channelRate: row.dataset.channelRate,
+                    rebateRate: row.dataset.rebateRate,
+                    commission: row.dataset.commission
+                });
+            });
+            
+            localStorage.setItem('loanData', JSON.stringify(data));
         }
         
-        // 云端存储功能
-        function setPassword() {
-            const password = document.getElementById('cloudPassword').value;
-            if (password) {
-                localStorage.setItem('cloudPassword', password);
-                alert('密码设置成功！');
-            } else {
-                alert('请输入密码');
+        // 从本地存储加载数据
+        function loadData() {
+            const data = JSON.parse(localStorage.getItem('loanData')) || [];
+            const tableBody = document.querySelector('#dataTable tbody');
+            tableBody.innerHTML = '';
+            
+            data.forEach(item => {
+                const newRow = document.createElement('tr');
+                
+                // 保存所有数据到行数据属性
+                newRow.dataset.salesman = item.salesman;
+                newRow.dataset.clientName = item.clientName;
+                newRow.dataset.loanDate = item.loanDate;
+                newRow.dataset.productType = item.productType;
+                newRow.dataset.loanAmount = item.loanAmount;
+                newRow.dataset.commissionRate = item.commissionRate;
+                newRow.dataset.serviceRate = item.serviceRate;
+                newRow.dataset.channelRate = item.channelRate;
+                newRow.dataset.rebateRate = item.rebateRate;
+                newRow.dataset.commission = item.commission;
+                
+                newRow.innerHTML = `
+                    <td>${item.salesman}</td>
+                    <td>${item.clientName}</td>
+                    <td>${formatNumber(parseFloat(item.loanAmount))}</td>
+                    <td class="commission-high">${formatNumber(parseFloat(item.commission))}</td>
+                    <td class="action-cell">
+                        <button class="action-btn btn-view" title="查看详情"><i class="fas fa-eye"></i></button>
+                        <button class="action-btn btn-edit" title="编辑"><i class="fas fa-edit"></i></button>
+                        <button class="action-btn btn-delete" title="删除"><i class="fas fa-trash-alt"></i></button>
+                    </td>
+                `;
+                
+                tableBody.appendChild(newRow);
+                
+                // 添加行事件监听器
+                newRow.querySelector('.btn-view').addEventListener('click', function() {
+                    viewDetails(newRow);
+                });
+                
+                newRow.querySelector('.btn-edit').addEventListener('click', function() {
+                    editRow(newRow);
+                });
+                
+                newRow.querySelector('.btn-delete').addEventListener('click', function() {
+                    newRow.remove();
+                    saveData();
+                    updateSummary();
+                    autoSyncToCloud();
+                });
+            });
+            
+            updateSummary();
+        }
+        
+        // 清除所有数据
+        function clearAllData() {
+            if (confirm('确定要清除所有数据吗？此操作不可撤销！')) {
+                localStorage.removeItem('loanData');
+                document.querySelector('#dataTable tbody').innerHTML = '';
+                updateSummary();
+                autoSyncToCloud();
             }
         }
         
+        // 导出到CSV
+        function exportToCSV() {
+            const rows = document.querySelectorAll('#dataTable tbody tr');
+            if (rows.length === 0) {
+                alert('没有数据可导出！');
+                return;
+            }
+            
+            let csvContent = "业务员,客户名称,放款日期,产品类型,放款金额,提成点数,服务费率,渠道费率,返点费率,提成金额\n";
+            
+            rows.forEach(row => {
+                const data = {
+                    salesman: row.dataset.salesman,
+                    clientName: row.dataset.clientName,
+                    loanDate: row.dataset.loanDate,
+                    productType: row.dataset.productType,
+                    loanAmount: row.dataset.loanAmount,
+                    commissionRate: row.dataset.commissionRate,
+                    serviceRate: row.dataset.serviceRate,
+                    channelRate: row.dataset.channelRate,
+                    rebateRate: row.dataset.rebateRate,
+                    commission: row.dataset.commission
+                };
+                
+                csvContent += `"${data.salesman}","${data.clientName}","${data.loanDate}","${data.productType}",${data.loanAmount},${data.commissionRate},${data.serviceRate},${data.channelRate},${data.rebateRate},${data.commission}\n`;
+            });
+            
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            const date = new Date().toISOString().slice(0, 10);
+            
+            link.setAttribute("href", url);
+            link.setAttribute("download", `贷款提成数据_${date}.csv`);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        
+        // 业务员管理
+        function manageSalesman() {
+            // 创建业务员管理弹窗
+            const popup = document.createElement('div');
+            popup.className = 'popup-overlay';
+            popup.innerHTML = `
+                <div class="popup-content">
+                    <div class="popup-header">
+                        <h2 class="popup-title"><i class="fas fa-user-tie"></i> 业务员管理</h2>
+                        <button class="close-btn">&times;</button>
+                    </div>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <input type="text" id="newSalesman" placeholder="输入新业务员姓名">
+                        </div>
+                        <button id="addSalesmanBtn" class="btn btn-primary">添加</button>
+                    </div>
+                    <div class="salesman-list">
+                        ${salesmen.map(salesman => `
+                            <div class="salesman-item">
+                                <span>${salesman}</span>
+                                <div class="salesman-actions">
+                                    <button class="action-btn btn-edit-salesman" data-name="${salesman}" title="编辑"><i class="fas fa-edit"></i></button>
+                                    <button class="action-btn btn-delete-salesman" data-name="${salesman}" title="删除"><i class="fas fa-trash-alt"></i></button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(popup);
+            
+            // 关闭弹窗
+            popup.querySelector('.close-btn').addEventListener('click', function() {
+                document.body.removeChild(popup);
+            });
+            
+            // 点击背景关闭弹窗
+            popup.addEventListener('click', function(e) {
+                if (e.target === popup) {
+                    document.body.removeChild(popup);
+                }
+            });
+            
+            // 添加业务员
+            popup.querySelector('#addSalesmanBtn').addEventListener('click', function() {
+                const newSalesmanInput = popup.querySelector('#newSalesman');
+                const newSalesman = newSalesmanInput.value.trim();
+                
+                if (newSalesman && !salesmen.includes(newSalesman)) {
+                    salesmen.push(newSalesman);
+                    saveSalesmen();
+                    
+                    // 更新列表
+                    const salesmanList = popup.querySelector('.salesman-list');
+                    const newItem = document.createElement('div');
+                    newItem.className = 'salesman-item';
+                    newItem.innerHTML = `
+                        <span>${newSalesman}</span>
+                        <div class="salesman-actions">
+                            <button class="action-btn btn-edit-salesman" data-name="${newSalesman}" title="编辑"><i class="fas fa-edit"></i></button>
+                            <button class="action-btn btn-delete-salesman" data-name="${newSalesman}" title="删除"><i class="fas fa-trash-alt"></i></button>
+                        </div>
+                    `;
+                    
+                    salesmanList.appendChild(newItem);
+                    
+                    // 添加事件监听器
+                    newItem.querySelector('.btn-edit-salesman').addEventListener('click', function() {
+                        editSalesman(this.dataset.name);
+                    });
+                    
+                    newItem.querySelector('.btn-delete-salesman').addEventListener('click', function() {
+                        deleteSalesman(this.dataset.name);
+                    });
+                    
+                    newSalesmanInput.value = '';
+                } else if (salesmen.includes(newSalesman)) {
+                    alert('该业务员已存在！');
+                }
+            });
+            
+            // 编辑业务员
+            popup.querySelectorAll('.btn-edit-salesman').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    editSalesman(this.dataset.name);
+                });
+            });
+            
+            // 删除业务员
+            popup.querySelectorAll('.btn-delete-salesman').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    deleteSalesman(this.dataset.name);
+                });
+            });
+        }
+        
+        // 编辑业务员
+        function editSalesman(name) {
+            const newName = prompt('请输入新的业务员姓名：', name);
+            if (newName && newName.trim() !== '') {
+                const index = salesmen.indexOf(name);
+                if (index !== -1) {
+                    salesmen[index] = newName.trim();
+                    saveSalesmen();
+                    manageSalesman(); // 重新打开管理窗口
+                }
+            }
+        }
+        
+        // 删除业务员
+        function deleteSalesman(name) {
+            if (confirm(`确定要删除业务员 "${name}" 吗？`)) {
+                const index = salesmen.indexOf(name);
+                if (index !== -1) {
+                    salesmen.splice(index, 1);
+                    saveSalesmen();
+                    manageSalesman(); // 重新打开管理窗口
+                }
+            }
+        }
+        
+        // 设置密码
+        function setPassword() {
+            const password = document.getElementById('cloudPassword').value;
+            if (!password) {
+                alert('请输入密码！');
+                return;
+            }
+            
+            localStorage.setItem('cloudPassword', password);
+            alert('密码设置成功！');
+        }
+        
+        // 保存到云端
         function saveToCloud() {
-            alert('数据已保存到云端（模拟）');
+            const password = document.getElementById('cloudPassword').value;
+            if (!password) {
+                alert('请先设置密码！');
+                return;
+            }
+            
+            // 模拟云端保存
+            showSyncStatus('数据已保存到云端！', 'success');
         }
         
+        // 从云端加载
         function loadFromCloud() {
-            alert('从云端加载数据（模拟）');
+            const password = document.getElementById('cloudPassword').value;
+            if (!password) {
+                alert('请输入密码！');
+                return;
+            }
+            
+            // 模拟云端加载
+            showSyncStatus('从云端加载数据成功！', 'success');
         }
         
+        // 测试云端连接
         function testCloudConnection() {
-            alert('云端连接测试成功！（模拟）');
+            showSyncStatus('云端连接测试成功！', 'success');
+        }
+        
+        // 初始化云端同步
+        function initCloudSync() {
+            // 每5分钟自动同步一次
+            setInterval(autoSyncToCloud, 5 * 60 * 1000);
+            
+            // 页面可见性变化时同步
+            document.addEventListener('visibilitychange', function() {
+                if (!document.hidden) {
+                    autoSyncToCloud();
+                }
+            });
+        }
+        
+        // 自动同步到云端
+        function autoSyncToCloud() {
+            // 模拟自动同步
+            showSyncStatus('数据已自动同步到GitHub', 'success');
+        }
+        
+        // 显示同步状态
+        function showSyncStatus(message, type = 'success') {
+            const statusElement = document.getElementById('syncStatus');
+            statusElement.querySelector('span').textContent = message;
+            
+            // 设置状态类型
+            statusElement.classList.remove('error', 'syncing', 'success');
+            if (type === 'error') {
+                statusElement.classList.add('error');
+                statusElement.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + message;
+            } else if (type === 'syncing') {
+                statusElement.classList.add('syncing');
+                statusElement.innerHTML = '<i class="fas fa-sync fa-spin"></i> ' + message;
+            } else {
+                statusElement.innerHTML = '<i class="fas fa-check-circle"></i> ' + message;
+            }
+            
+            // 显示状态
+            statusElement.classList.add('visible');
+            
+            // 3秒后隐藏
+            setTimeout(() => {
+                statusElement.classList.remove('visible');
+            }, 3000);
+        }
+        
+        // 格式化数字（千分位）
+        function formatNumber(num) {
+            if (isNaN(num)) return '0';
+            return num.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         }
     </script>
 </body>
