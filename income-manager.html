@@ -260,7 +260,7 @@
         
         th, td {
             padding: 10px 8px;
-            text-align: left;
+            text-align: center; /* 修改为居中对齐 */
             border-bottom: 1px solid #e5e5ea;
             font-size: 14px;
         }
@@ -288,7 +288,7 @@
         th:nth-child(3), td:nth-child(3) {
             width: 25%;
             max-width: 25%;
-            text-align: right;
+            text-align: center; /* 修改为居中对齐 */
         }
         
         th:nth-child(4), td:nth-child(4) {
@@ -311,6 +311,7 @@
             display: flex;
             gap: 8px;
             justify-content: center;
+            align-items: center; /* 添加垂直居中 */
         }
         
         .action-btn {
@@ -545,6 +546,29 @@
             border-left: 3px solid #007AFF;
         }
         
+        /* 详情表格头部样式 */
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+        
+        .month-selector-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .month-summary {
+            font-weight: 600;
+            color: #007AFF;
+            font-size: 16px;
+        }
+        
         /* 响应式设计 - 优化表格显示 */
         @media (max-width: 1024px) {
             .main-content {
@@ -615,6 +639,12 @@
                 width: 28px;
                 height: 28px;
                 font-size: 14px;
+            }
+            
+            .table-header {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
             }
         }
         
@@ -750,6 +780,7 @@
         /* 业务员管理弹窗样式 */
         .salesman-popup {
             max-width: 400px;
+            width: 95%;
         }
         
         .salesman-list {
@@ -796,6 +827,7 @@
         /* 云端配置弹窗样式 */
         .cloud-config-popup {
             max-width: 500px;
+            width: 95%;
         }
         
         .cloud-config-input {
@@ -831,11 +863,13 @@
                 <div class="commission-info">
                     <i class="fas fa-info-circle"></i> 提成计算公式: (放款金额 × 服务费率 + 返点金额 - 渠道成本 - 平台成本) × 提成点数
                 </div>
-               <!-- 基本信息卡片-->
+                
+                <!-- 基本信息卡片-->
                 <div class="section-card">
                     <div class="section-title">
                         <i class="fas fa-info-circle"></i> 基本信息
                     </div>
+                    <div class="section-content">
                         <div class="input-row">
                             <div class="input-group">
                                 <label for="salesman"><i class="fas fa-user-tie"></i> 业务员</label>
@@ -871,7 +905,6 @@
                                     <option value="抵押">抵押贷</option>
                                     <option value="信用贷">信用贷</option>
                                     <option value="企业贷">企业贷</option>
-                                     <option value="车抵贷">车抵贷</option>
                                 </select>
                             </div>
                         </div>
@@ -895,11 +928,12 @@
                     </div>
                 </div>
                 
-                <!-- 费率信息卡片 -->
+               <!-- 费率信息卡片 -->
                 <div class="section-card">
                     <div class="section-title">
                         <i class="fas fa-percent"></i> 费率信息
                     </div>
+                    <div class="section-content">
                         <div class="input-row">
                             <div class="input-group">
                                 <label for="serviceRate"><i class="fas fa-hand-holding-usd"></i> 服务费率 (%)</label>
@@ -926,6 +960,7 @@
                     <div class="section-title">
                         <i class="fas fa-money-bill-alt"></i> 成本信息
                     </div>
+                    <div class="section-content">
                         <div class="input-row">
                             <div class="input-group">
                                 <label for="channelCost"><i class="fas fa-tag"></i> 渠道成本 (元)</label>
@@ -1008,12 +1043,21 @@
                         <div class="summary-value" id="totalCommission">0.00</div>
                     </div>
                     
-                    <div class="summary-card monthly-summary">
-                        <h3><i class="fas fa-calendar-check"></i> 月度提成汇总</h3>
-                        <div class="summary-value" id="monthlyCommission">0.00</div>
-                        <div class="month-selector">
-                            <label for="monthSelect">选择月份:</label>
-                            <select id="monthSelect">
+                   
+            
+            <!-- 详细信息 -->
+            <div class="table-section">
+                <div class="section-card">
+                    <div class="section-title">
+                        <i class="fas fa-money-bill-alt"></i> 详细信息
+                    </div>
+                    
+                    <!-- 添加表格头部，包含月份筛选和当月合计 -->
+                    <div class="table-header">
+                        <div class="month-selector-container">
+                            <label for="detailMonthSelect">选择月份:</label>
+                            <select id="detailMonthSelect">
+                                <option value="all">全部月份</option>
                                 <option value="0">1月</option>
                                 <option value="1">2月</option>
                                 <option value="2">3月</option>
@@ -1028,36 +1072,37 @@
                                 <option value="11">12月</option>
                             </select>
                         </div>
+                        <div class="month-summary" id="detailMonthSummary">
+                            当月提成合计: 0.00 元
+                        </div>
                     </div>
-                </div>
-            </div>
-            
-            <div class="table-section">
-                <div class="table-container">
-                    <div class="table-scroll">
-                        <table id="dataTable">
-                            <thead>
-                                <tr>
-                                    <th>业务员</th>
-                                    <th>客户名称</th>
-                                    <th>提成</th>
-                                    <th>操作</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- 数据行将通过JavaScript动态添加 -->
-                            </tbody>
-                        </table>
+                    
+                    <div class="table-container">
+                        <div class="table-scroll">
+                            <table id="dataTable">
+                                <thead>
+                                    <tr>
+                                        <th>业务员</th>
+                                        <th>客户名称</th>
+                                        <th>提成</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- 数据行将通过JavaScript动态添加 -->
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                </div>
-                
-                <div class="action-buttons">
-                    <button id="clearData" class="btn btn-danger">
-                        <i class="fas fa-trash-alt"></i> 清除数据
-                    </button>
-                    <button id="exportData" class="btn btn-secondary">
-                        <i class="fas fa-file-export"></i> 导出CSV
-                    </button>
+                    
+                    <div class="action-buttons">
+                        <button id="clearData" class="btn btn-danger">
+                            <i class="fas fa-trash-alt"></i> 清除数据
+                        </button>
+                        <button id="exportData" class="btn btn-secondary">
+                            <i class="fas fa-file-export"></i> 导出CSV
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1111,6 +1156,7 @@
             // 设置当前月份为默认选择
             const today = new Date();
             document.getElementById('monthSelect').value = today.getMonth();
+            document.getElementById('detailMonthSelect').value = today.getMonth();
             
             // 初始化业务员下拉框
             updateSalesmanDropdown();
@@ -1187,6 +1233,7 @@
             
             // 月份选择变化
             document.getElementById('monthSelect').addEventListener('change', updateMonthlySummary);
+            document.getElementById('detailMonthSelect').addEventListener('change', filterTableByMonth);
             
             // 业务员管理按钮
             document.getElementById('manageSalesman').addEventListener('click', manageSalesmen);
@@ -1228,8 +1275,6 @@
                 platformCostRate = 0.01; // 1%
             } else if (productType === '信用贷') {
                 platformCostRate = 0.02; // 2%
-            }else if (productType === '车抵贷') {
-                platformCostRate = 0.02; // 2%
             }
             const platformCost = loanAmount * platformCostRate;
             document.getElementById('platformCost').value = platformCost.toFixed(2);
@@ -1268,7 +1313,9 @@
             // 添加数据单元格
             newRow.insertCell(0).textContent = salesman;
             newRow.insertCell(1).textContent = clientName;
-            newRow.insertCell(2).textContent = commission.toFixed(2);
+            const commissionCell = newRow.insertCell(2);
+            commissionCell.textContent = commission.toFixed(2);
+            commissionCell.style.textAlign = "center"; // 确保居中对齐
             
             // 添加操作单元格
             const actionCell = newRow.insertCell(3);
@@ -1426,6 +1473,42 @@
             }
         }
         
+        // 根据月份筛选表格
+        function filterTableByMonth() {
+            const selectedMonth = document.getElementById('detailMonthSelect').value;
+            const table = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
+            const rows = table.rows;
+            
+            let monthlyCommission = 0;
+            
+            for (let i = 0; i < rows.length; i++) {
+                const loanDate = rows[i].dataset.loanDate;
+                
+                if (selectedMonth === 'all') {
+                    // 显示所有行
+                    rows[i].style.display = '';
+                    monthlyCommission += parseFloat(rows[i].dataset.commission) || 0;
+                } else {
+                    // 根据月份筛选
+                    if (loanDate) {
+                        const date = new Date(loanDate);
+                        if (date.getMonth().toString() === selectedMonth) {
+                            rows[i].style.display = '';
+                            monthlyCommission += parseFloat(rows[i].dataset.commission) || 0;
+                        } else {
+                            rows[i].style.display = 'none';
+                        }
+                    } else {
+                        rows[i].style.display = 'none';
+                    }
+                }
+            }
+            
+            // 更新当月合计
+            document.getElementById('detailMonthSummary').textContent = 
+                `当月提成合计: ${monthlyCommission.toFixed(2)} 元`;
+        }
+        
         // 更新汇总信息
         function updateSummary() {
             const table = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
@@ -1441,6 +1524,9 @@
             
             // 更新月度汇总
             updateMonthlySummary();
+            
+            // 更新详情表格的筛选
+            filterTableByMonth();
         }
         
         // 更新月度汇总
@@ -1514,7 +1600,9 @@
                     // 添加数据单元格
                     newRow.insertCell(0).textContent = item.salesman;
                     newRow.insertCell(1).textContent = item.clientName;
-                    newRow.insertCell(2).textContent = parseFloat(item.commission).toFixed(2);
+                    const commissionCell = newRow.insertCell(2);
+                    commissionCell.textContent = parseFloat(item.commission).toFixed(2);
+                    commissionCell.style.textAlign = "center"; // 确保居中对齐
                     
                     // 添加操作单元格
                     const actionCell = newRow.insertCell(3);
@@ -2045,7 +2133,9 @@
                     // 添加数据单元格
                     newRow.insertCell(0).textContent = item.salesman;
                     newRow.insertCell(1).textContent = item.clientName;
-                    newRow.insertCell(2).textContent = parseFloat(item.commission).toFixed(2);
+                    const commissionCell = newRow.insertCell(2);
+                    commissionCell.textContent = parseFloat(item.commission).toFixed(2);
+                    commissionCell.style.textAlign = "center"; // 确保居中对齐
                     
                     // 添加操作单元格
                     const actionCell = newRow.insertCell(3);
@@ -2105,6 +2195,4 @@
         }
     </script>
 </body>
-
 </html>
-
