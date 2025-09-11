@@ -873,6 +873,7 @@
                                     <option value="抵押">抵押贷</option>
                                     <option value="信用贷">信用贷</option>
                                     <option value="企业贷">企业贷</option>
+                                     <option value="车抵贷">车抵贷</option>
                                 </select>
                             </div>
                         </div>
@@ -1230,6 +1231,8 @@
             if (productType === '抵押' || productType === '企业贷') {
                 platformCostRate = 0.01; // 1%
             } else if (productType === '信用贷') {
+                platformCostRate = 0.02; // 2%
+            }else if (productType === '车抵贷') {
                 platformCostRate = 0.02; // 2%
             }
             const platformCost = loanAmount * platformCostRate;
@@ -2106,4 +2109,5 @@
         }
     </script>
 </body>
+
 </html>
