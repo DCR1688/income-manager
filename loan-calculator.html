@@ -869,7 +869,7 @@
                     </div>
                     
                     <!-- 月度汇总 -->
-                    <div class="month-summary" id="monthSummary">
+                    <div class="month-summary" id="monthSummary" style="display: none;">
                         <h4><i class="fas fa-chart-bar"></i> 当月提成合计</h4>
                         <div class="month-summary-value" id="monthTotal">0 元</div>
                     </div>
@@ -1157,9 +1157,8 @@
             
             // 更新月份选择器
             function updateMonthSelector() {
-                // 获取当前月份
-                const today = new Date();
-                const currentMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+                // 保存当前选中的月份
+                const currentMonth = monthSelect.value;
                 
                 // 清空月份选择器
                 monthSelect.innerHTML = '<option value="">-- 全部月份 --</option>';
@@ -1188,22 +1187,13 @@
                     monthSelect.appendChild(option);
                 });
                 
-                // 默认选择当前月份
-                let hasCurrentMonth = false;
-                for (let i = 0; i < monthSelect.options.length; i++) {
-                    if (monthSelect.options[i].value === currentMonth) {
-                        monthSelect.value = currentMonth;
-                        hasCurrentMonth = true;
-                        break;
-                    }
+                // 恢复之前选中的月份
+                if (currentMonth) {
+                    monthSelect.value = currentMonth;
+                    filterByMonth(currentMonth);
+                } else {
+                    filterByMonth('');
                 }
-                
-                // 如果没有当前月份的数据，则显示全部数据
-                if (!hasCurrentMonth) {
-                    monthSelect.value = '';
-                }
-                
-                filterByMonth(monthSelect.value);
             }
             
             // 根据月份筛选数据
@@ -1229,8 +1219,13 @@
                     }
                 });
                 
-                // 显示月度汇总
-                monthTotalElement.textContent = `${formatNumber(monthTotal)} 元`;
+                // 显示或隐藏月度汇总
+                if (month) {
+                    monthSummary.style.display = 'block';
+                    monthTotalElement.textContent = `${formatNumber(monthTotal)} 元`;
+                } else {
+                    monthSummary.style.display = 'none';
+                }
             }
             
             // 添加新行
@@ -1353,9 +1348,6 @@
                     } catch (e) {
                         console.error('解析本地存储数据失败:', e);
                     }
-                } else {
-                    // 如果没有数据，也要更新月份选择器
-                    updateMonthSelector();
                 }
             }
             
