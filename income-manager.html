@@ -21,7 +21,7 @@
             color: #333;
             padding: 15px;
             line-height: 1.6;
-            padding-bottom: calc(15px + env(safe-area-inset-bottom));
+            padding-bottom: 20px;
         }
         
         .container {
@@ -57,6 +57,7 @@
             display: flex;
             justify-content: center;
             margin-bottom: 15px;
+            position: relative;
         }
         
         .logo-circle {
@@ -104,28 +105,10 @@
             gap: 10px;
             padding-bottom: 12px;
             border-bottom: 1px solid #f0f0f0;
-            cursor: pointer;
         }
         
         .section-title i {
             color: #007AFF;
-            transition: transform 0.3s ease;
-        }
-        
-        .section-title.collapsed i {
-            transform: rotate(-90deg);
-        }
-        
-        .section-content {
-            transition: all 0.3s ease;
-            overflow: hidden;
-        }
-        
-        .section-content.collapsed {
-            height: 0;
-            opacity: 0;
-            margin: 0;
-            padding: 0;
         }
         
         .input-row {
@@ -157,9 +140,6 @@
             font-size: 16px;
             transition: all 0.2s;
             background: #ffffff;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
         }
         
         .input-group select {
@@ -199,7 +179,6 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
-            border: 1px solid rgba(0, 0, 0, 0.1);
         }
         
         .btn-primary {
@@ -260,7 +239,7 @@
         
         th, td {
             padding: 10px 8px;
-            text-align: center; /* 修改为居中对齐 */
+            text-align: center;
             border-bottom: 1px solid #e5e5ea;
             font-size: 14px;
         }
@@ -274,44 +253,27 @@
             white-space: nowrap;
         }
         
-        /* 优化表格列宽 */
         th:nth-child(1), td:nth-child(1) {
             width: 20%;
-            max-width: 20%;
         }
         
         th:nth-child(2), td:nth-child(2) {
             width: 30%;
-            max-width: 30%;
         }
         
         th:nth-child(3), td:nth-child(3) {
             width: 25%;
-            max-width: 25%;
-            text-align: center; /* 修改为居中对齐 */
         }
         
         th:nth-child(4), td:nth-child(4) {
             width: 25%;
-            max-width: 25%;
-            text-align: center;
-        }
-        
-        .commission-high {
-            color: #34C759;
-            font-weight: 600;
-        }
-        
-        .commission-low {
-            color: #FF3B30;
-            font-weight: 600;
         }
         
         .action-cell {
             display: flex;
             gap: 8px;
             justify-content: center;
-            align-items: center; /* 添加垂直居中 */
+            align-items: center;
         }
         
         .action-btn {
@@ -325,14 +287,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 1px solid transparent;
             width: 32px;
             height: 32px;
         }
         
         .action-btn:hover {
             background: #f0f0f0;
-            border-color: #e0e0e0;
         }
         
         .btn-delete {
@@ -368,41 +328,6 @@
             font-size: 22px;
             font-weight: 700;
             color: #007AFF;
-        }
-        
-        .monthly-summary {
-            background: #34C759;
-            color: white;
-        }
-        
-        .monthly-summary h3 {
-            color: white;
-        }
-        
-        .monthly-summary .summary-value {
-            color: white;
-        }
-        
-        .month-selector {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        
-        .month-selector select {
-            flex: 1;
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid #e5e5ea;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23007AFF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 10px center;
-            background-size: 14px;
-            padding-right: 35px;
         }
         
         .footer {
@@ -447,106 +372,6 @@
             justify-content: center;
         }
         
-        /* 详情弹窗样式 - 已优化 */
-        .popup-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            padding: 20px;
-        }
-        
-        .popup-content {
-            background: white;
-            border-radius: 14px;
-            padding: 20px;
-            max-width: 500px;
-            width: 100%;
-            max-height: 80vh;
-            overflow-y: auto;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
-            border: 1px solid #e0e0e0;
-        }
-        
-        .popup-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #e5e5ea;
-        }
-        
-        .popup-title {
-            font-size: 18px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex: 1;
-        }
-        
-        .close-btn {
-            background: none;
-            border: none;
-            font-size: 20px;
-            cursor: pointer;
-            color: #8e8e93;
-        }
-        
-        .detail-popup {
-            max-width: 500px;
-            width: 95%;
-        }
-        
-        /* 信息详情表头优化 - 统一间距 */
-        .detail-item {
-            display: flex;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #f0f0f0;
-            margin-bottom: 0;
-        }
-        
-        .detail-icon {
-            width: 24px;
-            text-align: center;
-            color: #007AFF;
-            flex-shrink: 0;
-            font-size: 14px;
-        }
-        
-        .detail-label {
-            font-weight: 500;
-            width: 80px;
-            font-size: 14px;
-            flex-shrink: 0;
-            color: #666;
-        }
-        
-        .detail-value {
-            flex: 1;
-            color: #333;
-            font-size: 14px;
-            word-break: break-word;
-            min-width: 0;
-        }
-        
-        .detail-item.highlight {
-            background: #f0f7ff;
-            padding: 12px;
-            border-radius: 8px;
-            margin: 10px 0;
-            border-left: 3px solid #007AFF;
-        }
-        
-        /* 详情表格头部样式 */
         .table-header {
             display: flex;
             justify-content: space-between;
@@ -569,280 +394,29 @@
             font-size: 16px;
         }
         
-        /* 响应式设计 - 优化表格显示 */
-        @media (max-width: 1024px) {
-            .main-content {
-                flex-direction: column;
-            }
-            
-            .input-section, .table-section {
-                flex: 1 1 100%;
-            }
-            
-            th:nth-child(1), td:nth-child(1) {
-                width: 25%;
-                max-width: 25%;
-            }
-            
-            th:nth-child(2), td:nth-child(2) {
-                width: 35%;
-                max-width: 35%;
-            }
-            
-            th:nth-child(3), td:nth-child(3) {
-                width: 20%;
-                max-width: 20%;
-            }
-            
-            th:nth-child(4), td:nth-child(4) {
-                width: 20%;
-                max-width: 20%;
-            }
+        .year-select {
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #e5e5ea;
+        }
+        
+        .month-select {
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #e5e5ea;
         }
         
         @media (max-width: 768px) {
-            .detail-label {
-                width: 70px;
-                font-size: 13px;
-            }
-            
-            .detail-value {
-                font-size: 13px;
-            }
-            
-            th, td {
-                padding: 8px 6px;
-                font-size: 13px;
-            }
-            
-            th:nth-child(1), td:nth-child(1) {
-                width: 25%;
-                max-width: 25%;
-            }
-            
-            th:nth-child(2), td:nth-child(2) {
-                width: 30%;
-                max-width: 30%;
-            }
-            
-            th:nth-child(3), td:nth-child(3) {
-                width: 25%;
-                max-width: 25%;
-            }
-            
-            th:nth-child(4), td:nth-child(4) {
-                width: 20%;
-                max-width: 20%;
-            }
-            
-            .action-btn {
-                width: 28px;
-                height: 28px;
-                font-size: 14px;
-            }
-            
             .table-header {
                 flex-direction: column;
                 gap: 10px;
                 align-items: flex-start;
             }
-        }
-        
-        @media (max-width: 600px) {
-            table {
-                min-width: 100%;
-            }
             
-            th:nth-child(1), td:nth-child(1) {
-                width: 25%;
-                max-width: 25%;
+            .month-selector-container {
+                width: 100%;
+                justify-content: space-between;
             }
-            
-            th:nth-child(2), td:nth-child(2) {
-                width: 30%;
-                max-width: 30%;
-            }
-            
-            th:nth-child(3), td:nth-child(3) {
-                width: 25%;
-                max-width: 25%;
-            }
-            
-            th:nth-child(4), td:nth-child(4) {
-                width: 20%;
-                max-width: 20%;
-            }
-            
-            .action-cell {
-                flex-direction: row;
-                gap: 5px;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .detail-item {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 5px;
-                padding: 8px 0;
-            }
-            
-            .detail-label {
-                width: auto;
-                font-weight: 600;
-            }
-            
-            th, td {
-                padding: 6px 4px;
-                font-size: 12px;
-            }
-            
-            .action-btn {
-                padding: 4px;
-                font-size: 12px;
-                width: 24px;
-                height: 24px;
-            }
-            
-            th:nth-child(1), td:nth-child(1) {
-                width: 20%;
-                max-width: 20%;
-            }
-            
-            th:nth-child(2), td:nth-child(2) {
-                width: 30%;
-                max-width: 30%;
-            }
-            
-            th:nth-child(3), td:nth-child(3) {
-                width: 25%;
-                max-width: 25%;
-            }
-            
-            th:nth-child(4), td:nth-child(4) {
-                width: 25%;
-                max-width: 25%;
-            }
-        }
-        
-        @media (max-width: 360px) {
-            th, td {
-                padding: 5px 3px;
-                font-size: 11px;
-            }
-            
-            .action-cell {
-                flex-direction: row;
-                gap: 3px;
-            }
-            
-            .action-btn {
-                padding: 3px;
-                font-size: 11px;
-                width: 22px;
-                height: 22px;
-            }
-        }
-        
-        /* GitHub同步状态指示器 */
-        .sync-status {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            padding: 10px 15px;
-            border-radius: 8px;
-            background: #34C759;
-            color: white;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.3s ease;
-        }
-        
-        .sync-status.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        
-        .sync-status.error {
-            background: #FF3B30;
-        }
-        
-        .sync-status.syncing {
-            background: #007AFF;
-        }
-        
-        /* 业务员管理弹窗样式 */
-        .salesman-popup {
-            max-width: 400px;
-            width: 95%;
-        }
-        
-        .salesman-list {
-            max-height: 300px;
-            overflow-y: auto;
-            margin: 15px 0;
-        }
-        
-        .salesman-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-            border-bottom: 1px solid #f0f0f0;
-        }
-        
-        .salesman-item:last-child {
-            border-bottom: none;
-        }
-        
-        .salesman-name {
-            font-weight: 500;
-        }
-        
-        .salesman-actions {
-            display: flex;
-            gap: 8px;
-        }
-        
-        .salesman-input-row {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-        
-        .salesman-input {
-            flex: 1;
-            padding: 10px;
-            border: 1px solid #e5e5ea;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-
-        /* 云端配置弹窗样式 */
-        .cloud-config-popup {
-            max-width: 500px;
-            width: 95%;
-        }
-        
-        .cloud-config-input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #e5e5ea;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            font-size: 14px;
-        }
-        
-        .cloud-config-label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
         }
     </style>
 </head>
@@ -987,52 +561,6 @@
                     </div>
                 </div>
                 
-                <!-- 云端存储卡片 - 默认折叠 -->
-                <div class="section-card">
-                    <div class="section-title" onclick="toggleSection('cloudStorage')">
-                        <i class="fas fa-chevron-down"></i> 云端存储
-                    </div>
-                    <div class="section-content collapsed" id="cloudStorage">
-                        <div class="input-row">
-                            <div class="input-group">
-                                <label for="cloudPassword"><i class="fas fa-key"></i> 加密密码</label>
-                                <input type="password" id="cloudPassword" placeholder="设置云端加密密码">
-                            </div>
-                        </div>
-                        <div class="input-row">
-                            <div class="input-group">
-                                <button id="setPasswordBtn" class="btn btn-cloud w-100">
-                                    <i class="fas fa-key"></i> 设置密码
-                                </button>
-                            </div>
-                            <div class="input-group">
-                                <button id="saveToCloudBtn" class="btn btn-cloud w-100">
-                                    <i class="fas fa-cloud-upload-alt"></i> 保存到云端
-                                </button>
-                            </div>
-                        </div>
-                        <div class="input-row">
-                            <div class="input-group">
-                                <button id="loadFromCloudBtn" class="btn btn-cloud w-100">
-                                    <i class="fas fa-cloud-download-alt"></i> 从云端加载
-                                </button>
-                            </div>
-                            <div class="input-group">
-                                <button id="testCloudBtn" class="btn btn-cloud w-100">
-                                    <i class="fas fa-wifi"></i> 测试连接
-                                </button>
-                            </div>
-                        </div>
-                        <div class="input-row">
-                            <div class="input-group">
-                                <button id="configCloudBtn" class="btn btn-cloud w-100">
-                                    <i class="fas fa-cog"></i> 配置云端信息
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
                 <button id="addRow" class="btn btn-primary">
                     <i class="fas fa-plus-circle"></i> 添加新行
                 </button>
@@ -1041,28 +569,6 @@
                     <div class="summary-card">
                         <h3><i class="fas fa-chart-pie"></i> 总提成汇总</h3>
                         <div class="summary-value" id="totalCommission">0.00</div>
-                    </div>
-                    
-                    <div class="summary-card monthly-summary">
-                        <h3><i class="fas fa-calendar-check"></i> 月度提成汇总</h3>
-                        <div class="summary-value" id="monthlyCommission">0.00</div>
-                        <div class="month-selector">
-                            <label for="monthSelect">选择月份:</label>
-                            <select id="monthSelect">
-                                <option value="0">1月</option>
-                                <option value="1">2月</option>
-                                <option value="2">3月</option>
-                                <option value="3">4月</option>
-                                <option value="4">5月</option>
-                                <option value="5">6月</option>
-                                <option value="6">7月</option>
-                                <option value="7">8月</option>
-                                <option value="8">9月</option>
-                                <option value="9">10月</option>
-                                <option value="10">11月</option>
-                                <option value="11">12月</option>
-                            </select>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -1074,11 +580,14 @@
                         <i class="fas fa-money-bill-alt"></i> 详细信息
                     </div>
                     
-                    <!-- 添加表格头部，包含月份筛选和当月合计 -->
+                    <!-- 添加表格头部，包含年份月份筛选和当月合计 -->
                     <div class="table-header">
                         <div class="month-selector-container">
-                            <label for="detailMonthSelect">选择月份:</label>
-                            <select id="detailMonthSelect">
+                            <label for="yearSelect">选择年份:</label>
+                            <select id="yearSelect" class="year-select"></select>
+                            
+                            <label for="monthSelect">选择月份:</label>
+                            <select id="monthSelect" class="month-select">
                                 <option value="all">全部月份</option>
                                 <option value="0">1月</option>
                                 <option value="1">2月</option>
@@ -1134,51 +643,22 @@
         </div>
     </div>
 
-    <!-- GitHub同步状态指示器 -->
-    <div class="sync-status" id="syncStatus">
-        <i class="fas fa-sync"></i>
-        <span>数据已同步到GitHub</span>
-    </div>
-
     <script>
-        // ========== 云端存储配置 ==========
-        let GITHUB_OWNER = '';
-        let GITHUB_REPO = 'income-manager';
-        const GITHUB_PATH = 'income-data.enc';
-        let masterPassword = '';
-        let cloudConfig = {};
-        let autoSaveTimeout = null;
-
         // 业务员数据
         let salesmen = ['张三', '李四', '王五'];
         
         // 页面加载时初始化
         document.addEventListener('DOMContentLoaded', function() {
-            // 获取云端配置
-            try {
-                const configStr = sessionStorage.getItem('cloudConfig');
-                if (configStr) {
-                    cloudConfig = JSON.parse(configStr);
-                    GITHUB_OWNER = cloudConfig.username;
-                    GITHUB_REPO = cloudConfig.repo || 'income-manager';
-                    masterPassword = cloudConfig.password;
-                    
-                    // 自动从云端加载数据
-                    setTimeout(() => {
-                        autoLoadFromCloud(cloudConfig.token);
-                    }, 1000);
-                }
-            } catch (e) {
-                console.error('加载云端配置失败:', e);
-            }
-            
             // 设置默认日期为今天
             setTodayDate();
+            
+            // 初始化年份选择器
+            initYearSelector();
             
             // 设置当前月份为默认选择
             const today = new Date();
             document.getElementById('monthSelect').value = today.getMonth();
-            document.getElementById('detailMonthSelect').value = today.getMonth();
+            document.getElementById('yearSelect').value = today.getFullYear();
             
             // 初始化业务员下拉框
             updateSalesmanDropdown();
@@ -1191,14 +671,24 @@
             
             // 从本地存储加载数据
             loadData();
-            
-            // 云端存储按钮事件监听
-            document.getElementById('setPasswordBtn').addEventListener('click', setPassword);
-            document.getElementById('saveToCloudBtn').addEventListener('click', saveToCloud);
-            document.getElementById('loadFromCloudBtn').addEventListener('click', loadFromCloud);
-            document.getElementById('testCloudBtn').addEventListener('click', testCloudConnection);
-            document.getElementById('configCloudBtn').addEventListener('click', showCloudConfigPopup);
         });
+        
+        // 初始化年份选择器
+        function initYearSelector() {
+            const yearSelect = document.getElementById('yearSelect');
+            const currentYear = new Date().getFullYear();
+            
+            // 添加最近5年的选项
+            for (let i = currentYear - 2; i <= currentYear + 2; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i + '年';
+                yearSelect.appendChild(option);
+            }
+            
+            // 设置当前年份为选中
+            yearSelect.value = currentYear;
+        }
         
         // 设置今天日期
         function setTodayDate() {
@@ -1253,29 +743,12 @@
             // 导出数据按钮
             document.getElementById('exportData').addEventListener('click', exportData);
             
-            // 月份选择变化
-            document.getElementById('monthSelect').addEventListener('change', updateMonthlySummary);
-            document.getElementById('detailMonthSelect').addEventListener('change', filterTableByMonth);
+            // 年份月份选择变化
+            document.getElementById('yearSelect').addEventListener('change', filterTableByMonth);
+            document.getElementById('monthSelect').addEventListener('change', filterTableByMonth);
             
             // 业务员管理按钮
             document.getElementById('manageSalesman').addEventListener('click', manageSalesmen);
-        }
-        
-        // 切换区域展开/折叠
-        function toggleSection(sectionId) {
-            const section = document.getElementById(sectionId);
-            const title = section.previousElementSibling;
-            
-            section.classList.toggle('collapsed');
-            title.classList.toggle('collapsed');
-            
-            // 更新图标
-            const icon = title.querySelector('i');
-            if (section.classList.contains('collapsed')) {
-                icon.className = 'fas fa-chevron-down';
-            } else {
-                icon.className = 'fas fa-chevron-up';
-            }
         }
         
         // 计算所有值
@@ -1337,7 +810,7 @@
             newRow.insertCell(1).textContent = clientName;
             const commissionCell = newRow.insertCell(2);
             commissionCell.textContent = commission.toFixed(2);
-            commissionCell.style.textAlign = "center"; // 确保居中对齐
+            commissionCell.style.textAlign = "center";
             
             // 添加操作单元格
             const actionCell = newRow.insertCell(3);
@@ -1379,9 +852,6 @@
             // 保存数据到本地存储
             saveData();
             
-            // 自动保存到云端
-            autoSaveToCloud();
-            
             // 重置表单到初始状态
             resetForm();
             
@@ -1414,63 +884,74 @@
             // 创建详情弹窗
             const popup = document.createElement('div');
             popup.className = 'popup-overlay';
+            popup.style.position = 'fixed';
+            popup.style.top = '0';
+            popup.style.left = '0';
+            popup.style.right = '0';
+            popup.style.bottom = '0';
+            popup.style.backgroundColor = 'rgba(0,0,0,0.5)';
+            popup.style.display = 'flex';
+            popup.style.alignItems = 'center';
+            popup.style.justifyContent = 'center';
+            popup.style.zIndex = '1000';
+            
             popup.innerHTML = `
-                <div class="popup-content detail-popup">
-                    <div class="popup-header">
-                        <div class="popup-title">
+                <div style="background: white; border-radius: 14px; padding: 20px; max-width: 500px; width: 95%; max-height: 80vh; overflow-y: auto;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #e5e5ea;">
+                        <div style="font-size: 18px; font-weight: 600; display: flex; align-items: center; gap: 10px; flex: 1;">
                             <i class="fas fa-info-circle"></i> 贷款详情
                         </div>
-                        <button class="close-btn" onclick="this.closest('.popup-overlay').remove()">&times;</button>
+                        <button onclick="this.closest('.popup-overlay').remove()" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #8e8e93;">&times;</button>
                     </div>
-                    <div class="detail-item">
-                        <div class="detail-icon"><i class="fas fa-user-tie"></i></div>
-                        <div class="detail-label">业务员:</div>
-                        <div class="detail-value">${row.dataset.salesman}</div>
+                    <div style="display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #f0f0f0; margin-bottom: 0;">
+                        <div style="width: 24px; text-align: center; color: #007AFF; flex-shrink: 0; font-size: 14px;"><i class="fas fa-user-tie"></i></div>
+                        <div style="font-weight: 500; width: 80px; font-size: 14px; flex-shrink: 0; color: #666;">业务员:</div>
+                        <div style="flex: 1; color: #333; font-size: 14px;">${row.dataset.salesman}</div>
                     </div>
-                    <div class="detail-item">
-                        <div class="detail-icon"><i class="fas fa-user"></i></div>
-                        <div class="detail-label">客户名称:</div>
-                        <div class="detail-value">${row.dataset.clientName}</div>
+                    <div style="display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #f0f0f0; margin-bottom: 0;">
+                        <div style="width: 24px; text-align: center; color: #007AFF; flex-shrink: 0; font-size: 14px;"><i class="fas fa-user"></i></div>
+                        <div style="font-weight: 500; width: 80px; font-size: 14px; flex-shrink: 0; color: #666;">客户名称:</div>
+                        <div style="flex: 1; color: #333; font-size: 14px;">${row.dataset.clientName}</div>
                     </div>
-                    <div class="detail-item">
-                        <div class="detail-icon"><i class="fas fa-calendar-alt"></i></div>
-                        <div class="detail-label">放款日期:</div>
-                        <div class="detail-value">${row.dataset.loanDate}</div>
+                    <div style="display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #f0f0f0; margin-bottom: 0;">
+                        <div style="width: 24px; text-align: center; color: #007AFF; flex-shrink: 0; font-size: 14px;"><i class="fas fa-calendar-alt"></i></div>
+                        <div style="font-weight: 500; width: 80px; font-size: 14px; flex-shrink: 0; color: #666;">放款日期:</div>
+                        <div style="flex: 1; color: #333; font-size: 14px;">${row.dataset.loanDate}</div>
                     </div>
-                    <div class="detail-item">
-                        <div class="detail-icon"><i class="fas fa-box"></i></div>
-                        <div class="detail-label">产品类型:</div>
-                        <div class="detail-value">${row.dataset.productType}</div>
+                    <div style="display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #f0f0f0; margin-bottom: 0;">
+                        <div style="width: 24px; text-align: center; color: #007AFF; flex-shrink: 0; font-size: 14px;"><i class="fas fa-box"></i></div>
+                        <div style="font-weight: 500; width: 80px; font-size: 14px; flex-shrink: 0; color: #666;">产品类型:</div>
+                        <div style="flex: 1; color: #333; font-size: 14px;">${row.dataset.productType}</div>
                     </div>
-                    <div class="detail-item">
-                        <div class="detail-icon"><i class="fas fa-money-bill-wave"></i></div>
-                        <div class="detail-label">放款金额:</div>
-                        <div class="detail-value">${parseFloat(row.dataset.loanAmount).toFixed(2)} 元</div>
+                    <div style="display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #f0f0f0; margin-bottom: 0;">
+                        <div style="width: 24px; text-align: center; color: #007AFF; flex-shrink: 0; font-size: 14px;"><i class="fas fa-money-bill-wave"></i></div>
+                        <div style="font-weight: 500; width: 80px; font-size: 14px; flex-shrink: 0; color: #666;">放款金额:</div>
+                        <div style="flex: 1; color: #333; font-size: 14px;">${parseFloat(row.dataset.loanAmount).toFixed(2)} 元</div>
                     </div>
-                    <div class="detail-item">
-                        <div class="detail-icon"><i class="fas fa-hand-holding-usd"></i></div>
-                        <div class="detail-label">服务费率:</div>
-                        <div class="detail-value">${row.dataset.serviceRate}%</div>
+                    <div style="display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #f0f0f0; margin-bottom: 0;">
+                        <div style="width: 24px; text-align: center; color: #007AFF; flex-shrink: 0; font-size: 14px;"><i class="fas fa-hand-holding-usd"></i></div>
+                        <div style="font-weight: 500; width: 80px; font-size: 14px; flex-shrink: 0; color: #666;">服务费率:</div>
+                        <div style="flex: 1; color: #333; font-size: 14px;">${row.dataset.serviceRate}%</div>
                     </div>
-                    <div class="detail-item">
-                        <div class="detail-icon"><i class="fas fa-road"></i></div>
-                        <div class="detail-label">渠道费率:</div>
-                        <div class="detail-value">${row.dataset.channelRate}%</div>
+                    <div style="display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #f0f0f0; margin-bottom: 0;">
+                        <div style="width: 24px; text-align: center; color: #007AFF; flex-shrink: 0; font-size: 14px;"><i class="fas fa-road"></i></div>
+                        <div style="font-weight: 500; width: 80px; font-size: 14px; flex-shrink: 0; color: #666;">渠道费率:</div>
+                        <div style="flex: 1; color: #333; font-size: 14px;">${row.dataset.channelRate}%</div>
                     </div>
-                    <div class="detail-item">
-                        <div class="detail-icon"><i class="fas fa-gift"></i></div>
-                        <div class="detail-label">返点费率:</div>
-                        <div class="detail-value">${row.dataset.rebateRate}%</div>
+                    <div style="display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #f0f0f0; margin-bottom: 0;">
+                        <div style="width: 24px; text-align: center; color: #007AFF; flex-shrink: 0; font-size: 14px;"><i class="fas fa-gift"></i></div>
+                        <div style="font-weight: 500; width: 80px; font-size: 14px; flex-shrink: 0; color: #666;">返点费率:</div>
+                        <div style="flex: 1; color: #333; font-size: 14px;">${row.dataset.rebateRate}%</div>
                     </div>
-                    <div class="detail-item">
-                        <div class="detail-icon"><i class="fas fa-percent"></i></div>
-                        <div class="detail-label">提成点数:</div>
-                        <div class="detail-value">${(parseFloat(row.dataset.commissionRate) * 100).toFixed(1)}%</div>
+                    <div style="display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #f0f0f0; margin-bottom: 0;">
+                        <div style="width: 24px; text-align: center; color: #007AFF; flex-shrink: 0; font-size: 14px;"><i class="fas fa-percent"></i></div>
+                        <div style="font-weight: 500; width: 80px; font-size: 14px; flex-shrink: 0; color: #666;">提成点数:</div>
+                        <div style="flex: 1; color: #333; font-size: 14px;">${(parseFloat(row.dataset.commissionRate) * 100).toFixed(1)}%</div>
                     </div>
-                    <div class="detail-item highlight">
-                        <div class="detail-icon"><i class="fas fa-coins"></i></div>
-                        <div class="detail-label">提成金额:</div>
-                        <div class="detail-value">${parseFloat(row.dataset.commission).toFixed(2)} 元</div>
+                    <div style="display: flex; align-items: center; padding: 12px; border-radius: 8px; margin: 10px 0; border-left: 3px solid #007AFF; background: #f0f7ff;">
+                        <div style="width: 24px; text-align: center; color: #007AFF; flex-shrink: 0; font-size: 14px;"><i class="fas fa-coins"></i></div>
+                        <div style="font-weight: 500; width: 80px; font-size: 14px; flex-shrink: 0; color: #666;">提成金额:</div>
+                        <div style="flex: 1; color: #333; font-size: 14px;">${parseFloat(row.dataset.commission).toFixed(2)} 元</div>
                     </div>
                 </div>
             `;
@@ -1489,15 +970,13 @@
                 
                 // 保存数据到本地存储
                 saveData();
-                
-                // 自动保存到云端
-                autoSaveToCloud();
             }
         }
         
-        // 根据月份筛选表格
+        // 根据年份月份筛选表格
         function filterTableByMonth() {
-            const selectedMonth = document.getElementById('detailMonthSelect').value;
+            const selectedYear = document.getElementById('yearSelect').value;
+            const selectedMonth = document.getElementById('monthSelect').value;
             const table = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
             const rows = table.rows;
             
@@ -1511,10 +990,11 @@
                     rows[i].style.display = '';
                     monthlyCommission += parseFloat(rows[i].dataset.commission) || 0;
                 } else {
-                    // 根据月份筛选
+                    // 根据年份月份筛选
                     if (loanDate) {
                         const date = new Date(loanDate);
-                        if (date.getMonth().toString() === selectedMonth) {
+                        if (date.getFullYear().toString() === selectedYear && 
+                            date.getMonth().toString() === selectedMonth) {
                             rows[i].style.display = '';
                             monthlyCommission += parseFloat(rows[i].dataset.commission) || 0;
                         } else {
@@ -1527,8 +1007,10 @@
             }
             
             // 更新当月合计
+            const monthNames = ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"];
+            const monthName = selectedMonth === 'all' ? '全部' : monthNames[parseInt(selectedMonth)];
             document.getElementById('detailMonthSummary').textContent = 
-                `当月提成合计: ${monthlyCommission.toFixed(2)} 元`;
+                `${selectedYear}年${monthName}提成合计: ${monthlyCommission.toFixed(2)} 元`;
         }
         
         // 更新汇总信息
@@ -1544,32 +1026,8 @@
             
             document.getElementById('totalCommission').textContent = totalCommission.toFixed(2);
             
-            // 更新月度汇总
-            updateMonthlySummary();
-            
             // 更新详情表格的筛选
             filterTableByMonth();
-        }
-        
-        // 更新月度汇总
-        function updateMonthlySummary() {
-            const selectedMonth = parseInt(document.getElementById('monthSelect').value);
-            const table = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
-            const rows = table.rows;
-            
-            let monthlyCommission = 0;
-            
-            for (let i = 0; i < rows.length; i++) {
-                const loanDate = rows[i].dataset.loanDate;
-                if (loanDate) {
-                    const date = new Date(loanDate);
-                    if (date.getMonth() === selectedMonth) {
-                        monthlyCommission += parseFloat(rows[i].dataset.commission) || 0;
-                    }
-                }
-            }
-            
-            document.getElementById('monthlyCommission').textContent = monthlyCommission.toFixed(2);
         }
         
         // 保存数据到本地存储
@@ -1624,7 +1082,7 @@
                     newRow.insertCell(1).textContent = item.clientName;
                     const commissionCell = newRow.insertCell(2);
                     commissionCell.textContent = parseFloat(item.commission).toFixed(2);
-                    commissionCell.style.textAlign = "center"; // 确保居中对齐
+                    commissionCell.style.textAlign = "center";
                     
                     // 添加操作单元格
                     const actionCell = newRow.insertCell(3);
@@ -1675,9 +1133,6 @@
                 
                 // 更新汇总
                 updateSummary();
-                
-                // 自动保存到云端
-                autoSaveToCloud();
             }
         }
         
@@ -1713,29 +1168,40 @@
         function manageSalesmen() {
             const popup = document.createElement('div');
             popup.className = 'popup-overlay';
+            popup.style.position = 'fixed';
+            popup.style.top = '0';
+            popup.style.left = '0';
+            popup.style.right = '0';
+            popup.style.bottom = '0';
+            popup.style.backgroundColor = 'rgba(0,0,0,0.5)';
+            popup.style.display = 'flex';
+            popup.style.alignItems = 'center';
+            popup.style.justifyContent = 'center';
+            popup.style.zIndex = '1000';
+            
             popup.innerHTML = `
-                <div class="popup-content salesman-popup">
-                    <div class="popup-header">
-                        <div class="popup-title">
+                <div style="background: white; border-radius: 14px; padding: 20px; max-width: 400px; width: 95%;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #e5e5ea;">
+                        <div style="font-size: 18px; font-weight: 600; display: flex; align-items: center; gap: 10px; flex: 1;">
                             <i class="fas fa-user-tie"></i> 业务员管理
                         </div>
-                        <button class="close-btn" onclick="this.closest('.popup-overlay').remove()">&times;</button>
+                        <button onclick="this.closest('.popup-overlay').remove()" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #8e8e93;">&times;</button>
                     </div>
-                    <div class="salesman-list" id="salesmanList">
+                    <div id="salesmanList" style="max-height: 300px; overflow-y: auto; margin: 15px 0;">
                         ${salesmen.map(salesman => `
-                            <div class="salesman-item">
-                                <div class="salesman-name">${salesman}</div>
-                                <div class="salesman-actions">
-                                    <button class="action-btn btn-delete" onclick="deleteSalesman('${salesman}')">
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #f0f0f0;">
+                                <div style="font-weight: 500;">${salesman}</div>
+                                <div style="display: flex; gap: 8px;">
+                                    <button class="action-btn btn-delete" onclick="deleteSalesman('${salesman}')" style="background: none; border: none; cursor: pointer; color: #FF3B30; padding: 6px; border-radius: 6px; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px;">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
                             </div>
                         `).join('')}
                     </div>
-                    <div class="salesman-input-row">
-                        <input type="text" id="newSalesman" class="salesman-input" placeholder="输入新业务员姓名">
-                        <button class="btn btn-primary" onclick="addNewSalesman()">
+                    <div style="display: flex; gap: 10px; margin-top: 15px;">
+                        <input type="text" id="newSalesman" style="flex: 1; padding: 10px; border: 1px solid #e5e5ea; border-radius: 8px; font-size: 14px;" placeholder="输入新业务员姓名">
+                        <button class="btn btn-primary" onclick="addNewSalesman()" style="padding: 10px 15px; border: none; border-radius: 8px; background: #007AFF; color: white; cursor: pointer;">
                             <i class="fas fa-plus"></i> 添加
                         </button>
                     </div>
@@ -1767,11 +1233,11 @@
             // 更新业务员列表显示
             const salesmanList = document.getElementById('salesmanList');
             const newItem = document.createElement('div');
-            newItem.className = 'salesman-item';
+            newItem.style = "display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #f0f0f0;";
             newItem.innerHTML = `
-                <div class="salesman-name">${newSalesman}</div>
-                <div class="salesman-actions">
-                    <button class="action-btn btn-delete" onclick="deleteSalesman('${newSalesman}')">
+                <div style="font-weight: 500;">${newSalesman}</div>
+                <div style="display: flex; gap: 8px;">
+                    <button class="action-btn btn-delete" onclick="deleteSalesman('${newSalesman}')" style="background: none; border: none; cursor: pointer; color: #FF3B30; padding: 6px; border-radius: 6px; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px;">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
@@ -1791,428 +1257,6 @@
                 // 重新加载业务员管理弹窗
                 document.querySelector('.popup-overlay').remove();
                 manageSalesmen();
-            }
-        }
-        
-        // ========== 云端存储功能 ==========
-        
-        // 显示云端配置弹窗
-        function showCloudConfigPopup() {
-            const popup = document.createElement('div');
-            popup.className = 'popup-overlay';
-            popup.innerHTML = `
-                <div class="popup-content cloud-config-popup">
-                    <div class="popup-header">
-                        <div class="popup-title">
-                            <i class="fas fa-cloud"></i> 云端配置
-                        </div>
-                        <button class="close-btn" onclick="this.closest('.popup-overlay').remove()">&times;</button>
-                    </div>
-                    <div>
-                        <label class="cloud-config-label">GitHub用户名:</label>
-                        <input type="text" id="githubUsername" class="cloud-config-input" placeholder="输入GitHub用户名" value="${GITHUB_OWNER}">
-                    </div>
-                    <div>
-                        <label class="cloud-config-label">仓库名称:</label>
-                        <input type="text" id="githubRepo" class="cloud-config-input" placeholder="输入仓库名称" value="${GITHUB_REPO}">
-                    </div>
-                    <div>
-                        <label class="cloud-config-label">GitHub Token:</label>
-                        <input type="password" id="githubToken" class="cloud-config-input" placeholder="输入GitHub个人访问令牌">
-                    </div>
-                    <div>
-                        <button class="btn btn-primary w-100" onclick="saveCloudConfig()">
-                            <i class="fas fa-save"></i> 保存配置
-                        </button>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(popup);
-        }
-        
-        // 保存云端配置
-        function saveCloudConfig() {
-            const username = document.getElementById('githubUsername').value.trim();
-            const repo = document.getElementById('githubRepo').value.trim();
-            const token = document.getElementById('githubToken').value.trim();
-            
-            if (!username || !repo || !token) {
-                alert('请填写所有字段！');
-                return;
-            }
-            
-            GITHUB_OWNER = username;
-            GITHUB_REPO = repo;
-            
-            // 保存配置
-            cloudConfig = { 
-                username, 
-                repo, 
-                token,
-                password: masterPassword 
-            };
-            sessionStorage.setItem('cloudConfig', JSON.stringify(cloudConfig));
-            
-            alert('云端配置保存成功！');
-            document.querySelector('.popup-overlay').remove();
-        }
-        
-        // 设置密码
-        function setPassword() {
-            const password = document.getElementById('cloudPassword').value;
-            if (!password) {
-                alert('请输入加密密码！');
-                return;
-            }
-            
-            masterPassword = password;
-            
-            // 保存到云端配置
-            cloudConfig.password = password;
-            sessionStorage.setItem('cloudConfig', JSON.stringify(cloudConfig));
-            
-            alert('密码设置成功！');
-        }
-        
-        // 加密数据
-        function encryptData(data, password) {
-            return CryptoJS.AES.encrypt(JSON.stringify(data), password).toString();
-        }
-        
-        // 解密数据
-        function decryptData(encryptedData, password) {
-            try {
-                const bytes = CryptoJS.AES.decrypt(encryptedData, password);
-                return JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
-            } catch (e) {
-                console.error('解密失败:', e);
-                return null;
-            }
-        }
-        
-        // 显示同步状态
-        function showSyncStatus(message, isError = false, isSyncing = false) {
-            const statusElement = document.getElementById('syncStatus');
-            statusElement.querySelector('span').textContent = message;
-            
-            statusElement.className = 'sync-status';
-            if (isError) {
-                statusElement.classList.add('error');
-            } else if (isSyncing) {
-                statusElement.classList.add('syncing');
-            }
-            
-            statusElement.classList.add('visible');
-            
-            // 3秒后隐藏
-            setTimeout(() => {
-                statusElement.classList.remove('visible');
-            }, 3000);
-        }
-        
-        // 自动保存到云端
-        function autoSaveToCloud() {
-            if (autoSaveTimeout) {
-                clearTimeout(autoSaveTimeout);
-            }
-            
-            autoSaveTimeout = setTimeout(() => {
-                saveToCloud(true);
-            }, 2000);
-        }
-        
-        // 自动从云端加载
-        function autoLoadFromCloud(token) {
-            if (!token || !masterPassword) return;
-            
-            // 从云端加载数据
-            loadFromGitHub(token, true);
-        }
-        
-        // 保存到云端
-        async function saveToCloud(isAuto = false) {
-            if (!cloudConfig || !cloudConfig.token) {
-                showSyncStatus('请先配置云端信息', true);
-                if (!isAuto) {
-                    alert('请先配置云端信息！');
-                    showCloudConfigPopup();
-                }
-                return;
-            }
-            
-            if (!masterPassword) {
-                showSyncStatus('请先设置加密密码', true);
-                if (!isAuto) {
-                    alert('请先设置加密密码！');
-                }
-                return;
-            }
-            
-            // 获取数据
-            const table = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
-            const rows = table.rows;
-            
-            const data = [];
-            
-            for (let i = 0; i < rows.length; i++) {
-                data.push({
-                    salesman: rows[i].dataset.salesman,
-                    clientName: rows[i].dataset.clientName,
-                    loanDate: rows[i].dataset.loanDate,
-                    productType: rows[i].dataset.productType,
-                    loanAmount: rows[i].dataset.loanAmount,
-                    serviceRate: rows[i].dataset.serviceRate,
-                    channelRate: rows[i].dataset.channelRate,
-                    rebateRate: rows[i].dataset.rebateRate,
-                    commissionRate: rows[i].dataset.commissionRate,
-                    commission: rows[i].dataset.commission
-                });
-            }
-            
-            // 加密数据
-            const encryptedData = encryptData({
-                data,
-                salesmen,
-                timestamp: new Date().toISOString()
-            }, masterPassword);
-            
-            // 保存到GitHub
-            try {
-                showSyncStatus('正在同步到云端...', false, true);
-                
-                // 检查文件是否存在
-                const existingFile = await getGitHubFile(cloudConfig.token, cloudConfig.username, cloudConfig.repo);
-                
-                let sha = null;
-                if (existingFile) {
-                    sha = existingFile.sha;
-                }
-                
-                // 创建或更新文件
-                const response = await saveToGitHub(cloudConfig.token, cloudConfig.username, cloudConfig.repo, encryptedData, sha);
-                
-                if (response.ok) {
-                    showSyncStatus('数据已成功同步到GitHub！');
-                    if (!isAuto) {
-                        alert('数据已成功保存到云端！');
-                    }
-                } else {
-                    const error = await response.json();
-                    showSyncStatus('同步失败: ' + error.message, true);
-                    if (!isAuto) {
-                        alert('保存失败: ' + error.message);
-                    }
-                }
-            } catch (error) {
-                console.error('保存到GitHub失败:', error);
-                showSyncStatus('同步失败: ' + error.message, true);
-                if (!isAuto) {
-                    alert('保存失败: ' + error.message);
-                }
-            }
-        }
-        
-        // 从云端加载
-        async function loadFromCloud() {
-            if (!cloudConfig || !cloudConfig.token) {
-                alert('请先配置云端信息！');
-                showCloudConfigPopup();
-                return;
-            }
-            
-            if (!masterPassword) {
-                alert('请先设置加密密码！');
-                return;
-            }
-            
-            // 从GitHub加载数据
-            loadFromGitHub(cloudConfig.token);
-        }
-        
-        // 测试云端连接
-        async function testCloudConnection() {
-            if (!cloudConfig || !cloudConfig.token) {
-                alert('请先配置云端信息！');
-                showCloudConfigPopup();
-                return;
-            }
-            
-            try {
-                showSyncStatus('正在测试连接...', false, true);
-                
-                // 尝试获取仓库信息
-                const response = await fetch(`https://api.github.com/repos/${cloudConfig.username}/${cloudConfig.repo}`, {
-                    headers: {
-                        'Authorization': `token ${cloudConfig.token}`,
-                        'Accept': 'application/vnd.github.v3+json'
-                    }
-                });
-                
-                if (response.ok) {
-                    showSyncStatus('云端连接测试成功！');
-                    alert('云端连接测试成功！');
-                } else {
-                    const error = await response.json();
-                    showSyncStatus('连接测试失败: ' + error.message, true);
-                    alert('连接测试失败: ' + error.message);
-                }
-            } catch (error) {
-                console.error('测试连接失败:', error);
-                showSyncStatus('连接测试失败: ' + error.message, true);
-                alert('连接测试失败: ' + error.message);
-            }
-        }
-        
-        // 从GitHub获取文件
-        async function getGitHubFile(token, username, repo) {
-            try {
-                const response = await fetch(`https://api.github.com/repos/${username}/${repo}/contents/${GITHUB_PATH}`, {
-                    headers: {
-                        'Authorization': `token ${token}`,
-                        'Accept': 'application/vnd.github.v3+json'
-                    }
-                });
-                
-                if (response.status === 404) {
-                    // 文件不存在
-                    return null;
-                }
-                
-                if (!response.ok) {
-                    throw new Error('获取文件失败: ' + response.statusText);
-                }
-                
-                return await response.json();
-            } catch (error) {
-                console.error('获取GitHub文件失败:', error);
-                throw error;
-            }
-        }
-        
-        // 保存到GitHub
-        async function saveToGitHub(token, username, repo, content, sha = null) {
-            const message = sha ? '更新贷款收入数据' : '添加贷款收入数据';
-            
-            return await fetch(`https://api.github.com/repos/${username}/${repo}/contents/${GITHUB_PATH}`, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `token ${token}`,
-                    'Accept': 'application/vnd.github.v3+json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    message: message,
-                    content: btoa(unescape(encodeURIComponent(content))),
-                    sha: sha
-                })
-            });
-        }
-        
-        // 从GitHub加载数据
-        async function loadFromGitHub(token, isAuto = false) {
-            try {
-                if (!isAuto) {
-                    showSyncStatus('正在从云端加载...', false, true);
-                }
-                
-                // 获取文件
-                const file = await getGitHubFile(token, cloudConfig.username, cloudConfig.repo);
-                
-                if (!file) {
-                    if (!isAuto) {
-                        showSyncStatus('云端没有找到数据', true);
-                        alert('云端没有找到数据文件');
-                    }
-                    return;
-                }
-                
-                // 解码内容
-                const content = atob(file.content);
-                
-                // 解密数据
-                const decryptedData = decryptData(content, masterPassword);
-                
-                if (!decryptedData) {
-                    showSyncStatus('解密失败，密码可能错误', true);
-                    alert('解密失败，请检查密码是否正确');
-                    return;
-                }
-                
-                // 加载数据
-                const data = decryptedData.data;
-                salesmen = decryptedData.salesmen || salesmen;
-                
-                const table = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
-                
-                // 清空现有表格
-                table.innerHTML = '';
-                
-                // 添加保存的数据行
-                data.forEach(item => {
-                    const newRow = table.insertRow();
-                    
-                    // 添加数据单元格
-                    newRow.insertCell(0).textContent = item.salesman;
-                    newRow.insertCell(1).textContent = item.clientName;
-                    const commissionCell = newRow.insertCell(2);
-                    commissionCell.textContent = parseFloat(item.commission).toFixed(2);
-                    commissionCell.style.textAlign = "center"; // 确保居中对齐
-                    
-                    // 添加操作单元格
-                    const actionCell = newRow.insertCell(3);
-                    actionCell.className = 'action-cell';
-                    
-                    const viewBtn = document.createElement('button');
-                    viewBtn.className = 'action-btn';
-                    viewBtn.innerHTML = '<i class="fas fa-eye"></i>';
-                    viewBtn.title = '查看详情';
-                    viewBtn.onclick = function() {
-                        viewRowDetails(this);
-                    };
-                    actionCell.appendChild(viewBtn);
-                    
-                    const deleteBtn = document.createElement('button');
-                    deleteBtn.className = 'action-btn btn-delete';
-                    deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
-                    deleteBtn.title = '删除';
-                    deleteBtn.onclick = function() {
-                        deleteRow(this);
-                    };
-                    actionCell.appendChild(deleteBtn);
-                    
-                    // 存储完整数据
-                    newRow.dataset.salesman = item.salesman;
-                    newRow.dataset.clientName = item.clientName;
-                    newRow.dataset.loanDate = item.loanDate;
-                    newRow.dataset.productType = item.productType;
-                    newRow.dataset.loanAmount = item.loanAmount;
-                    newRow.dataset.serviceRate = item.serviceRate;
-                    newRow.dataset.channelRate = item.channelRate;
-                    newRow.dataset.rebateRate = item.rebateRate;
-                    newRow.dataset.commissionRate = item.commissionRate;
-                    newRow.dataset.commission = item.commission;
-                });
-                
-                // 更新业务员下拉框
-                updateSalesmanDropdown();
-                
-                // 更新汇总
-                updateSummary();
-                
-                // 保存到本地存储
-                saveData();
-                
-                if (!isAuto) {
-                    showSyncStatus('数据已从云端加载成功！');
-                    alert('数据已从云端加载成功！');
-                }
-            } catch (error) {
-                console.error('从GitHub加载数据失败:', error);
-                if (!isAuto) {
-                    showSyncStatus('加载失败: ' + error.message, true);
-                    alert('加载失败: ' + error.message);
-                }
             }
         }
     </script>
