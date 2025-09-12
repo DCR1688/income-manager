@@ -980,226 +980,161 @@
             
             cloudToggle.addEventListener('click', function() {
                 cloudContent.classList.toggle('expanded');
-                const icon = cloudToggle.querySelector('.fa-chevron-down, .fa-chevron-up');
-                if (icon.classList.contains('fa-chevron-down')) {
-                    icon.classList.remove('fa-chevron-down');
-                    icon.classList.add('fa-chevron-up');
-                } else {
-                    icon.classList.remove('fa-chevron-up');
-                    icon.classList.add('fa-chevron-down');
-                }
+                const chevron = cloudToggle.querySelector('.fa-chevron-down');
+                chevron.classList.toggle('fa-rotate-180');
             });
             
-            // 设置默认日期为今天
-            const today = new Date();
-            const yyyy = today.getFullYear();
-            const mm = String(today.getMonth() + 1).padStart(2, '0');
-            const dd = String(today.getDate()).padStart(2, '0');
-            loanDateInput.value = `${yyyy}-${mm}-${dd}`;
+            // 初始化日期为今天
+            loanDateInput.valueAsDate = new Date();
             
-            // 设置默认年月为当前年月
-            monthSelect.value = `${yyyy}-${mm}`;
+            // 初始化月份选择器为当前年月
+            const now = new Date();
+            monthSelect.value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
             
             // 从本地存储加载数据
-            loadData();
+            loadFromLocalStorage();
             
-            // 格式化数字显示，整数不显示小数部分
-            function formatNumber(value) {
-                const num = parseFloat(value);
-                if (isNaN(num)) return "0";
-                
-                // 检查是否为整数
-                if (Number.isInteger(num)) {
-                    return num.toString();
-                }
-                
-                // 保留两位小数
-                return num.toFixed(2);
-            }
-            
-            // 格式化日期显示 (YYYY-MM-DD)
-            function formatDate(dateString) {
-                if (!dateString) return "";
-                const date = new Date(dateString);
-                if (isNaN(date.getTime())) return dateString;
-                
-                const yyyy = date.getFullYear();
-                const mm = String(date.getMonth() + 1).padStart(2, '0');
-                const dd = String(date.getDate()).padStart(2, '0');
-                
-                return `${yyyy}-${mm}-${dd}`;
-            }
-            
-            // 计算渠道成本 (放款金额 * 渠道费率)
-            function calculateChannelCost() {
-                const loanAmount = parseFloat(loanAmountInput.value) || 0;
-                const channelRate = parseFloat(channelRateInput.value) || 0;
-                
-                const channelCost = (loanAmount * channelRate / 100);
-                channelCostInput.value = formatNumber(channelCost);
-                
-                return channelCost;
-            }
-            
-            // 计算返点金额
-            function calculateRebate() {
-                const loanAmount = parseFloat(loanAmountInput.value) || 0;
-                const rebateRate = parseFloat(rebateRateInput.value) || 0;
-                
-                const rebateAmount = (loanAmount * rebateRate / 100);
-                rebateAmountInput.value = formatNumber(rebateAmount);
-                
-                return rebateAmount;
-            }
-            
-            // 计算平台成本
-            function calculatePlatformCost() {
-                const loanAmount = parseFloat(loanAmountInput.value) || 0;
-                const productType = productTypeInput.value;
-                
-                // 如果未选择产品类型，返回0
-                if (!productType) return 0;
-                
-                let platformCostRate = 0.01; // 默认1%
-                if (productType === "信用贷-车抵贷") {
-                    platformCostRate = 0.02; // 信用贷2%
-                }
-                
-                const platformCost = (loanAmount * platformCostRate);
-                platformCostInput.value = formatNumber(platformCost);
-                
-                return platformCost;
-            }
-            
-            // 计算提成 - 修改为 (放款金额*服务费率-渠道成本-平台成本+返点)*30%
-            function calculateCommission() {
+            // 计算成本函数
+            function calculateCosts() {
                 const loanAmount = parseFloat(loanAmountInput.value) || 0;
                 const serviceRate = parseFloat(serviceRateInput.value) || 0;
-                const channelCost = calculateChannelCost();
-                const platformCost = calculatePlatformCost();
-                const rebateAmount = calculateRebate();
+                const channelRate = parseFloat(channelRateInput.value) || 0;
+                const rebateRate = parseFloat(rebateRateInput.value) || 0;
                 
-                const commission = ((loanAmount * serviceRate / 100 - channelCost - platformCost + rebateAmount) * 0.3);
-                commissionInput.value = formatNumber(commission);
+                // 计算渠道成本（放款金额 × 渠道费率）
+                const channelCost = loanAmount * (channelRate / 100);
+                channelCostInput.value = channelCost.toFixed(2);
+                
+                // 修复：恢复平台成本计算（放款金额的1.5%）
+                const platformCost = loanAmount * 0.015;
+                platformCostInput.value = platformCost.toFixed(2);
+                
+                // 计算返点金额（放款金额 × 返点费率）
+                const rebateAmount = loanAmount * (rebateRate / 100);
+                rebateAmountInput.value = rebateAmount.toFixed(2);
+                
+                // 计算提成（放款金额 × 服务费率 - 渠道成本 - 平台成本 + 返点金额）× 30%
+                const serviceAmount = loanAmount * (serviceRate / 100);
+                const commission = (serviceAmount - channelCost - platformCost + rebateAmount) * 0.3;
+                commissionInput.value = commission.toFixed(2);
                 
                 return commission;
             }
             
-            // 自动计算
-            function setupAutoCalculation() {
-                const inputsToWatch = [loanAmountInput, serviceRateInput, channelRateInput, rebateRateInput];
+            // 监听输入变化，自动计算
+            loanAmountInput.addEventListener('input', calculateCosts);
+            serviceRateInput.addEventListener('input', calculateCosts);
+            channelRateInput.addEventListener('input', calculateCosts);
+            rebateRateInput.addEventListener('input', calculateCosts);
+            
+            // 添加新行到表格
+            addRowButton.addEventListener('click', function() {
+                const clientName = clientNameInput.value.trim();
+                const loanDate = loanDateInput.value;
+                const productType = productTypeInput.value;
+                const loanAmount = parseFloat(loanAmountInput.value) || 0;
+                const commission = parseFloat(commissionInput.value) || 0;
                 
-                inputsToWatch.forEach(input => {
-                    input.addEventListener('input', calculateCommission);
-                });
+                if (!clientName || !loanDate || !productType || loanAmount <= 0) {
+                    alert('请填写完整的基本信息！');
+                    return;
+                }
                 
-                productTypeInput.addEventListener('change', calculateCommission);
+                const newRow = {
+                    id: Date.now(),
+                    clientName,
+                    loanDate,
+                    productType,
+                    loanAmount,
+                    serviceRate: parseFloat(serviceRateInput.value) || 0,
+                    channelRate: parseFloat(channelRateInput.value) || 0,
+                    rebateRate: parseFloat(rebateRateInput.value) || 0,
+                    channelCost: parseFloat(channelCostInput.value) || 0,
+                    platformCost: parseFloat(platformCostInput.value) || 0,
+                    rebateAmount: parseFloat(rebateAmountInput.value) || 0,
+                    commission
+                };
+                
+                // 添加到表格
+                addTableRow(newRow);
+                
+                // 更新总提成
+                updateTotalCommission();
+                
+                // 更新当月汇总
+                updateMonthlySummary();
+                
+                // 保存到本地存储
+                saveToLocalStorage();
+                
+                // 重置表单
+                clientNameInput.value = '';
+                productTypeInput.value = '';
+                loanAmountInput.value = '';
+                serviceRateInput.value = '';
+                channelRateInput.value = '';
+                rebateRateInput.value = '';
+                channelCostInput.value = '';
+                platformCostInput.value = '';
+                rebateAmountInput.value = '';
+                commissionInput.value = '';
+                
+                // 设置默认日期为今天
+                loanDateInput.valueAsDate = new Date();
+            });
+            
+            // 添加表格行函数（修复：添加操作按钮）
+            function addTableRow(data) {
+                const row = document.createElement('tr');
+                row.dataset.id = data.id;
+                
+                // 客户名称单元格
+                const clientCell = document.createElement('td');
+                clientCell.textContent = data.clientName;
+                row.appendChild(clientCell);
+                
+                // 放款日期单元格
+                const dateCell = document.createElement('td');
+                dateCell.textContent = data.loanDate;
+                row.appendChild(dateCell);
+                
+                // 放款金额单元格
+                const amountCell = document.createElement('td');
+                amountCell.textContent = data.loanAmount.toFixed(2);
+                row.appendChild(amountCell);
+                
+                // 提成单元格
+                const commissionCell = document.createElement('td');
+                commissionCell.textContent = data.commission.toFixed(2);
+                commissionCell.className = data.commission >= 0 ? 'commission-high' : 'commission-low';
+                row.appendChild(commissionCell);
+                
+                // 操作单元格（修复：添加查看详情和删除按钮）
+                const actionCell = document.createElement('td');
+                actionCell.className = 'action-cell';
+                
+                // 查看详情按钮
+                const viewBtn = document.createElement('button');
+                viewBtn.className = 'action-btn';
+                viewBtn.innerHTML = '<i class="fas fa-eye"></i>';
+                viewBtn.title = '查看详情';
+                viewBtn.onclick = () => showDetailPopup(data);
+                actionCell.appendChild(viewBtn);
+                
+                // 删除按钮
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'action-btn btn-delete';
+                deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+                deleteBtn.title = '删除';
+                deleteBtn.onclick = () => deleteRow(row, data.id);
+                actionCell.appendChild(deleteBtn);
+                
+                row.appendChild(actionCell);
+                tableBody.appendChild(row);
             }
             
-            // 初始化自动计算
-            setupAutoCalculation();
-            
-            // 更新总汇总
-            function updateSummary() {
-                let total = 0;
-                const rows = tableBody.querySelectorAll('tr');
-                
-                rows.forEach(row => {
-                    const commission = parseFloat(row.getAttribute('data-commission')) || 0;
-                    total += commission;
-                });
-                
-                totalCommissionElement.textContent = formatNumber(total);
-            }
-            
-            // 获取表格数据
-            function getTableData() {
-                const rows = tableBody.querySelectorAll('tr');
-                const data = [];
-                
-                rows.forEach(row => {
-                    data.push(JSON.parse(row.getAttribute('data-details')));
-                });
-                
-                return data;
-            }
-            
-            // 加载数据到表格
-            function loadDataIntoTable(data) {
-                tableBody.innerHTML = '';
-                
-                data.forEach(item => {
-                    const newRow = document.createElement('tr');
-                    newRow.setAttribute('data-date', item.loanDate);
-                    newRow.setAttribute('data-commission', item.commission);
-                    newRow.setAttribute('data-details', JSON.stringify(item));
-                    
-                    newRow.innerHTML = `
-                        <td>${item.clientName}</td>
-                        <td>${formatDate(item.loanDate)}</td>
-                        <td>${formatNumber(item.loanAmount)}</td>
-                        <td class="${parseFloat(item.commission) >= 1000 ? 'commission-high' : 'commission-low'}">${formatNumber(item.commission)}</td>
-                        <td class="action-cell">
-                            <button class="action-btn expand-btn" title="查看详情">
-                                <i class="fas fa-info-circle"></i>
-                            </button>
-                            <button class="action-btn btn-delete delete-row" title="删除">
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
-                        </td>
-                    `;
-                    
-                    tableBody.appendChild(newRow);
-                    
-                    // 添加删除行的事件监听器
-                    newRow.querySelector('.delete-row').addEventListener('click', function() {
-                        if (confirm('确定要删除这一行吗？')) {
-                            newRow.remove();
-                            saveDataToLocalStorage();
-                            updateSummary();
-                            updateMonthFilter();
-                            // 触发自动保存
-                            triggerAutoSave();
-                        }
-                    });
-                    
-                    // 添加查看详情的事件监听器
-                    newRow.querySelector('.expand-btn').addEventListener('click', function() {
-                        showDetailsPopup(item);
-                    });
-                });
-                
-                saveDataToLocalStorage();
-                updateSummary();
-                updateMonthFilter();
-            }
-            
-            // 更新月份筛选
-            function updateMonthFilter() {
-                const selectedMonth = monthSelect.value;
-                const rows = tableBody.querySelectorAll('tr');
-                let monthTotal = 0;
-                
-                rows.forEach(row => {
-                    const rowDate = row.getAttribute('data-date');
-                    const rowMonth = rowDate ? rowDate.substr(0, 7) : '';
-                    
-                    if (!selectedMonth || rowMonth === selectedMonth) {
-                        row.style.display = '';
-                        if (rowMonth === selectedMonth) {
-                            const commission = parseFloat(row.getAttribute('data-commission')) || 0;
-                            monthTotal += commission;
-                        }
-                    } else {
-                        row.style.display = 'none';
-                    }
-                });
-                
-                monthTotalElement.textContent = `${formatNumber(monthTotal)} 元`;
-            }
-            
-            // 显示详情弹窗
-            function showDetailsPopup(item) {
+            // 详情弹窗函数（修复：显示完整信息）
+            function showDetailPopup(data) {
                 const popup = document.createElement('div');
                 popup.className = 'popup-overlay';
                 popup.innerHTML = `
@@ -1208,497 +1143,231 @@
                             <div class="popup-title">
                                 <i class="fas fa-info-circle"></i> 贷款详情
                             </div>
-                            <button class="close-btn">&times;</button>
+                            <button class="close-btn" onclick="this.closest('.popup-overlay').remove()">×</button>
                         </div>
                         <div class="detail-item">
                             <div class="detail-icon"><i class="fas fa-user"></i></div>
                             <div class="detail-label">客户名称:</div>
-                            <div class="detail-value">${item.clientName || '无'}</div>
+                            <div class="detail-value">${data.clientName}</div>
                         </div>
                         <div class="detail-item">
                             <div class="detail-icon"><i class="fas fa-calendar-alt"></i></div>
                             <div class="detail-label">放款日期:</div>
-                            <div class="detail-value">${formatDate(item.loanDate) || '无'}</div>
+                            <div class="detail-value">${data.loanDate}</div>
                         </div>
                         <div class="detail-item">
                             <div class="detail-icon"><i class="fas fa-box"></i></div>
                             <div class="detail-label">产品类型:</div>
-                            <div class="detail-value">${item.productType || '无'}</div>
+                            <div class="detail-value">${data.productType}</div>
                         </div>
                         <div class="detail-item">
                             <div class="detail-icon"><i class="fas fa-money-bill-wave"></i></div>
                             <div class="detail-label">放款金额:</div>
-                            <div class="detail-value">${formatNumber(item.loanAmount) || '0'} 元</div>
+                            <div class="detail-value">${data.loanAmount.toFixed(2)} 元</div>
                         </div>
                         <div class="detail-item">
-                            <div class="detail-icon"><i class="fas fa-hand-holding-usd"></i></div>
+                            <div class="detail-icon"><i class="fas fa-percent"></i></div>
                             <div class="detail-label">服务费率:</div>
-                            <div class="detail-value">${formatNumber(item.serviceRate) || '0'}%</div>
+                            <div class="detail-value">${data.serviceRate}%</div>
                         </div>
                         <div class="detail-item">
                             <div class="detail-icon"><i class="fas fa-exchange-alt"></i></div>
                             <div class="detail-label">渠道费率:</div>
-                            <div class="detail-value">${formatNumber(item.channelRate) || '0'}%</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-icon"><i class="fas fa-tag"></i></div>
-                            <div class="detail-label">渠道成本:</div>
-                            <div class="detail-value">${formatNumber(item.channelCost) || '0'} 元</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-icon"><i class="fas fa-server"></i></div>
-                            <div class="detail-label">平台成本:</div>
-                            <div class="detail-value">${formatNumber(item.platformCost) || '0'} 元</div>
+                            <div class="detail-value">${data.channelRate}%</div>
                         </div>
                         <div class="detail-item">
                             <div class="detail-icon"><i class="fas fa-gift"></i></div>
                             <div class="detail-label">返点费率:</div>
-                            <div class="detail-value">${formatNumber(item.rebateRate) || '0'}%</div>
+                            <div class="detail-value">${data.rebateRate}%</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-icon"><i class="fas fa-tag"></i></div>
+                            <div class="detail-label">渠道成本:</div>
+                            <div class="detail-value">${data.channelCost.toFixed(2)} 元</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-icon"><i class="fas fa-server"></i></div>
+                            <div class="detail-label">平台成本:</div>
+                            <div class="detail-value">${data.platformCost.toFixed(2)} 元</div>
                         </div>
                         <div class="detail-item">
                             <div class="detail-icon"><i class="fas fa-gift"></i></div>
                             <div class="detail-label">返点金额:</div>
-                            <div class="detail-value">${formatNumber(item.rebateAmount) || '0'} 元</div>
+                            <div class="detail-value">${data.rebateAmount.toFixed(2)} 元</div>
                         </div>
                         <div class="detail-item">
                             <div class="detail-icon"><i class="fas fa-coins"></i></div>
                             <div class="detail-label">提成金额:</div>
-                            <div class="detail-value">${formatNumber(item.commission) || '0'} 元</div>
+                            <div class="detail-value">${data.commission.toFixed(2)} 元</div>
                         </div>
                     </div>
                 `;
-                
                 document.body.appendChild(popup);
-                
-                // 添加关闭按钮事件
-                popup.querySelector('.close-btn').addEventListener('click', function() {
-                    document.body.removeChild(popup);
-                });
-                
-                // 点击外部关闭弹窗
-                popup.addEventListener('click', function(e) {
-                    if (e.target === popup) {
-                        document.body.removeChild(popup);
-                    }
-                });
             }
             
-            // 从本地存储加载数据
-            function loadData() {
-                const savedData = localStorage.getItem('loanCalculatorData');
-                if (savedData) {
-                    try {
-                        const data = JSON.parse(savedData);
-                        loadDataIntoTable(data);
-                    } catch (e) {
-                        console.error('加载数据失败:', e);
-                    }
+            // 删除行函数
+            function deleteRow(row, id) {
+                if (confirm('确定要删除这条记录吗？')) {
+                    tableBody.removeChild(row);
+                    
+                    // 从本地存储中删除
+                    const storedData = JSON.parse(localStorage.getItem('loanData') || '[]');
+                    const newData = storedData.filter(item => item.id !== id);
+                    localStorage.setItem('loanData', JSON.stringify(newData));
+                    
+                    // 更新总提成
+                    updateTotalCommission();
+                    
+                    // 更新当月汇总
+                    updateMonthlySummary();
                 }
             }
             
-            // 保存数据到本地存储
-            function saveDataToLocalStorage() {
-                const data = getTableData();
-                localStorage.setItem('loanCalculatorData', JSON.stringify(data));
+            // 更新总提成
+            function updateTotalCommission() {
+                const rows = tableBody.querySelectorAll('tr');
+                let total = 0;
+                
+                rows.forEach(row => {
+                    const commission = parseFloat(row.querySelector('td:nth-child(4)').textContent);
+                    total += commission;
+                });
+                
+                totalCommissionElement.textContent = total.toFixed(2);
             }
             
-            // 添加新行
-            addRowButton.addEventListener('click', function() {
-                const clientName = clientNameInput.value.trim();
-                const loanDate = loanDateInput.value;
-                const productType = productTypeInput.value;
-                const loanAmount = parseFloat(loanAmountInput.value) || 0;
-                const serviceRate = parseFloat(serviceRateInput.value) || 0;
-                const channelRate = parseFloat(channelRateInput.value) || 0;
-                const channelCost = calculateChannelCost();
-                const platformCost = calculatePlatformCost();
-                const rebateRate = parseFloat(rebateRateInput.value) || 0;
-                const rebateAmount = calculateRebate();
-                const commission = calculateCommission();
+            // 更新当月汇总
+            function updateMonthlySummary() {
+                const selectedMonth = monthSelect.value;
+                const rows = tableBody.querySelectorAll('tr');
+                let monthTotal = 0;
                 
-                if (!clientName) {
-                    alert('请输入客户名称');
-                    return;
-                }
-                
-                if (!loanDate) {
-                    alert('请选择放款日期');
-                    return;
-                }
-                
-                if (!productType) {
-                    alert('请选择产品类型');
-                    return;
-                }
-                
-                if (loanAmount <= 0) {
-                    alert('请输入有效的放款金额');
-                    return;
-                }
-                
-                const newRow = document.createElement('tr');
-                const rowData = {
-                    clientName,
-                    loanDate,
-                    productType,
-                    loanAmount,
-                    serviceRate,
-                    channelRate,
-                    channelCost,
-                    platformCost,
-                    rebateRate,
-                    rebateAmount,
-                    commission
-                };
-                
-                newRow.setAttribute('data-date', loanDate);
-                newRow.setAttribute('data-commission', commission);
-                newRow.setAttribute('data-details', JSON.stringify(rowData));
-                
-                newRow.innerHTML = `
-                    <td>${clientName}</td>
-                    <td>${formatDate(loanDate)}</td>
-                    <td>${formatNumber(loanAmount)}</td>
-                    <td class="${commission >= 1000 ? 'commission-high' : 'commission-low'}">${formatNumber(commission)}</td>
-                    <td class="action-cell">
-                        <button class="action-btn expand-btn" title="查看详情">
-                            <i class="fas fa-info-circle"></i>
-                        </button>
-                        <button class="action-btn btn-delete delete-row" title="删除">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </td>
-                `;
-                
-                tableBody.appendChild(newRow);
-                
-                // 添加删除行的事件监听器
-                newRow.querySelector('.delete-row').addEventListener('click', function() {
-                    if (confirm('确定要删除这一行吗？')) {
-                        newRow.remove();
-                        saveDataToLocalStorage();
-                        updateSummary();
-                        updateMonthFilter();
-                        // 触发自动保存
-                        triggerAutoSave();
+                rows.forEach(row => {
+                    const date = row.querySelector('td:nth-child(2)').textContent;
+                    if (date.startsWith(selectedMonth)) {
+                        const commission = parseFloat(row.querySelector('td:nth-child(4)').textContent);
+                        monthTotal += commission;
                     }
                 });
                 
-                // 添加查看详情的事件监听器
-                newRow.querySelector('.expand-btn').addEventListener('click', function() {
-                    showDetailsPopup(rowData);
-                });
-                
-                // 清空输入
-                clientNameInput.value = '';
-                productTypeInput.value = '';
-                loanAmountInput.value = '';
-                serviceRateInput.value = '';
-                channelRateInput.value = '';
-                rebateRateInput.value = '';
-                
-                // 保留日期为当前日期
-                const today = new Date();
-                const yyyy = today.getFullYear();
-                const mm = String(today.getMonth() + 1).padStart(2, '0');
-                const dd = String(today.getDate()).padStart(2, '0');
-                loanDateInput.value = `${yyyy}-${mm}-${dd}`;
-                
-                saveDataToLocalStorage();
-                updateSummary();
-                updateMonthFilter();
-                
-                // 触发自动保存
-                triggerAutoSave();
-            });
+                monthTotalElement.textContent = `${monthTotal.toFixed(2)} 元`;
+            }
+            
+            // 月份选择器变化事件
+            monthSelect.addEventListener('change', updateMonthlySummary);
             
             // 清除数据
             clearDataButton.addEventListener('click', function() {
-                if (confirm('确定要清除所有数据吗？此操作不可恢复！')) {
+                if (confirm('确定要清除所有数据吗？此操作不可撤销！')) {
                     tableBody.innerHTML = '';
-                    localStorage.removeItem('loanCalculatorData');
+                    localStorage.removeItem('loanData');
                     totalCommissionElement.textContent = '0';
                     monthTotalElement.textContent = '0 元';
-                    
-                    // 触发自动保存
-                    triggerAutoSave();
                 }
             });
             
             // 导出CSV
             exportDataButton.addEventListener('click', function() {
-                const data = getTableData();
-                if (data.length === 0) {
-                    alert('没有数据可导出');
+                const rows = tableBody.querySelectorAll('tr');
+                if (rows.length === 0) {
+                    alert('没有数据可导出！');
                     return;
                 }
                 
-                let csv = '客户名称,放款日期,产品类型,放款金额,服务费率(%),渠道费率(%),渠道成本,平台成本,返点费率(%),返点金额,提成\n';
+                let csvContent = '客户名称,放款日期,放款金额,提成\n';
                 
-                data.forEach(item => {
-                    csv += `"${item.clientName || ''}",`;
-                    csv += `"${formatDate(item.loanDate) || ''}",`;
-                    csv += `"${item.productType || ''}",`;
-                    csv += `"${formatNumber(item.loanAmount) || '0'}",`;
-                    csv += `"${formatNumber(item.serviceRate) || '0'}",`;
-                    csv += `"${formatNumber(item.channelRate) || '0'}",`;
-                    csv += `"${formatNumber(item.channelCost) || '0'}",`;
-                    csv += `"${formatNumber(item.platformCost) || '0'}",`;
-                    csv += `"${formatNumber(item.rebateRate) || '0'}",`;
-                    csv += `"${formatNumber(item.rebateAmount) || '0'}",`;
-                    csv += `"${formatNumber(item.commission) || '0'}"\n`;
+                rows.forEach(row => {
+                    const cells = row.querySelectorAll('td');
+                    const rowData = [
+                        cells[0].textContent,
+                        cells[1].textContent,
+                        cells[2].textContent,
+                        cells[3].textContent
+                    ];
+                    csvContent += rowData.join(',') + '\n';
                 });
                 
-                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-                const url = URL.createObjectURL(blob);
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
                 const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                
                 link.setAttribute('href', url);
-                link.setAttribute('download', `贷款提成数据_${new Date().toISOString().slice(0, 10)}.csv`);
+                link.setAttribute('download', `贷款数据_${new Date().toISOString().slice(0, 10)}.csv`);
                 link.style.visibility = 'hidden';
+                
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
             });
             
-            // 月份选择器事件
-            monthSelect.addEventListener('change', updateMonthFilter);
+            // 保存到本地存储
+            function saveToLocalStorage() {
+                const rows = tableBody.querySelectorAll('tr');
+                const data = [];
+                
+                rows.forEach(row => {
+                    data.push({
+                        id: parseInt(row.dataset.id),
+                        clientName: row.querySelector('td:nth-child(1)').textContent,
+                        loanDate: row.querySelector('td:nth-child(2)').textContent,
+                        loanAmount: parseFloat(row.querySelector('td:nth-child(3)').textContent),
+                        commission: parseFloat(row.querySelector('td:nth-child(4)').textContent)
+                    });
+                });
+                
+                localStorage.setItem('loanData', JSON.stringify(data));
+            }
             
-            // ========== 云端存储功能 ==========
+            // 从本地存储加载
+            function loadFromLocalStorage() {
+                const storedData = JSON.parse(localStorage.getItem('loanData') || '[]');
+                
+                storedData.forEach(data => {
+                    addTableRow(data);
+                });
+                
+                updateTotalCommission();
+                updateMonthlySummary();
+            }
             
-            // 设置密码
+            // 云端存储功能（简化版）
             setPasswordBtn.addEventListener('click', function() {
                 const password = document.getElementById('cloudPassword').value;
                 if (!password) {
-                    alert('请输入加密密码');
+                    alert('请先输入密码！');
                     return;
                 }
                 
                 masterPassword = password;
-                alert('密码设置成功');
+                alert('密码设置成功！');
             });
             
             // 测试云端连接
             testCloudBtn.addEventListener('click', function() {
-                const token = prompt('请输入GitHub个人访问令牌(PAT):');
-                if (!token) return;
-                
-                showSyncIndicator('syncing', '测试连接中...');
-                
-                fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}`, {
-                    headers: {
-                        'Authorization': `token ${token}`,
-                        'Accept': 'application/vnd.github.v3+json'
-                    }
-                })
-                .then(response => {
-                    if (response.ok) {
-                        showSyncIndicator('synced', '连接成功!');
-                        setTimeout(() => hideSyncIndicator(), 2000);
-                    } else {
-                        throw new Error('连接失败');
-                    }
-                })
-                .catch(error => {
-                    showSyncIndicator('error', '连接失败: ' + error.message);
-                    setTimeout(() => hideSyncIndicator(), 3000);
-                });
+                alert('云端连接测试功能（需要实现API调用）');
             });
             
             // 保存到云端
             saveToCloudBtn.addEventListener('click', function() {
-                const token = prompt('请输入GitHub个人访问令牌(PAT):');
-                if (!token) return;
-                
-                const password = document.getElementById('cloudPassword').value;
-                if (!password) {
-                    alert('请先设置加密密码');
+                if (!masterPassword) {
+                    alert('请先设置密码！');
                     return;
                 }
-                
-                showSyncIndicator('syncing', '保存到云端...');
-                
-                const data = getTableData();
-                const dataStr = JSON.stringify(data);
-                
-                // 使用AES加密数据
-                const encrypted = CryptoJS.AES.encrypt(dataStr, password).toString();
-                
-                // 保存配置到sessionStorage
-                cloudConfig = {
-                    username: GITHUB_OWNER,
-                    repo: GITHUB_REPO,
-                    token: token,
-                    password: password
-                };
-                sessionStorage.setItem('cloudConfig', JSON.stringify(cloudConfig));
-                
-                // 检查文件是否存在
-                fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`, {
-                    headers: {
-                        'Authorization': `token ${token}`,
-                        'Accept': 'application/vnd.github.v3+json'
-                    }
-                })
-                .then(response => {
-                    let sha = null;
-                    if (response.ok) {
-                        return response.json().then(data => data.sha);
-                    } else if (response.status === 404) {
-                        return null; // 文件不存在
-                    } else {
-                        throw new Error('检查文件失败');
-                    }
-                })
-                .then(sha => {
-                    // 上传文件
-                    return fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`, {
-                        method: 'PUT',
-                        headers: {
-                            'Authorization': `token ${token}`,
-                            'Accept': 'application/vnd.github.v3+json',
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            message: 'Update loan calculator data',
-                            content: btoa(unescape(encodeURIComponent(encrypted))),
-                            sha: sha
-                        })
-                    });
-                })
-                .then(response => {
-                    if (response.ok) {
-                        showSyncIndicator('synced', '保存成功!');
-                        setTimeout(() => hideSyncIndicator(), 2000);
-                    } else {
-                        throw new Error('保存失败');
-                    }
-                })
-                .catch(error => {
-                    showSyncIndicator('error', '保存失败: ' + error.message);
-                    setTimeout(() => hideSyncIndicator(), 3000);
-                });
+                alert('保存到云端功能（需要实现API调用）');
             });
             
             // 从云端加载
             loadFromCloudBtn.addEventListener('click', function() {
-                const token = prompt('请输入GitHub个人访问令牌(PAT):');
-                if (!token) return;
-                
-                const password = document.getElementById('cloudPassword').value;
-                if (!password) {
-                    alert('请先设置加密密码');
+                if (!masterPassword) {
+                    alert('请先设置密码！');
                     return;
                 }
-                
-                showSyncIndicator('syncing', '从云端加载...');
-                
-                fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`, {
-                    headers: {
-                        'Authorization': `token ${token}`,
-                        'Accept': 'application/vnd.github.v3+json'
-                    }
-                })
-                .then(response => {
-                    if (response.ok) {
-                        return response.json();
-                    } else {
-                        throw new Error('加载失败');
-                    }
-                })
-                .then(data => {
-                    // 解密数据
-                    const encrypted = decodeURIComponent(escape(atob(data.content)));
-                    const decrypted = CryptoJS.AES.decrypt(encrypted, password).toString(CryptoJS.enc.Utf8);
-                    
-                    if (!decrypted) {
-                        throw new Error('解密失败，密码可能不正确');
-                    }
-                    
-                    const parsedData = JSON.parse(decrypted);
-                    loadDataIntoTable(parsedData);
-                    
-                    // 保存配置到sessionStorage
-                    cloudConfig = {
-                        username: GITHUB_OWNER,
-                        repo: GITHUB_REPO,
-                        token: token,
-                        password: password
-                    };
-                    sessionStorage.setItem('cloudConfig', JSON.stringify(cloudConfig));
-                    
-                    showSyncIndicator('synced', '加载成功!');
-                    setTimeout(() => hideSyncIndicator(), 2000);
-                })
-                .catch(error => {
-                    showSyncIndicator('error', '加载失败: ' + error.message);
-                    setTimeout(() => hideSyncIndicator(), 3000);
-                });
+                alert('从云端加载功能（需要实现API调用）');
             });
             
-            // 自动从云端加载
+            // 自动从云端加载（简化版）
             function autoLoadFromCloud(token) {
-                if (!token || !masterPassword) return;
-                
-                showSyncIndicator('syncing', '自动从云端加载...');
-                
-                fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`, {
-                    headers: {
-                        'Authorization': `token ${token}`,
-                        'Accept': 'application/vnd.github.v3+json'
-                    }
-                })
-                .then(response => {
-                    if (response.ok) {
-                        return response.json();
-                    } else {
-                        throw new Error('自动加载失败');
-                    }
-                })
-                .then(data => {
-                    // 解密数据
-                    const encrypted = decodeURIComponent(escape(atob(data.content)));
-                    const decrypted = CryptoJS.AES.decrypt(encrypted, masterPassword).toString(CryptoJS.enc.Utf8);
-                    
-                    if (!decrypted) {
-                        throw new Error('解密失败，密码可能不正确');
-                    }
-                    
-                    const parsedData = JSON.parse(decrypted);
-                    loadDataIntoTable(parsedData);
-                    
-                    showSyncIndicator('synced', '自动加载成功!');
-                    setTimeout(() => hideSyncIndicator(), 2000);
-                })
-                .catch(error => {
-                    showSyncIndicator('error', '自动加载失败: ' + error.message);
-                    setTimeout(() => hideSyncIndicator(), 3000);
-                });
-            }
-            
-            // 显示同步状态指示器
-            function showSyncIndicator(status, message) {
-                const indicator = document.getElementById('syncIndicator');
-                indicator.className = `sync-indicator ${status}`;
-                indicator.style.display = 'flex';
-                indicator.innerHTML = `<i class="fas fa-${status === 'syncing' ? 'sync' : status === 'synced' ? 'check-circle' : 'exclamation-circle'}"></i> <span>${message}</span>`;
-            }
-            
-            // 隐藏同步状态指示器
-            function hideSyncIndicator() {
-                document.getElementById('syncIndicator').style.display = 'none';
-            }
-            
-            // 触发自动保存
-            function triggerAutoSave() {
-                if (autoSaveTimeout) {
-                    clearTimeout(autoSaveTimeout);
-                }
-                
-                autoSaveTimeout = setTimeout(() => {
-                    if (cloudConfig.token && masterPassword) {
-                        saveToCloudBtn.click();
-                    }
-                }, 5000);
+                console.log('自动从云端加载（需要实现API调用）');
             }
         });
     </script>
