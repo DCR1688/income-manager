@@ -539,12 +539,19 @@
     flex-wrap: nowrap;
 }
 
-/* 手机上的样式 */
+.action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: nowrap;
+}
+
+/* 手机上的样式 - 只针对操作列内的按钮 */
 @media (max-width: 768px) {
     .action-buttons {
         gap: 5px;
     }
-    .action-btn {
+    .action-buttons .action-btn {  /* 添加.action-buttons限制范围 */
         padding: 5px 8px;
         font-size: 14px;
     }
@@ -1586,4 +1593,5 @@
 </body>
 
 </html>
+
 
