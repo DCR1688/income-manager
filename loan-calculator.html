@@ -273,7 +273,7 @@
             cursor: pointer;
             font-size: 16px;
             color: #007AFF;
-            padding: 6px;
+            padding: 3px;
             border-radius: 6px;
             display: flex;
             align-items: center;
@@ -732,7 +732,7 @@
                             <select id="productType">
                                 <option value="" disabled selected>-- 请选择产品类型 --</option>
                                 <option value="抵押">抵押贷</option>
-                                <option value="信用贷">信用贷</option>
+                                <option value="信用贷-车抵贷">信用贷-车抵贷</option>
                                 <option value="企业贷">企业贷</option>
                             </select>
                         </div>
@@ -809,6 +809,12 @@
                 </div>
             </div>
             
+             <!-- 详细信息 -->
+            <div class="table-section">
+                <div class="section-card">
+                    <div class="section-title">
+                        <i class="fas fa-money-bill-alt"></i> 详细信息
+                    </div>
             <div class="table-section">
                 <div class="table-container">
                     <div class="table-scroll">
@@ -958,8 +964,8 @@
                 if (!productType) return 0;
                 
                 let platformCostRate = 0.01; // 默认1%
-                if (productType === "信用贷") {
-                    platformCostRate = 0.02; // 信用贷2%
+                if (productType === "信用贷-车抵贷") {
+                    platformCostRate = 0.02; // 信用贷-车抵贷2%
                 }
                 
                 const platformCost = (loanAmount * platformCostRate);
@@ -1640,3 +1646,4 @@
     </script>
 </body>
 </html>
+
