@@ -328,6 +328,15 @@
             width: 32px;
             height: 32px;
         }
+          /* 操作按钮容器 */
+.action-cell {
+    display: flex;
+    justify-content: space-between; /* 关键：向左对齐 */
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 8px 12px;
+}
         
         .action-btn:hover {
             background: #f0f0f0;
@@ -832,12 +841,12 @@
                     <i class="fas fa-info-circle"></i> 提成计算公式: (放款金额 × 服务费率 + 返点金额 - 渠道成本 - 平台成本) × 提成点数
                 </div>
                 
-                <!-- 基本信息卡片 - 默认折叠 -->
+               <!-- 基本信息卡片 -->
                 <div class="section-card">
                     <div class="section-title" onclick="toggleSection('basicInfo')">
-                        <i class="fas fa-chevron-down"></i> 基本信息
+                        <i class="fas fa-info-circle"></i> 基本信息
                     </div>
-                    <div class="section-content collapsed" id="basicInfo">
+                    <div class="section-content" id="basicInfo">
                         <div class="input-row">
                             <div class="input-group">
                                 <label for="salesman"><i class="fas fa-user-tie"></i> 业务员</label>
@@ -896,12 +905,12 @@
                     </div>
                 </div>
                 
-                <!-- 费率信息卡片 - 默认折叠 -->
+               <!-- 费率信息卡片 -->
                 <div class="section-card">
                     <div class="section-title" onclick="toggleSection('rateInfo')">
-                        <i class="fas fa-chevron-down"></i> 费率信息
+                        <i class="fas fa-percent"></i> 费率信息
                     </div>
-                    <div class="section-content collapsed" id="rateInfo">
+                    <div class="section-content" id="rateInfo">
                         <div class="input-row">
                             <div class="input-group">
                                 <label for="serviceRate"><i class="fas fa-hand-holding-usd"></i> 服务费率 (%)</label>
@@ -923,12 +932,12 @@
                     </div>
                 </div>
                 
-                <!-- 成本信息卡片 - 默认折叠 -->
+                <!-- 成本信息卡片 -->
                 <div class="section-card">
                     <div class="section-title" onclick="toggleSection('costInfo')">
-                        <i class="fas fa-chevron-down"></i> 成本信息
+                        <i class="fas fa-money-bill-alt"></i> 成本信息
                     </div>
-                    <div class="section-content collapsed" id="costInfo">
+                    <div class="section-content" id="costInfo">
                         <div class="input-row">
                             <div class="input-group">
                                 <label for="channelCost"><i class="fas fa-tag"></i> 渠道成本 (元)</label>
@@ -2106,4 +2115,5 @@
         }
     </script>
 </body>
+
 </html>
