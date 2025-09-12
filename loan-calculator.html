@@ -533,24 +533,6 @@
             }
         }
         
-.action-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    flex-wrap: nowrap;
-}
-
-/* 手机上的样式 - 只针对操作列内的按钮 */
-@media (max-width: 768px) {
-    .action-buttons {
-        gap: 5px;
-    }
-    table .action-buttons .action-btn {  /* 添加.action-buttons限制范围 */
-        padding: 5px 8px;
-        font-size: 14px;
-    }
-}
-        
         /* 弹窗样式 */
         .popup-overlay {
             position: fixed;
@@ -1049,8 +1031,7 @@
                         <td>${item.clientName}</td>
                         <td>${formatNumber(item.loanAmount)}</td>
                         <td class="${parseFloat(item.commission) >= 1000 ? 'commission-high' : 'commission-low'}">${formatNumber(item.commission)}</td>
-                        <td class="action-cell">
-                        <div class="action-buttons">  <!-- 添加这行 -->
+                        <td class="action-cell">    
                             <button class="action-btn expand-btn" title="查看详情">
                                 <i class="fas fa-info-circle"></i>
                             </button>
@@ -1587,6 +1568,7 @@
 </body>
 
 </html>
+
 
 
 
