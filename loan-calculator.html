@@ -272,13 +272,13 @@
             cursor: pointer;
             font-size: 16px;
             color: #007AFF;
-            padding: 0px;
+            padding: 6px;
             border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
-         
+        
         .action-btn:hover {
             background: #f0f0f0;
         }
@@ -1031,7 +1031,7 @@
                         <td>${item.clientName}</td>
                         <td>${formatNumber(item.loanAmount)}</td>
                         <td class="${parseFloat(item.commission) >= 1000 ? 'commission-high' : 'commission-low'}">${formatNumber(item.commission)}</td>
-                        <td class="action-cell">    
+                        <td class="action-cell">
                             <button class="action-btn expand-btn" title="查看详情">
                                 <i class="fas fa-info-circle"></i>
                             </button>
@@ -1566,19 +1566,4 @@
         });
     </script>
 </body>
-
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
