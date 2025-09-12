@@ -1,5 +1,25 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+    <style id="force-fix">
+/* 强制修复操作按钮 */
+table tr td:last-child .action-buttons {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 8px !important;
+}
+
+/* 强制保护底部按钮 */
+body > *:last-child button:not(.action-btn) {
+    all: unset !important;
+    padding: 10px 20px !important;
+    font-size: 16px !important;
+    background: #007bff !important;
+    color: white !important;
+    border-radius: 5px !important;
+    cursor: pointer !important;
+    margin: 5px !important;
+}
+</style>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -629,33 +649,6 @@
             background: #fce8e6;
             color: #c5221f;
         }
-        /* 修复操作按钮 - 强制生效 */
-table .action-buttons {
-    display: flex !important;
-    justify-content: center !important;
-    gap: 10px !important;
-    flex-wrap: nowrap !important;
-}
-
-/* 只在手机上调整操作按钮 */
-@media (max-width: 768px) {
-    table .action-cell .action-buttons .action-btn {
-        padding: 5px 8px !important;
-        font-size: 14px !important;
-        width: auto !important;
-        height: auto !important;
-    }
-}
-
-/* 保护底部按钮 - 强制恢复原样 */
-body > div:last-child .bottom-btn,
-body > div:last-child button:not(.action-btn) {
-    padding: 10px 15px !important;
-    font-size: 16px !important;
-    width: auto !important;
-    height: auto !important;
-    display: inline-block !important;
-}
     </style>
 </head>
 <body>
@@ -1595,6 +1588,7 @@ body > div:last-child button:not(.action-btn) {
 </body>
 
 </html>
+
 
 
 
