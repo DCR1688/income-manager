@@ -334,7 +334,15 @@
             width: 32px;
             height: 32px;
         }
-        
+         /* 操作按钮容器 - 修复垂直居中 */
+.action-cell {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center; /* 确保垂直居中 */
+    gap: 15px;
+    height: 100%; /* 关键：设置高度为100% */
+    padding: 8px 12px;
+}
         .action-btn:hover {
             background: #f0f0f0;
             border-color: #e0e0e0;
@@ -2217,3 +2225,4 @@
     </script>
 </body>
 </html>
+
