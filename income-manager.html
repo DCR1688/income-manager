@@ -334,10 +334,10 @@
             width: 32px;
             height: 32px;
         }
-         /* 操作按钮容器 - 修复垂直居中 */
+        /* 操作按钮容器 - 修复水平居中 */
 .action-cell {
     display: flex;
-    justify-content: flex-start;
+    justify-content: center; /* 关键：改为水平居中 */
     align-items: center; /* 确保垂直居中 */
     gap: 15px;
     height: 100%; /* 关键：设置高度为100% */
@@ -2225,4 +2225,5 @@
     </script>
 </body>
 </html>
+
 
