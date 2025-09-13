@@ -651,7 +651,7 @@
             align-items: center;
             gap: 8px;
             z-index: 1000;
-            box-shadow: 0 2px, 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         
         .sync-indicator.syncing {
@@ -959,8 +959,8 @@
 
     <script>
         // ========== 云端存储配置 ==========
-        let GITHUB_OWNER = 'DCR1688'; // 请修改为您的GitHub用户名
-        let GITHUB_REPO = 'income-manager';      // 请修改为您的仓库名
+        let GITHUB_OWNER = '';
+        let GITHUB_REPO = 'income-manager';
         const GITHUB_PATH = 'loan-data.enc';
         let masterPassword = '';
         let cloudConfig = {};
@@ -1013,6 +1013,11 @@
                     GITHUB_OWNER = cloudConfig.username;
                     GITHUB_REPO = cloudConfig.repo || 'income-manager';
                     masterPassword = cloudConfig.password || '';
+                    
+                    // 自动从云端加载数据
+                    setTimeout(() => {
+                        autoLoadFromCloud(cloudConfig.token);
+                    }, 1000);
                 }
             } catch (e) {
                 console.error('获取云端配置失败:', e);
@@ -1026,7 +1031,19 @@
             
             // 更新筛选后的数据
             updateFilteredData();
+            
+            // 设置默认日期为今天
+            setTodayDate();
         });
+
+        // 设置今天日期
+        function setTodayDate() {
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            document.getElementById('loanDate').value = `${yyyy}-${mm}-${dd}`;
+        }
 
         // ========== 事件监听器绑定 ==========
         function bindEventListeners() {
@@ -1122,6 +1139,9 @@
             
             // 更新总提成
             updateTotalCommission();
+            
+            // 自动保存到云端
+            autoSaveToCloud();
             
             // 清空输入框
             document.getElementById('clientName').value = '';
@@ -1281,6 +1301,8 @@
                 saveToLocalStorage();
                 updateDataTable();
                 updateTotalCommission();
+                // 自动保存到云端
+                autoSaveToCloud();
             }
         }
 
@@ -1290,6 +1312,8 @@
                 saveToLocalStorage();
                 updateDataTable();
                 updateTotalCommission();
+                // 自动保存到云端
+                autoSaveToCloud();
             }
         }
 
@@ -1348,7 +1372,7 @@
             document.body.removeChild(link);
         }
 
-        // ========== 云端存储函数 (占位实现) ==========
+        // ========== 云端存储函数 ==========
         function setMasterPassword() {
             const password = document.getElementById('cloudPassword').value;
             if (!password) {
@@ -1362,16 +1386,270 @@
             alert('密码设置成功！');
         }
 
-        function saveToCloud() {
-            alert('保存到云端功能尚未实现');
+        // 加密数据
+        function encryptData(data, password) {
+            return CryptoJS.AES.encrypt(JSON.stringify(data), password).toString();
         }
 
-        function loadFromCloud() {
-            alert('从云端加载功能尚未实现');
+        // 解密数据
+        function decryptData(encryptedData, password) {
+            try {
+                const bytes = CryptoJS.AES.decrypt(encryptedData, password);
+                return JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+            } catch (e) {
+                console.error('解密失败:', e);
+                return null;
+            }
         }
 
-        function testCloudConnection() {
-            alert('测试连接功能尚未实现');
+        // 显示同步状态
+        function showSyncStatus(message, isError = false, isSyncing = false) {
+            const statusElement = document.getElementById('syncIndicator');
+            statusElement.querySelector('span').textContent = message;
+            
+            statusElement.className = 'sync-indicator';
+            if (isError) {
+                statusElement.classList.add('error');
+            } else if (isSyncing) {
+                statusElement.classList.add('syncing');
+            } else {
+                statusElement.classList.add('synced');
+            }
+            
+            statusElement.style.display = 'flex';
+            
+            // 3秒后隐藏
+            setTimeout(() => {
+                statusElement.style.display = 'none';
+            }, 3000);
+        }
+
+        // 自动保存到云端
+        function autoSaveToCloud() {
+            if (autoSaveTimeout) {
+                clearTimeout(autoSaveTimeout);
+            }
+            
+            autoSaveTimeout = setTimeout(() => {
+                saveToCloud(true);
+            }, 2000);
+        }
+
+        // 自动从云端加载
+        function autoLoadFromCloud(token) {
+            if (!token || !masterPassword) return;
+            
+            // 从云端加载数据
+            loadFromGitHub(token, true);
+        }
+
+        // 保存到云端
+        async function saveToCloud(isAuto = false) {
+            if (!cloudConfig || !cloudConfig.token) {
+                showSyncStatus('请先配置云端信息', true);
+                if (!isAuto) {
+                    alert('请先配置云端信息！');
+                }
+                return;
+            }
+            
+            if (!masterPassword) {
+                showSyncStatus('请先设置加密密码', true);
+                if (!isAuto) {
+                    alert('请先设置加密密码！');
+                }
+                return;
+            }
+            
+            // 加密数据
+            const encryptedData = encryptData({
+                data: loanData,
+                timestamp: new Date().toISOString()
+            }, masterPassword);
+            
+            // 保存到GitHub
+            try {
+                showSyncStatus('正在同步到云端...', false, true);
+                
+                // 检查文件是否存在
+                const existingFile = await getGitHubFile(cloudConfig.token, cloudConfig.username, cloudConfig.repo);
+                
+                let sha = null;
+                if (existingFile) {
+                    sha = existingFile.sha;
+                }
+                
+                // 创建或更新文件
+                const response = await saveToGitHub(cloudConfig.token, cloudConfig.username, cloudConfig.repo, encryptedData, sha);
+                
+                if (response.ok) {
+                    showSyncStatus('数据已成功同步到GitHub！');
+                    if (!isAuto) {
+                        alert('数据已成功保存到云端！');
+                    }
+                } else {
+                    const error = await response.json();
+                    showSyncStatus('同步失败: ' + error.message, true);
+                    if (!isAuto) {
+                        alert('保存失败: ' + error.message);
+                    }
+                }
+            } catch (error) {
+                console.error('保存到GitHub失败:', error);
+                showSyncStatus('同步失败: ' + error.message, true);
+                if (!isAuto) {
+                    alert('保存失败: ' + error.message);
+                }
+            }
+        }
+
+        // 从云端加载
+        async function loadFromCloud() {
+            if (!cloudConfig || !cloudConfig.token) {
+                alert('请先配置云端信息！');
+                return;
+            }
+            
+            if (!masterPassword) {
+                alert('请先设置加密密码！');
+                return;
+            }
+            
+            // 从GitHub加载数据
+            loadFromGitHub(cloudConfig.token);
+        }
+
+        // 测试云端连接
+        async function testCloudConnection() {
+            if (!cloudConfig || !cloudConfig.token) {
+                alert('请先配置云端信息！');
+                return;
+            }
+            
+            try {
+                showSyncStatus('正在测试连接...', false, true);
+                
+                // 尝试获取仓库信息
+                const response = await fetch(`https://api.github.com/repos/${cloudConfig.username}/${cloudConfig.repo}`, {
+                    headers: {
+                        'Authorization': `token ${cloudConfig.token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+                
+                if (response.ok) {
+                    showSyncStatus('云端连接测试成功！');
+                    alert('云端连接测试成功！');
+                } else {
+                    const error = await response.json();
+                    showSyncStatus('连接测试失败: ' + error.message, true);
+                    alert('连接测试失败: ' + error.message);
+                }
+            } catch (error) {
+                console.error('测试连接失败:', error);
+                showSyncStatus('连接测试失败: ' + error.message, true);
+                alert('连接测试失败: ' + error.message);
+            }
+        }
+
+        // 从GitHub获取文件
+        async function getGitHubFile(token, username, repo) {
+            try {
+                const response = await fetch(`https://api.github.com/repos/${username}/${repo}/contents/${GITHUB_PATH}`, {
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+                
+                if (response.status === 404) {
+                    // 文件不存在
+                    return null;
+                }
+                
+                if (!response.ok) {
+                    throw new Error('获取文件失败: ' + response.statusText);
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error('获取GitHub文件失败:', error);
+                throw error;
+            }
+        }
+
+        // 保存到GitHub
+        async function saveToGitHub(token, username, repo, content, sha = null) {
+            const message = sha ? '更新贷款收入数据' : '添加贷款收入数据';
+            
+            return await fetch(`https://api.github.com/repos/${username}/${repo}/contents/${GITHUB_PATH}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `token ${token}`,
+                    'Accept': 'application/vnd.github.v3+json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: message,
+                    content: btoa(unescape(encodeURIComponent(content))),
+                    sha: sha
+                })
+            });
+        }
+
+        // 从GitHub加载数据
+        async function loadFromGitHub(token, isAuto = false) {
+            try {
+                if (!isAuto) {
+                    showSyncStatus('正在从云端加载...', false, true);
+                }
+                
+                // 获取文件
+                const file = await getGitHubFile(token, cloudConfig.username, cloudConfig.repo);
+                
+                if (!file) {
+                    if (!isAuto) {
+                        showSyncStatus('云端没有找到数据', true);
+                        alert('云端没有找到数据文件');
+                    }
+                    return;
+                }
+                
+                // 解码内容
+                const content = atob(file.content);
+                
+                // 解密数据
+                const decryptedData = decryptData(content, masterPassword);
+                
+                if (!decryptedData) {
+                    showSyncStatus('解密失败，密码可能错误', true);
+                    alert('解密失败，请检查密码是否正确');
+                    return;
+                }
+                
+                // 加载数据
+                loanData = decryptedData.data || [];
+                
+                // 更新表格显示
+                updateDataTable();
+                
+                // 更新总提成
+                updateTotalCommission();
+                
+                // 保存到本地存储
+                saveToLocalStorage();
+                
+                if (!isAuto) {
+                    showSyncStatus('数据已从云端加载成功！');
+                    alert('数据已从云端加载成功！');
+                }
+            } catch (error) {
+                console.error('从GitHub加载数据失败:', error);
+                if (!isAuto) {
+                    showSyncStatus('加载失败: ' + error.message, true);
+                    alert('加载失败: ' + error.message);
+                }
+            }
         }
     </script>
 </body>
