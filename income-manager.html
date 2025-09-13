@@ -316,6 +316,7 @@
             display: flex;
             gap: 8px;
             justify-content: center;
+            align-items: center; /* 添加垂直居中 */
         }
         
         .action-btn {
@@ -1046,9 +1047,6 @@
                                 <option value="11">12月</option>
                             </select>
                         </div>
-                        <button id="applyFilter" class="btn btn-primary">
-                            <i class="fas fa-filter"></i> 应用筛选
-                        </button>
                     </div>
                     
                     <!-- 筛选汇总 -->
@@ -1238,8 +1236,9 @@
             // 业务员管理按钮
             document.getElementById('manageSalesman').addEventListener('click', manageSalesmen);
             
-            // 添加年月筛选按钮事件
-            document.getElementById('applyFilter').addEventListener('click', applyYearMonthFilter);
+            // 添加年月筛选自动响应
+            document.getElementById('yearSelect').addEventListener('change', applyYearMonthFilter);
+            document.getElementById('monthSelect').addEventListener('change', applyYearMonthFilter);
         }
         
         // 切换区域展开/折叠
@@ -1491,7 +1490,7 @@
                     </div>
                     <div class="detail-item">
                         <div class="detail-icon"><i class="fas fa-percent"></i></div>
-                        <div class="detail-label">提成点数:</div>
+                        <div class 'detail-label'>提成点数:</div>
                         <div class="detail-value">${(parseFloat(row.dataset.commissionRate) * 100).toFixed(1)}%</div>
                     </div>
                     <div class="detail-item highlight">
