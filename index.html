@@ -90,12 +90,29 @@
             animation: slideUp 0.6s ease-out;
         }
         
-        .cloud-config-section h2 {
+        .cloud-config-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .cloud-config-header h2 {
             font-size: 20px;
-            margin-bottom: 20px;
+            margin-bottom: 0;
             display: flex;
             align-items: center;
             gap: 10px;
+        }
+        
+        .config-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        
+        .config-content.expanded {
+            max-height: 1000px; /* 足够大的值以容纳所有内容 */
         }
         
         .form-group {
@@ -263,6 +280,14 @@
                 transform: translateY(0);
             }
         }
+        
+        .toggle-icon {
+            transition: transform 0.3s ease;
+        }
+        
+        .toggle-icon.rotated {
+            transform: rotate(180deg);
+        }
     </style>
 </head>
 <body>
@@ -276,39 +301,44 @@
         </div>
         
         <div class="cloud-config-section">
-            <h2><i class="fas fa-cog"></i> 同步配置</h2>
-            
-            <div class="form-group">
-                <label for="github-username">GitHub用户名</label>
-                <input type="text" id="github-username" placeholder="输入您的GitHub用户名">
+            <div class="cloud-config-header" onclick="toggleConfigContent()">
+                <h2><i class="fas fa-cog"></i> 同步配置</h2>
+                <i class="fas fa-chevron-down toggle-icon" id="toggleIcon"></i>
             </div>
             
-            <div class="form-group">
-                <label for="github-token">GitHub Personal Access Token</label>
-                <input type="password" id="github-token" placeholder="输入您的GitHub Token">
-            </div>
-            
-            <div class="form-group">
-                <label for="repo-name">仓库名称</label>
-                <input type="text" id="repo-name" value="income-manager" placeholder="输入仓库名称">
-            </div>
-            
-            <div class="form-group">
-                <label for="encryption-password">数据加密密码</label>
-                <input type="password" id="encryption-password" placeholder="设置数据加密密码">
-            </div>
-            
-            <button class="btn btn-primary" onclick="saveCloudConfig()">
-                <i class="fas fa-save"></i> 保存配置
-            </button>
-            
-            <button class="btn btn-secondary" onclick="testConnection()" style="margin-left: 10px;">
-                <i class="fas fa-wifi"></i> 测试连接
-            </button>
-            
-            <div class="sync-status" id="syncStatus">
-                <i class="fas fa-info-circle"></i>
-                <span>请先配置云端同步设置</span>
+            <div class="config-content" id="configContent">
+                <div class="form-group">
+                    <label for="github-username">GitHub用户名</label>
+                    <input type="text" id="github-username" placeholder="输入您的GitHub用户名">
+                </div>
+                
+                <div class="form-group">
+                    <label for="github-token">GitHub Personal Access Token</label>
+                    <input type="password" id="github-token" placeholder="输入您的GitHub Token">
+                </div>
+                
+                <div class="form-group">
+                    <label for="repo-name">仓库名称</label>
+                    <input type="text" id="repo-name" value="income-manager" placeholder="输入仓库名称">
+                </div>
+                
+                <div class="form-group">
+                    <label for="encryption-password">数据加密密码</label>
+                    <input type="password" id="encryption-password" placeholder="设置数据加密密码">
+                </div>
+                
+                <button class="btn btn-primary" onclick="saveCloudConfig()">
+                    <i class="fas fa-save"></i> 保存配置
+                </button>
+                
+                <button class="btn btn-secondary" onclick="testConnection()" style="margin-left: 10px;">
+                    <i class="fas fa-wifi"></i> 测试连接
+                </button>
+                
+                <div class="sync-status" id="syncStatus">
+                    <i class="fas fa-info-circle"></i>
+                    <span>请先配置云端同步设置</span>
+                </div>
             </div>
         </div>
         
@@ -344,6 +374,15 @@
             REPO_NAME: 'repo_name',
             ENCRYPTION_PASSWORD: 'encryption_password'
         };
+        
+        // 切换配置内容显示/隐藏
+        function toggleConfigContent() {
+            const content = document.getElementById('configContent');
+            const icon = document.getElementById('toggleIcon');
+            
+            content.classList.toggle('expanded');
+            icon.classList.toggle('rotated');
+        }
         
         // 加载保存的配置
         function loadCloudConfig() {
@@ -463,6 +502,11 @@
             
             if (!username || !token || !password) {
                 alert('请先配置云端同步设置');
+                // 展开配置面板以便用户配置
+                const content = document.getElementById('configContent');
+                const icon = document.getElementById('toggleIcon');
+                content.classList.add('expanded');
+                icon.classList.add('rotated');
                 return;
             }
             
