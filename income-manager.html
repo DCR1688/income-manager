@@ -334,14 +334,26 @@
             width: 32px;
             height: 32px;
         }
-        /* 操作按钮容器 - 修复水平居中 */
+        /* 操作列特定样式 */
+td:last-child {
+    text-align: center; /* 确保操作列内容水平居中 */
+    width: 150px; /* 给操作列固定宽度 */
+}
+
+/* 操作按钮容器 - 关键修复 */
 .action-cell {
-    display: flex;
-    justify-content: flex-start; /* 关键：改为水平居中 */
-    align-items: center; /* 确保垂直居中 */
+    display: inline-flex; /* 使用inline-flex而不是flex */
+    justify-content: center; /* 水平居中 */
+    align-items: center; /* 垂直居中 */
     gap: 15px;
-    height: 100%; /* 关键：设置高度为100% */
-    padding: 8px 12px;
+    margin: 0 auto; /* 水平居中 */
+}
+
+/* 表格单元格垂直居中 */
+td {
+    padding: 14px 20px;
+    border-bottom: 1px solid #eef1f5;
+    vertical-align: middle; /* 确保单元格内容垂直居中 */
 }
         .action-btn:hover {
             background: #f0f0f0;
@@ -2225,6 +2237,7 @@
     </script>
 </body>
 </html>
+
 
 
 
