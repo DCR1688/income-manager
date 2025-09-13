@@ -822,6 +822,72 @@
         th:nth-child(4), td:nth-child(4) {
             text-align: right !important;
         }
+         /* 详情弹窗样式 - 修改为并排显示 */
+        .detail-popup {
+            max-width: 600px; /* 增加宽度以适应并排布局 */
+            width: 95%;
+        }
+        
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* 两列布局 */
+            gap: 12px;
+        }
+        
+        .detail-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-radius: 8px;
+            background: #f9f9f9;
+            margin-bottom: 0;
+            min-height: 50px;
+        }
+        
+        .detail-item.highlight {
+            grid-column: span 2; /* 重要信息横跨两列 */
+            background: #e6f2ff;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 3px solid #007AFF;
+        }
+        
+        .detail-icon {
+            width: 24px;
+            text-align: center;
+            color: #007AFF;
+            flex-shrink: 0;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+        
+        .detail-label {
+            font-weight: 500;
+            width: 80px;
+            font-size: 14px;
+            flex-shrink: 0;
+            color: #666;
+        }
+        
+        .detail-value {
+            flex: 1;
+            color: #333;
+            font-size: 14px;
+            word-break: break-word;
+            min-width: 0;
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 600px) {
+            .detail-grid {
+                grid-template-columns: 1fr; /* 小屏幕下恢复单列布局 */
+            }
+            
+            .detail-item.highlight {
+                grid-column: span 1;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1450,11 +1516,11 @@
             setTodayDate();
         }
         
-        // 查看行详情
+       // 查看行详情
         function viewRowDetails(button) {
             const row = button.closest('tr');
             
-            // 创建详情弹窗
+            // 创建详情弹窗 - 修改为并排布局
             const popup = document.createElement('div');
             popup.className = 'popup-overlay';
             popup.innerHTML = `
@@ -1465,55 +1531,57 @@
                         </div>
                         <button class="close-btn" onclick="this.closest('.popup-overlay').remove()">&times;</button>
                     </div>
-                    <div class="detail-item">
-                        <div class="detail-icon"><i class="fas fa-user-tie"></i></div>
-                        <div class="detail-label">业务员:</div>
-                        <div class="detail-value">${row.dataset.salesman}</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-icon"><i class="fas fa-user"></i></div>
-                        <div class="detail-label">客户名称:</div>
-                        <div class="detail-value">${row.dataset.clientName}</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-icon"><i class="fas fa-calendar-alt"></i></div>
-                        <div class="detail-label">放款日期:</div>
-                        <div class="detail-value">${row.dataset.loanDate}</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-icon"><i class="fas fa-box"></i></div>
-                        <div class="detail-label">产品类型:</div>
-                        <div class="detail-value">${row.dataset.productType}</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-icon"><i class="fas fa-money-bill-wave"></i></div>
-                        <div class="detail-label">放款金额:</div>
-                        <div class="detail-value">${parseFloat(row.dataset.loanAmount).toFixed(2)} 元</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-icon"><i class="fas fa-hand-holding-usd"></i></div>
-                        <div class="detail-label">服务费率:</div>
-                        <div class="detail-value">${row.dataset.serviceRate}%</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-icon"><i class="fas fa-road"></i></div>
-                        <div class="detail-label">渠道费率:</div>
-                        <div class="detail-value">${row.dataset.channelRate}%</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-icon"><i class="fas fa-gift"></i></div>
-                        <div class="detail-label">返点费率:</div>
-                        <div class="detail-value">${row.dataset.rebateRate}%</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-icon"><i class="fas fa-percent"></i></div>
-                        <div class="detail-label">提成点数:</div>
-                        <div class="detail-value">${(parseFloat(row.dataset.commissionRate) * 100).toFixed(1)}%</div>
-                    </div>
-                    <div class="detail-item highlight">
-                        <div class="detail-icon"><i class="fas fa-coins"></i></div>
-                        <div class="detail-label">提成金额:</div>
-                        <div class="detail-value">${parseFloat(row.dataset.commission).toFixed(2)} 元</div>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <div class="detail-icon"><i class="fas fa-user-tie"></i></div>
+                            <div class="detail-label">业务员:</div>
+                            <div class="detail-value">${row.dataset.salesman}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-icon"><i class="fas fa-user"></i></div>
+                            <div class="detail-label">客户名称:</div>
+                            <div class="detail-value">${row.dataset.clientName}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-icon"><i class="fas fa-calendar-alt"></i></div>
+                            <div class="detail-label">放款日期:</div>
+                            <div class="detail-value">${row.dataset.loanDate}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-icon"><i class="fas fa-box"></i></div>
+                            <div class="detail-label">产品类型:</div>
+                            <div class="detail-value">${row.dataset.productType}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-icon"><i class="fas fa-money-bill-wave"></i></div>
+                            <div class="detail-label">放款金额:</div>
+                            <div class="detail-value">${parseFloat(row.dataset.loanAmount).toFixed(2)} 元</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-icon"><i class="fas fa-hand-holding-usd"></i></div>
+                            <div class="detail-label">服务费率:</div>
+                            <div class="detail-value">${row.dataset.serviceRate}%</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-icon"><i class="fas fa-road"></i></div>
+                            <div class="detail-label">渠道费率:</div>
+                            <div class="detail-value">${row.dataset.channelRate}%</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-icon"><i class="fas fa-gift"></i></div>
+                            <div class="detail-label">返点费率:</div>
+                            <div class="detail-value">${row.dataset.rebateRate}%</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-icon"><i class="fas fa-percent"></i></div>
+                            <div class="detail-label">提成点数:</div>
+                            <div class="detail-value">${(parseFloat(row.dataset.commissionRate) * 100).toFixed(1)}%</div>
+                        </div>
+                        <div class="detail-item highlight">
+                            <div class="detail-icon"><i class="fas fa-coins"></i></div>
+                            <div class="detail-label">提成金额:</div>
+                            <div class="detail-value">${parseFloat(row.dataset.commission).toFixed(2)} 元</div>
+                        </div>
                     </div>
                 </div>
             `;
@@ -2234,3 +2302,4 @@
     </script>
 </body>
 </html>
+
