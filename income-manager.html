@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>贷款收入计算器 - 日期格式优化版</title>
+    <title>贷款收入计算器 - 功能修复版</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- 添加CryptoJS库用于加密 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
@@ -334,7 +334,7 @@
             width: 32px;
             height: 32px;
         }
-        /* 操作按钮容器 - 修复垂直居中 */
+       /* 操作按钮容器 - 修复垂直居中 */
 .action-cell {
     display: flex;
     justify-content: flex-start;
@@ -822,72 +822,6 @@
         th:nth-child(4), td:nth-child(4) {
             text-align: right !important;
         }
-         /* 详情弹窗样式 - 修改为并排显示 */
-        .detail-popup {
-            max-width: 600px; /* 增加宽度以适应并排布局 */
-            width: 95%;
-        }
-        
-        .detail-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr); /* 两列布局 */
-            gap: 12px;
-        }
-        
-        .detail-item {
-            display: flex;
-            align-items: center;
-            padding: 10px;
-            border-radius: 8px;
-            background: #f9f9f9;
-            margin-bottom: 0;
-            min-height: 50px;
-        }
-        
-        .detail-item.highlight {
-            grid-column: span 2; /* 重要信息横跨两列 */
-            background: #e6f2ff;
-            padding: 12px;
-            border-radius: 8px;
-            margin: 10px 0;
-            border-left: 3px solid #007AFF;
-        }
-        
-        .detail-icon {
-            width: 24px;
-            text-align: center;
-            color: #007AFF;
-            flex-shrink: 0;
-            font-size: 14px;
-            margin-right: 10px;
-        }
-        
-        .detail-label {
-            font-weight: 500;
-            width: 80px;
-            font-size: 14px;
-            flex-shrink: 0;
-            color: #666;
-        }
-        
-        .detail-value {
-            flex: 1;
-            color: #333;
-            font-size: 14px;
-            word-break: break-word;
-            min-width: 0;
-        }
-        
-        /* 响应式调整 */
-        @media (max-width: 600px) {
-            .detail-grid {
-                grid-template-columns: 1fr; /* 小屏幕下恢复单列布局 */
-            }
-            
-            .detail-item.highlight {
-                grid-column: span 1;
-            }
-        }
     </style>
 </head>
 <body>
@@ -899,7 +833,7 @@
                 </div>
             </div>
             <h1>贷款收入计算器</h1>
-            <p>计算贷款提成，数据自动保存 - 日期格式优化版</p>
+            <p>计算贷款提成，数据自动保存 - 功能修复版</p>
         </div>
         
         <div class="main-content">
@@ -1159,7 +1093,7 @@
         </div>
         
         <div class="footer">
-            <p>© 2023 贷款收入计算器 - 日期格式优化版 | 支持返点与平台成本计算</p>
+            <p>© 2023 贷款收入计算器 - 功能修复版 | 支持返点与平台成本计算</p>
         </div>
     </div>
 
@@ -1365,15 +1299,6 @@
             document.getElementById('commission').value = commission.toFixed(2);
         }
         
-        // 格式化日期为YYMMDD格式
-        function formatDateToYYMMDD(dateString) {
-            const date = new Date(dateString);
-            const year = date.getFullYear().toString().slice(-2); // 获取年份后两位
-            const month = (date.getMonth() + 1).toString().padStart(2, '0'); // 月份补零
-            const day = date.getDate().toString().padStart(2, '0'); // 日期补零
-            return year + month + day;
-        }
-        
         // 应用年月筛选
         function applyYearMonthFilter() {
             const selectedYear = parseInt(document.getElementById('yearSelect').value);
@@ -1441,8 +1366,8 @@
             // 添加数据单元格
             newRow.insertCell(0).textContent = salesman;
             newRow.insertCell(1).textContent = clientName;
-            // 添加放款日期显示（使用YYMMDD格式）
-            newRow.insertCell(2).textContent = formatDateToYYMMDD(loanDate);
+            // 添加放款日期显示
+            newRow.insertCell(2).textContent = loanDate;
             newRow.insertCell(3).textContent = commission.toFixed(2);
             
             // 添加操作单元格
@@ -1516,11 +1441,11 @@
             setTodayDate();
         }
         
-       // 查看行详情
+        // 查看行详情
         function viewRowDetails(button) {
             const row = button.closest('tr');
             
-            // 创建详情弹窗 - 修改为并排布局
+            // 创建详情弹窗
             const popup = document.createElement('div');
             popup.className = 'popup-overlay';
             popup.innerHTML = `
@@ -1531,57 +1456,55 @@
                         </div>
                         <button class="close-btn" onclick="this.closest('.popup-overlay').remove()">&times;</button>
                     </div>
-                    <div class="detail-grid">
-                        <div class="detail-item">
-                            <div class="detail-icon"><i class="fas fa-user-tie"></i></div>
-                            <div class="detail-label">业务员:</div>
-                            <div class="detail-value">${row.dataset.salesman}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-icon"><i class="fas fa-user"></i></div>
-                            <div class="detail-label">客户名称:</div>
-                            <div class="detail-value">${row.dataset.clientName}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-icon"><i class="fas fa-calendar-alt"></i></div>
-                            <div class="detail-label">放款日期:</div>
-                            <div class="detail-value">${row.dataset.loanDate}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-icon"><i class="fas fa-box"></i></div>
-                            <div class="detail-label">产品类型:</div>
-                            <div class="detail-value">${row.dataset.productType}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-icon"><i class="fas fa-money-bill-wave"></i></div>
-                            <div class="detail-label">放款金额:</div>
-                            <div class="detail-value">${parseFloat(row.dataset.loanAmount).toFixed(2)} 元</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-icon"><i class="fas fa-hand-holding-usd"></i></div>
-                            <div class="detail-label">服务费率:</div>
-                            <div class="detail-value">${row.dataset.serviceRate}%</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-icon"><i class="fas fa-road"></i></div>
-                            <div class="detail-label">渠道费率:</div>
-                            <div class="detail-value">${row.dataset.channelRate}%</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-icon"><i class="fas fa-gift"></i></div>
-                            <div class="detail-label">返点费率:</div>
-                            <div class="detail-value">${row.dataset.rebateRate}%</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-icon"><i class="fas fa-percent"></i></div>
-                            <div class="detail-label">提成点数:</div>
-                            <div class="detail-value">${(parseFloat(row.dataset.commissionRate) * 100).toFixed(1)}%</div>
-                        </div>
-                        <div class="detail-item highlight">
-                            <div class="detail-icon"><i class="fas fa-coins"></i></div>
-                            <div class="detail-label">提成金额:</div>
-                            <div class="detail-value">${parseFloat(row.dataset.commission).toFixed(2)} 元</div>
-                        </div>
+                    <div class="detail-item">
+                        <div class="detail-icon"><i class="fas fa-user-tie"></i></div>
+                        <div class="detail-label">业务员:</div>
+                        <div class="detail-value">${row.dataset.salesman}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-icon"><i class="fas fa-user"></i></div>
+                        <div class="detail-label">客户名称:</div>
+                        <div class="detail-value">${row.dataset.clientName}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-icon"><i class="fas fa-calendar-alt"></i></div>
+                        <div class="detail-label">放款日期:</div>
+                        <div class="detail-value">${row.dataset.loanDate}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-icon"><i class="fas fa-box"></i></div>
+                        <div class="detail-label">产品类型:</div>
+                        <div class="detail-value">${row.dataset.productType}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-icon"><i class="fas fa-money-bill-wave"></i></div>
+                        <div class="detail-label">放款金额:</div>
+                        <div class="detail-value">${parseFloat(row.dataset.loanAmount).toFixed(2)} 元</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-icon"><i class="fas fa-hand-holding-usd"></i></div>
+                        <div class="detail-label">服务费率:</div>
+                        <div class="detail-value">${row.dataset.serviceRate}%</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-icon"><i class="fas fa-road"></i></div>
+                        <div class="detail-label">渠道费率:</div>
+                        <div class="detail-value">${row.dataset.channelRate}%</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-icon"><i class="fas fa-gift"></i></div>
+                        <div class="detail-label">返点费率:</div>
+                        <div class="detail-value">${row.dataset.rebateRate}%</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-icon"><i class="fas fa-percent"></i></div>
+                        <div class 'detail-label'>提成点数:</div>
+                        <div class="detail-value">${(parseFloat(row.dataset.commissionRate) * 100).toFixed(1)}%</div>
+                    </div>
+                    <div class="detail-item highlight">
+                        <div class="detail-icon"><i class="fas fa-coins"></i></div>
+                        <div class="detail-label">提成金额:</div>
+                        <div class="detail-value">${parseFloat(row.dataset.commission).toFixed(2)} 元</div>
                     </div>
                 </div>
             `;
@@ -1673,8 +1596,8 @@
                     // 添加数据单元格
                     newRow.insertCell(0).textContent = item.salesman;
                     newRow.insertCell(1).textContent = item.clientName;
-                    // 添加放款日期显示（使用YYMMDD格式）
-                    newRow.insertCell(2).textContent = formatDateToYYMMDD(item.loanDate);
+                    // 添加放款日期显示
+                    newRow.insertCell(2).textContent = item.loanDate;
                     newRow.insertCell(3).textContent = parseFloat(item.commission).toFixed(2);
                     
                     // 添加操作单元格
@@ -2236,8 +2159,8 @@
                     // 添加数据单元格
                     newRow.insertCell(0).textContent = item.salesman;
                     newRow.insertCell(1).textContent = item.clientName;
-                    // 添加放款日期显示（使用YYMMDD格式）
-                    newRow.insertCell(2).textContent = formatDateToYYMMDD(item.loanDate);
+                    // 添加放款日期显示
+                    newRow.insertCell(2).textContent = item.loanDate;
                     newRow.insertCell(3).textContent = parseFloat(item.commission).toFixed(2);
                     
                     // 添加操作单元格
@@ -2302,4 +2225,8 @@
     </script>
 </body>
 </html>
+
+
+
+
 
