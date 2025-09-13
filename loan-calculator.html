@@ -142,7 +142,7 @@
         }
         
         .input-group select {
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23007AFF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23007AFF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
             background-repeat: no-repeat;
             background-position: right 16px center;
             background-size: 16px;
@@ -428,7 +428,7 @@
         
         .detail-value {
             flex: 1;
-            color: #333;
+            color: 333;
             font-size: 14px;
         }
         
@@ -1034,6 +1034,9 @@
             
             // 设置默认日期为今天
             setTodayDate();
+            
+            // 初始化计算
+            calculateCosts();
         });
 
         // 设置今天日期
@@ -1052,6 +1055,7 @@
             document.getElementById('serviceRate').addEventListener('input', calculateCosts);
             document.getElementById('channelRate').addEventListener('input', calculateCosts);
             document.getElementById('rebateRate').addEventListener('input', calculateCosts);
+            document.getElementById('productType').addEventListener('change', calculateCosts);
             
             // 添加新行
             document.getElementById('addRow').addEventListener('click', addNewRow);
@@ -1084,11 +1088,21 @@
             const serviceRate = parseFloat(document.getElementById('serviceRate').value) || 0;
             const channelRate = parseFloat(document.getElementById('channelRate').value) || 0;
             const rebateRate = parseFloat(document.getElementById('rebateRate').value) || 0;
+            const productType = document.getElementById('productType').value;
             
             // 计算各项成本和提成
             const serviceAmount = loanAmount * (serviceRate / 100);
             const channelCost = loanAmount * (channelRate / 100);
-            const platformCost = serviceAmount * 0.7; // 假设平台成本是服务金额的70%
+            
+            // 根据产品类型计算平台成本
+            let platformCostRate = 0;
+            if (productType === "抵押" || productType === "企业贷") {
+                platformCostRate = 0.01; // 1%
+            } else if (productType === "信用贷" || productType === "车抵贷") {
+                platformCostRate = 0.02; // 2%
+            }
+            const platformCost = loanAmount * platformCostRate;
+            
             const rebateAmount = loanAmount * (rebateRate / 100);
             const commission = (serviceAmount - channelCost - platformCost + rebateAmount) * 0.3;
             
@@ -1096,7 +1110,7 @@
             document.getElementById('channelCost').value = channelCost.toFixed(2);
             document.getElementById('platformCost').value = platformCost.toFixed(2);
             document.getElementById('rebateAmount').value = rebateAmount.toFixed(2);
-            document.getElementById('commission').value = commission.toFixed(2);
+            document.getElementById('commission').value = commission > 0 ? commission.toFixed(2) : '0.00';
         }
 
         // ========== 数据管理函数 ==========
@@ -1155,6 +1169,9 @@
             document.getElementById('platformCost').value = '';
             document.getElementById('rebateAmount').value = '';
             document.getElementById('commission').value = '';
+            
+            // 重新设置日期为今天
+            setTodayDate();
         }
 
         function updateDataTable() {
@@ -1199,6 +1216,7 @@
                 // 提成
                 const commissionCell = document.createElement('td');
                 commissionCell.textContent = '¥' + item.commission.toFixed(2);
+                commissionCell.className = item.commission >= 1000 ? 'commission-high' : 'commission-low';
                 row.appendChild(commissionCell);
                 
                 // 操作
@@ -1231,6 +1249,15 @@
 
         function showDetail(item) {
             const detailContent = document.getElementById('detailContent');
+            
+            // 根据产品类型计算平台成本
+            let platformCostRate = 0;
+            if (item.productType === "抵押" || item.productType === "企业贷") {
+                platformCostRate = 0.01;
+            } else if (item.productType === "信用贷" || item.productType === "车抵贷") {
+                platformCostRate = 0.02;
+            }
+            const platformCost = item.loanAmount * platformCostRate;
             
             // 创建详情内容
             detailContent.innerHTML = `
@@ -1277,7 +1304,7 @@
                 <div class="detail-item">
                     <div class="detail-icon"><i class="fas fa-server"></i></div>
                     <div class="detail-label">平台成本:</div>
-                    <div class="detail-value">¥${(item.loanAmount * item.serviceRate / 100 * 0.7).toFixed(2)}</div>
+                    <div class="detail-value">¥${platformCost.toFixed(2)} (${platformCostRate * 100}%)</div>
                 </div>
                 <div class="detail-item">
                     <div class="detail-icon"><i class="fas fa-gift"></i></div>
@@ -1352,6 +1379,11 @@
         }
 
         function exportToCSV() {
+            if (loanData.length === 0) {
+                alert('没有数据可导出！');
+                return;
+            }
+            
             // 简单实现CSV导出
             let csvContent = "客户名称,放款日期,产品类型,放款金额,服务费率,渠道费率,返点费率,提成\n";
             
