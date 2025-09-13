@@ -276,24 +276,29 @@
         
         /* 优化表格列宽 */
         th:nth-child(1), td:nth-child(1) {
+            width: 15%;
+            max-width: 15%;
+        }
+        
+        th:nth-child(2), td:nth-child(2) {
             width: 20%;
             max-width: 20%;
         }
         
-        th:nth-child(2), td:nth-child(2) {
-            width: 30%;
-            max-width: 30%;
-        }
-        
         th:nth-child(3), td:nth-child(3) {
-            width: 25%;
-            max-width: 25%;
-            text-align: right;
+            width: 15%;
+            max-width: 15%;
         }
         
         th:nth-child(4), td:nth-child(4) {
-            width: 25%;
-            max-width: 25%;
+            width: 15%;
+            max-width: 15%;
+            text-align: right;
+        }
+        
+        th:nth-child(5), td:nth-child(5) {
+            width: 20%;
+            max-width: 20%;
             text-align: center;
         }
         
@@ -328,15 +333,6 @@
             width: 32px;
             height: 32px;
         }
-          /* 操作按钮容器 */
-.action-cell {
-    display: flex;
-    justify-content: space-between; /* 关键：向左对齐 */
-    align-items: center;
-    gap: 10px;
-    width: 100%;
-    padding: 8px 12px;
-}
         
         .action-btn:hover {
             background: #f0f0f0;
@@ -376,41 +372,6 @@
             font-size: 22px;
             font-weight: 700;
             color: #007AFF;
-        }
-        
-        .monthly-summary {
-            background: #34C759;
-            color: white;
-        }
-        
-        .monthly-summary h3 {
-            color: white;
-        }
-        
-        .monthly-summary .summary-value {
-            color: white;
-        }
-        
-        .month-selector {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        
-        .month-selector select {
-            flex: 1;
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid #e5e5ea;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23007AFF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 10px center;
-            background-size: 14px;
-            padding-right: 35px;
         }
         
         .footer {
@@ -554,6 +515,48 @@
             border-left: 3px solid #007AFF;
         }
         
+        /* 年月选择器样式 */
+        .year-month-selector {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .year-month-selector select {
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #e5e5ea;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23007AFF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 14px;
+            padding-right: 35px;
+        }
+        
+        .filter-summary {
+            background: #e6f2ff;
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 15px;
+            color: #007AFF;
+            border: 1px solid #b3d7ff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .filter-summary .summary-value {
+            font-weight: 600;
+            font-size: 16px;
+        }
+        
         /* 响应式设计 - 优化表格显示 */
         @media (max-width: 1024px) {
             .main-content {
@@ -565,23 +568,28 @@
             }
             
             th:nth-child(1), td:nth-child(1) {
+                width: 20%;
+                max-width: 20%;
+            }
+            
+            th:nth-child(2), td:nth-child(2) {
                 width: 25%;
                 max-width: 25%;
             }
             
-            th:nth-child(2), td:nth-child(2) {
-                width: 35%;
-                max-width: 35%;
-            }
-            
             th:nth-child(3), td:nth-child(3) {
-                width: 20%;
-                max-width: 20%;
+                width: 15%;
+                max-width: 15%;
             }
             
             th:nth-child(4), td:nth-child(4) {
-                width: 20%;
-                max-width: 20%;
+                width: 15%;
+                max-width: 15%;
+            }
+            
+            th:nth-child(5), td:nth-child(5) {
+                width: 25%;
+                max-width: 25%;
             }
         }
         
@@ -600,30 +608,17 @@
                 font-size: 13px;
             }
             
-            th:nth-child(1), td:nth-child(1) {
-                width: 25%;
-                max-width: 25%;
+            .year-month-selector {
+                flex-direction: column;
+                align-items: stretch;
             }
             
-            th:nth-child(2), td:nth-child(2) {
-                width: 30%;
-                max-width: 30%;
+            .year-month-selector > div {
+                width: 100%;
             }
             
-            th:nth-child(3), td:nth-child(3) {
-                width: 25%;
-                max-width: 25%;
-            }
-            
-            th:nth-child(4), td:nth-child(4) {
-                width: 20%;
-                max-width: 20%;
-            }
-            
-            .action-btn {
-                width: 28px;
-                height: 28px;
-                font-size: 14px;
+            .year-month-selector select {
+                width: 100%;
             }
         }
         
@@ -633,23 +628,28 @@
             }
             
             th:nth-child(1), td:nth-child(1) {
-                width: 25%;
-                max-width: 25%;
+                width: 20%;
+                max-width: 20%;
             }
             
             th:nth-child(2), td:nth-child(2) {
-                width: 30%;
-                max-width: 30%;
-            }
-            
-            th:nth-child(3), td:nth-child(3) {
                 width: 25%;
                 max-width: 25%;
             }
             
+            th:nth-child(3), td:nth-child(3) {
+                width: 15%;
+                max-width: 15%;
+            }
+            
             th:nth-child(4), td:nth-child(4) {
-                width: 20%;
-                max-width: 20%;
+                width: 15%;
+                max-width: 15%;
+            }
+            
+            th:nth-child(5), td:nth-child(5) {
+                width: 25%;
+                max-width: 25%;
             }
             
             .action-cell {
@@ -681,26 +681,6 @@
                 font-size: 12px;
                 width: 24px;
                 height: 24px;
-            }
-            
-            th:nth-child(1), td:nth-child(1) {
-                width: 20%;
-                max-width: 20%;
-            }
-            
-            th:nth-child(2), td:nth-child(2) {
-                width: 30%;
-                max-width: 30%;
-            }
-            
-            th:nth-child(3), td:nth-child(3) {
-                width: 25%;
-                max-width: 25%;
-            }
-            
-            th:nth-child(4), td:nth-child(4) {
-                width: 25%;
-                max-width: 25%;
             }
         }
         
@@ -765,6 +745,9 @@
             max-height: 300px;
             overflow-y: auto;
             margin: 15px 0;
+            border: 1px solid #f0f0f0;
+            border-radius: 8px;
+            padding: 10px;
         }
         
         .salesman-item {
@@ -821,10 +804,15 @@
             margin-bottom: 8px;
             font-weight: 500;
         }
+        
         /* 表格居中样式 */
-th, td {
-  text-align: center !important;
-}
+        th, td {
+            text-align: center !important;
+        }
+        
+        th:nth-child(4), td:nth-child(4) {
+            text-align: right !important;
+        }
     </style>
 </head>
 <body>
@@ -1024,13 +1012,26 @@ th, td {
                         <h3><i class="fas fa-chart-pie"></i> 总提成汇总</h3>
                         <div class="summary-value" id="totalCommission">0.00</div>
                     </div>
+                </div>
+            </div>
+              
+            <!-- 详细信息 -->
+            <div class="table-section">
+                <div class="section-card">
+                    <div class="section-title">
+                        <i class="fas fa-money-bill-alt"></i> 详细信息
+                    </div>
                     
-                    <div class="summary-card monthly-summary">
-                        <h3><i class="fas fa-calendar-check"></i> 月度提成汇总</h3>
-                        <div class="summary-value" id="monthlyCommission">0.00</div>
-                        <div class="month-selector">
+                    <!-- 年月选择器 -->
+                    <div class="year-month-selector">
+                        <div>
+                            <label for="yearSelect">选择年份:</label>
+                            <select id="yearSelect"></select>
+                        </div>
+                        <div>
                             <label for="monthSelect">选择月份:</label>
                             <select id="monthSelect">
+                                <option value="-1">所有月份</option>
                                 <option value="0">1月</option>
                                 <option value="1">2月</option>
                                 <option value="2">3月</option>
@@ -1045,24 +1046,24 @@ th, td {
                                 <option value="11">12月</option>
                             </select>
                         </div>
+                        <button id="applyFilter" class="btn btn-primary">
+                            <i class="fas fa-filter"></i> 应用筛选
+                        </button>
                     </div>
-                </div>
-            </div>
-              
-            <!-- 详细信息 -->
-            <div class="table-section">
-                <div class="section-card">
-                    <div class="section-title">
-                        <i class="fas fa-money-bill-alt"></i> 详细信息
+                    
+                    <!-- 筛选汇总 -->
+                    <div class="filter-summary">
+                        <span>筛选汇总 (<span id="currentFilter">当前年月</span>):</span>
+                        <span class="summary-value" id="filteredCommission">0.00</span>
                     </div>
-            <div class="table-section">
-                <div class="table-container">
-                    <div class="table-scroll">
+                    
+                    <div class="table-container">
                         <table id="dataTable">
                             <thead>
                                 <tr>
                                     <th>业务员</th>
                                     <th>客户名称</th>
+                                    <th>放款日期</th>
                                     <th>提成</th>
                                     <th>操作</th>
                                 </tr>
@@ -1072,15 +1073,15 @@ th, td {
                             </tbody>
                         </table>
                     </div>
-                </div>
-                
-                <div class="action-buttons">
-                    <button id="clearData" class="btn btn-danger">
-                        <i class="fas fa-trash-alt"></i> 清除数据
-                    </button>
-                    <button id="exportData" class="btn btn-secondary">
-                        <i class="fas fa-file-export"></i> 导出CSV
-                    </button>
+                    
+                    <div class="action-buttons">
+                        <button id="clearData" class="btn btn-danger">
+                            <i class="fas fa-trash-alt"></i> 清除数据
+                        </button>
+                        <button id="exportData" class="btn btn-secondary">
+                            <i class="fas fa-file-export"></i> 导出CSV
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1131,9 +1132,11 @@ th, td {
             // 设置默认日期为今天
             setTodayDate();
             
-            // 设置当前月份为默认选择
-            const today = new Date();
-            document.getElementById('monthSelect').value = today.getMonth();
+            // 初始化年份选择器
+            initYearSelector();
+            
+            // 设置默认年月为当前年月
+            setDefaultYearMonth();
             
             // 初始化业务员下拉框
             updateSalesmanDropdown();
@@ -1162,6 +1165,30 @@ th, td {
             const mm = String(today.getMonth() + 1).padStart(2, '0');
             const dd = String(today.getDate()).padStart(2, '0');
             document.getElementById('loanDate').value = `${yyyy}-${mm}-${dd}`;
+        }
+        
+        // 初始化年份选择器
+        function initYearSelector() {
+            const yearSelect = document.getElementById('yearSelect');
+            const currentYear = new Date().getFullYear();
+            
+            // 添加最近5年的选项
+            for (let i = currentYear - 2; i <= currentYear + 2; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i + '年';
+                yearSelect.appendChild(option);
+            }
+        }
+        
+        // 设置默认年月为当前年月
+        function setDefaultYearMonth() {
+            const today = new Date();
+            document.getElementById('yearSelect').value = today.getFullYear();
+            document.getElementById('monthSelect').value = today.getMonth();
+            
+            // 应用筛选
+            applyYearMonthFilter();
         }
         
         // 更新业务员下拉框
@@ -1208,11 +1235,11 @@ th, td {
             // 导出数据按钮
             document.getElementById('exportData').addEventListener('click', exportData);
             
-            // 月份选择变化
-            document.getElementById('monthSelect').addEventListener('change', updateMonthlySummary);
-            
             // 业务员管理按钮
             document.getElementById('manageSalesman').addEventListener('click', manageSalesmen);
+            
+            // 添加年月筛选按钮事件
+            document.getElementById('applyFilter').addEventListener('click', applyYearMonthFilter);
         }
         
         // 切换区域展开/折叠
@@ -1265,6 +1292,49 @@ th, td {
             document.getElementById('commission').value = commission.toFixed(2);
         }
         
+        // 应用年月筛选
+        function applyYearMonthFilter() {
+            const selectedYear = parseInt(document.getElementById('yearSelect').value);
+            const selectedMonth = parseInt(document.getElementById('monthSelect').value);
+            const table = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
+            const rows = table.rows;
+            
+            let filteredCommission = 0;
+            let visibleCount = 0;
+            
+            // 更新筛选显示文本
+            let filterText = selectedYear + '年';
+            if (selectedMonth >= 0) {
+                filterText += (selectedMonth + 1) + '月';
+            } else {
+                filterText += '所有月份';
+            }
+            document.getElementById('currentFilter').textContent = filterText;
+            
+            // 遍历所有行，根据年月筛选显示
+            for (let i = 0; i < rows.length; i++) {
+                const loanDate = rows[i].dataset.loanDate;
+                if (loanDate) {
+                    const date = new Date(loanDate);
+                    const yearMatch = date.getFullYear() === selectedYear;
+                    const monthMatch = selectedMonth < 0 || date.getMonth() === selectedMonth;
+                    
+                    if (yearMatch && monthMatch) {
+                        rows[i].style.display = '';
+                        filteredCommission += parseFloat(rows[i].dataset.commission) || 0;
+                        visibleCount++;
+                    } else {
+                        rows[i].style.display = 'none';
+                    }
+                } else {
+                    rows[i].style.display = 'none';
+                }
+            }
+            
+            // 更新筛选汇总
+            document.getElementById('filteredCommission').textContent = filteredCommission.toFixed(2);
+        }
+        
         // 添加新行
         function addRow() {
             const salesman = document.getElementById('salesman').value;
@@ -1289,10 +1359,12 @@ th, td {
             // 添加数据单元格
             newRow.insertCell(0).textContent = salesman;
             newRow.insertCell(1).textContent = clientName;
-            newRow.insertCell(2).textContent = commission.toFixed(2);
+            // 添加放款日期显示
+            newRow.insertCell(2).textContent = loanDate;
+            newRow.insertCell(3).textContent = commission.toFixed(2);
             
             // 添加操作单元格
-            const actionCell = newRow.insertCell(3);
+            const actionCell = newRow.insertCell(4);
             actionCell.className = 'action-cell';
             
             const viewBtn = document.createElement('button');
@@ -1339,6 +1411,9 @@ th, td {
             
             // 重新计算
             calculateAll();
+            
+            // 添加行后应用当前筛选
+            applyYearMonthFilter();
         }
         
         // 重置表单到初始状态
@@ -1444,6 +1519,9 @@ th, td {
                 
                 // 自动保存到云端
                 autoSaveToCloud();
+                
+                // 更新筛选汇总
+                applyYearMonthFilter();
             }
         }
         
@@ -1459,30 +1537,6 @@ th, td {
             }
             
             document.getElementById('totalCommission').textContent = totalCommission.toFixed(2);
-            
-            // 更新月度汇总
-            updateMonthlySummary();
-        }
-        
-        // 更新月度汇总
-        function updateMonthlySummary() {
-            const selectedMonth = parseInt(document.getElementById('monthSelect').value);
-            const table = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
-            const rows = table.rows;
-            
-            let monthlyCommission = 0;
-            
-            for (let i = 0; i < rows.length; i++) {
-                const loanDate = rows[i].dataset.loanDate;
-                if (loanDate) {
-                    const date = new Date(loanDate);
-                    if (date.getMonth() === selectedMonth) {
-                        monthlyCommission += parseFloat(rows[i].dataset.commission) || 0;
-                    }
-                }
-            }
-            
-            document.getElementById('monthlyCommission').textContent = monthlyCommission.toFixed(2);
         }
         
         // 保存数据到本地存储
@@ -1535,10 +1589,12 @@ th, td {
                     // 添加数据单元格
                     newRow.insertCell(0).textContent = item.salesman;
                     newRow.insertCell(1).textContent = item.clientName;
-                    newRow.insertCell(2).textContent = parseFloat(item.commission).toFixed(2);
+                    // 添加放款日期显示
+                    newRow.insertCell(2).textContent = item.loanDate;
+                    newRow.insertCell(3).textContent = parseFloat(item.commission).toFixed(2);
                     
                     // 添加操作单元格
-                    const actionCell = newRow.insertCell(3);
+                    const actionCell = newRow.insertCell(4);
                     actionCell.className = 'action-cell';
                     
                     const viewBtn = document.createElement('button');
@@ -1574,6 +1630,9 @@ th, td {
                 
                 // 更新汇总
                 updateSummary();
+                
+                // 应用筛选
+                applyYearMonthFilter();
             }
         }
         
@@ -1587,6 +1646,9 @@ th, td {
                 // 更新汇总
                 updateSummary();
                 
+                // 更新筛选汇总
+                applyYearMonthFilter();
+                
                 // 自动保存到云端
                 autoSaveToCloud();
             }
@@ -1594,6 +1656,8 @@ th, td {
         
         // 导出数据为CSV
         function exportData() {
+            const selectedYear = parseInt(document.getElementById('yearSelect').value);
+            const selectedMonth = parseInt(document.getElementById('monthSelect').value);
             const table = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
             const rows = table.rows;
             
@@ -1606,14 +1670,36 @@ th, td {
             
             for (let i = 0; i < rows.length; i++) {
                 const row = rows[i];
-                csvContent += `"${row.dataset.salesman}","${row.dataset.clientName}","${row.dataset.loanDate}","${row.dataset.productType}",${row.dataset.loanAmount},${row.dataset.serviceRate},${row.dataset.channelRate},${row.dataset.rebateRate},${(parseFloat(row.dataset.commissionRate) * 100).toFixed(1)},${row.dataset.commission}\n`;
+                const loanDate = row.dataset.loanDate;
+                
+                // 检查是否符合筛选条件
+                if (loanDate) {
+                    const date = new Date(loanDate);
+                    const yearMatch = date.getFullYear() === selectedYear;
+                    const monthMatch = selectedMonth < 0 || date.getMonth() === selectedMonth;
+                    
+                    // 只有在筛选可见时才导出
+                    if (yearMatch && monthMatch) {
+                        csvContent += `"${row.dataset.salesman}","${row.dataset.clientName}","${row.dataset.loanDate}","${row.dataset.productType}",${row.dataset.loanAmount},${row.dataset.serviceRate},${row.dataset.channelRate},${row.dataset.rebateRate},${(parseFloat(row.dataset.commissionRate) * 100).toFixed(1)},${row.dataset.commission}\n`;
+                    }
+                }
             }
             
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
             const link = document.createElement("a");
             link.setAttribute("href", url);
-            link.setAttribute("download", "贷款收入数据.csv");
+            
+            // 根据筛选条件生成文件名
+            let fileName = "贷款收入数据";
+            if (selectedMonth >= 0) {
+                fileName += `_${selectedYear}年${selectedMonth + 1}月`;
+            } else {
+                fileName += `_${selectedYear}年`;
+            }
+            fileName += ".csv";
+            
+            link.setAttribute("download", fileName);
             link.style.visibility = 'hidden';
             document.body.appendChild(link);
             link.click();
@@ -2066,10 +2152,12 @@ th, td {
                     // 添加数据单元格
                     newRow.insertCell(0).textContent = item.salesman;
                     newRow.insertCell(1).textContent = item.clientName;
-                    newRow.insertCell(2).textContent = parseFloat(item.commission).toFixed(2);
+                    // 添加放款日期显示
+                    newRow.insertCell(2).textContent = item.loanDate;
+                    newRow.insertCell(3).textContent = parseFloat(item.commission).toFixed(2);
                     
                     // 添加操作单元格
-                    const actionCell = newRow.insertCell(3);
+                    const actionCell = newRow.insertCell(4);
                     actionCell.className = 'action-cell';
                     
                     const viewBtn = document.createElement('button');
@@ -2109,6 +2197,9 @@ th, td {
                 // 更新汇总
                 updateSummary();
                 
+                // 应用筛选
+                applyYearMonthFilter();
+                
                 // 保存到本地存储
                 saveData();
                 
@@ -2126,8 +2217,4 @@ th, td {
         }
     </script>
 </body>
-
 </html>
-
-
-
