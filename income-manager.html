@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>贷款收入计算器 - 日期格式优化版</title>
+    <title>贷款收入计算器 - 详情并排显示优化版</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- 添加CryptoJS库用于加密 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
@@ -334,15 +334,7 @@
             width: 32px;
             height: 32px;
         }
-        /* 操作按钮容器 - 修复垂直居中 */
-.action-cell {
-    display: flex;
-    justify-content: flex-start;
-    align-items: center; /* 确保垂直居中 */
-    gap: 15px;
-    height: 100%; /* 关键：设置高度为100% */
-    padding: 8px 12px;
-}
+        
         .action-btn:hover {
             background: #f0f0f0;
             border-color: #e0e0e0;
@@ -425,7 +417,7 @@
             justify-content: center;
         }
         
-        /* 详情弹窗样式 - 已优化 */
+        /* 详情弹窗样式 - 已优化为并排显示 */
         .popup-overlay {
             position: fixed;
             top: 0;
@@ -444,7 +436,7 @@
             background: white;
             border-radius: 14px;
             padding: 20px;
-            max-width: 500px;
+            max-width: 700px;
             width: 100%;
             max-height: 80vh;
             overflow-y: auto;
@@ -479,11 +471,17 @@
         }
         
         .detail-popup {
-            max-width: 500px;
+            max-width: 700px;
             width: 95%;
         }
         
-        /* 信息详情表头优化 - 统一间距 */
+        /* 信息详情表头优化 - 并排显示 */
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
         .detail-item {
             display: flex;
             align-items: center;
@@ -502,7 +500,7 @@
         
         .detail-label {
             font-weight: 500;
-            width: 80px;
+            width: 100px;
             font-size: 14px;
             flex-shrink: 0;
             color: #666;
@@ -522,6 +520,7 @@
             border-radius: 8px;
             margin: 10px 0;
             border-left: 3px solid #007AFF;
+            grid-column: span 2;
         }
         
         /* 年月选择器样式 */
@@ -603,6 +602,14 @@
         }
         
         @media (max-width: 768px) {
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .detail-item.highlight {
+                grid-column: span 1;
+            }
+            
             .detail-label {
                 width: 70px;
                 font-size: 13px;
@@ -833,7 +840,7 @@
                 </div>
             </div>
             <h1>贷款收入计算器</h1>
-            <p>计算贷款提成，数据自动保存 - 日期格式优化版</p>
+            <p>计算贷款提成，数据自动保存 - 详情并排显示优化版</p>
         </div>
         
         <div class="main-content">
@@ -1093,7 +1100,7 @@
         </div>
         
         <div class="footer">
-            <p>© 2023 贷款收入计算器 - 日期格式优化版 | 支持返点与平台成本计算</p>
+            <p>© 2023 贷款收入计算器 - 详情并排显示优化版 | 支持返点与平台成本计算</p>
         </div>
     </div>
 
@@ -1413,6 +1420,23 @@
             newRow.dataset.commissionRate = commissionRate;
             newRow.dataset.commission = commission;
             
+            // 计算并存储成本和返点金额
+            const channelCost = loanAmount * (channelRate / 100);
+            const rebateAmount = loanAmount * (rebateRate / 100);
+            
+            // 计算平台成本 - 根据产品类型
+            let platformCostRate = 0;
+            if (productType === '抵押' || productType === '企业贷') {
+                platformCostRate = 0.01; // 1%
+            } else if (productType === '信用贷'|| productType === '车抵贷') {
+                platformCostRate = 0.02; // 2%
+            }
+            const platformCost = loanAmount * platformCostRate;
+            
+            newRow.dataset.channelCost = channelCost.toFixed(2);
+            newRow.dataset.platformCost = platformCost.toFixed(2);
+            newRow.dataset.rebateAmount = rebateAmount.toFixed(2);
+            
             // 更新汇总
             updateSummary();
             
@@ -1465,55 +1489,72 @@
                         </div>
                         <button class="close-btn" onclick="this.closest('.popup-overlay').remove()">&times;</button>
                     </div>
-                    <div class="detail-item">
-                     
-                        <div class="detail-label">业务员:</div>
-                        <div class="detail-value">${row.dataset.salesman}</div>
-                    </div>
-                    <div class="detail-item">
-                       
-                        <div class="detail-label">客户名称:</div>
-                        <div class="detail-value">${row.dataset.clientName}</div>
-                    </div>
-                    <div class="detail-item">
-                      
-                        <div class="detail-label">放款日期:</div>
-                        <div class="detail-value">${row.dataset.loanDate}</div>
-                    </div>
-                    <div class="detail-item">
-                       
-                        <div class="detail-label">产品类型:</div>
-                        <div class="detail-value">${row.dataset.productType}</div>
-                    </div>
-                    <div class="detail-item">
-                      
-                        <div class="detail-label">放款金额:</div>
-                        <div class="detail-value">${parseFloat(row.dataset.loanAmount).toFixed(2)} 元</div>
-                    </div>
-                    <div class="detail-item">
-                        
-                        <div class="detail-label">服务费率:</div>
-                        <div class="detail-value">${row.dataset.serviceRate}%</div>
-                    </div>
-                    <div class="detail-item">
-                       
-                        <div class="detail-label">渠道费率:</div>
-                        <div class="detail-value">${row.dataset.channelRate}%</div>
-                    </div>
-                    <div class="detail-item">
-                       
-                        <div class="detail-label">返点费率:</div>
-                        <div class="detail-value">${row.dataset.rebateRate}%</div>
-                    </div>
-                    <div class="detail-item">
-                      
-                        <div class="detail-label">提成点数:</div>
-                        <div class="detail-value">${(parseFloat(row.dataset.commissionRate) * 100).toFixed(1)}%</div>
-                    </div>
-                    <div class="detail-item highlight">
-                     
-                        <div class="detail-label">提成金额:</div>
-                        <div class="detail-value">${parseFloat(row.dataset.commission).toFixed(2)} 元</div>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <div class="detail-icon"><i class="fas fa-user-tie"></i></div>
+                            <div class="detail-label">业务员:</div>
+                            <div class="detail-value">${row.dataset.salesman}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-icon"><i class="fas fa-user"></i></div>
+                            <div class="detail-label">客户名称:</div>
+                            <div class="detail-value">${row.dataset.clientName}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-icon"><i class="fas fa-calendar-alt"></i></div>
+                            <div class="detail-label">放款日期:</div>
+                            <div class="detail-value">${row.dataset.loanDate}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-icon"><i class="fas fa-box"></i></div>
+                            <div class="detail-label">产品类型:</div>
+                            <div class="detail-value">${row.dataset.productType}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-icon"><i class="fas fa-money-bill-wave"></i></div>
+                            <div class="detail-label">放款金额:</div>
+                            <div class="detail-value">${parseFloat(row.dataset.loanAmount).toFixed(2)} 元</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-icon"><i class="fas fa-hand-holding-usd"></i></div>
+                            <div class="detail-label">服务费率:</div>
+                            <div class="detail-value">${row.dataset.serviceRate}%</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-icon"><i class="fas fa-road"></i></div>
+                            <div class="detail-label">渠道费率:</div>
+                            <div class="detail-value">${row.dataset.channelRate}%</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-icon"><i class="fas fa-gift"></i></div>
+                            <div class="detail-label">返点费率:</div>
+                            <div class="detail-value">${row.dataset.rebateRate}%</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-icon"><i class="fas fa-tag"></i></div>
+                            <div class="detail-label">渠道成本:</div>
+                            <div class="detail-value">${row.dataset.channelCost} 元</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-icon"><i class="fas fa-server"></i></div>
+                            <div class="detail-label">平台成本:</div>
+                            <div class="detail-value">${row.dataset.platformCost} 元</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-icon"><i class="fas fa-gift"></i></div>
+                            <div class="detail-label">返点金额:</div>
+                            <div class="detail-value">${row.dataset.rebateAmount} 元</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-icon"><i class="fas fa-percent"></i></div>
+                            <div class="detail-label">提成点数:</div>
+                            <div class="detail-value">${(parseFloat(row.dataset.commissionRate) * 100).toFixed(1)}%</div>
+                        </div>
+                        <div class="detail-item highlight">
+                            <div class="detail-icon"><i class="fas fa-coins"></i></div>
+                            <div class="detail-label">提成金额:</div>
+                            <div class="detail-value">${parseFloat(row.dataset.commission).toFixed(2)} 元</div>
+                        </div>
                     </div>
                 </div>
             `;
@@ -1573,7 +1614,10 @@
                     channelRate: rows[i].dataset.channelRate,
                     rebateRate: rows[i].dataset.rebateRate,
                     commissionRate: rows[i].dataset.commissionRate,
-                    commission: rows[i].dataset.commission
+                    commission: rows[i].dataset.commission,
+                    channelCost: rows[i].dataset.channelCost,
+                    platformCost: rows[i].dataset.platformCost,
+                    rebateAmount: rows[i].dataset.rebateAmount
                 });
             }
             
@@ -1642,6 +1686,9 @@
                     newRow.dataset.rebateRate = item.rebateRate;
                     newRow.dataset.commissionRate = item.commissionRate;
                     newRow.dataset.commission = item.commission;
+                    newRow.dataset.channelCost = item.channelCost || 0;
+                    newRow.dataset.platformCost = item.platformCost || 0;
+                    newRow.dataset.rebateAmount = item.rebateAmount || 0;
                 });
                 
                 // 更新汇总
@@ -1979,7 +2026,10 @@
                     channelRate: rows[i].dataset.channelRate,
                     rebateRate: rows[i].dataset.rebateRate,
                     commissionRate: rows[i].dataset.commissionRate,
-                    commission: rows[i].dataset.commission
+                    commission: rows[i].dataset.commission,
+                    channelCost: rows[i].dataset.channelCost,
+                    platformCost: rows[i].dataset.platformCost,
+                    rebateAmount: rows[i].dataset.rebateAmount
                 });
             }
             
@@ -2205,6 +2255,9 @@
                     newRow.dataset.rebateRate = item.rebateRate;
                     newRow.dataset.commissionRate = item.commissionRate;
                     newRow.dataset.commission = item.commission;
+                    newRow.dataset.channelCost = item.channelCost || 0;
+                    newRow.dataset.platformCost = item.platformCost || 0;
+                    newRow.dataset.rebateAmount = item.rebateAmount || 0;
                 });
                 
                 // 更新业务员下拉框
@@ -2234,4 +2287,3 @@
     </script>
 </body>
 </html>
-
