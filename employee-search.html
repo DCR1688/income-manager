@@ -6,6 +6,7 @@
     <title>员工信息检索系统</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* 所有样式保持不变 */
         * {
             margin: 0;
             padding: 0;
@@ -529,6 +530,9 @@
             repo: 'username/income-manager'
         };
         
+        // 存储加载状态
+        let dataLoaded = false;
+        
         // DOM元素
         const fileInput = document.getElementById('file-input');
         const fileUploadArea = document.getElementById('file-upload-area');
@@ -549,14 +553,31 @@
         const syncStatus = document.getElementById('sync-status');
         const errorDetails = document.getElementById('error-details');
         
-        // 初始化
-        function init() {
+        // 初始化 - 修复版本
+        async function init() {
             updateStats();
             loadGitHubConfig();
             
-            // 尝试从GitHub加载数据
+            // 首先尝试从本地存储加载
+            const savedEmployees = localStorage.getItem('employees');
+            if (savedEmployees) {
+                employees = JSON.parse(savedEmployees);
+                console.log('从本地存储加载数据:', employees.length, '条记录');
+            }
+            
+            // 如果配置了GitHub，尝试从GitHub加载数据
             if (githubConfig.token && githubConfig.repo) {
-                loadFromGitHub();
+                console.log('检测到GitHub配置，尝试从GitHub加载数据...');
+                await loadFromGitHub();
+            } else {
+                console.log('未检测到GitHub配置，使用本地数据');
+                dataLoaded = true;
+            }
+            
+            // 如果本地有数据但GitHub加载失败，仍然显示本地数据
+            if (employees.length > 0) {
+                console.log('初始化完成，共有', employees.length, '条记录');
+                dataLoaded = true;
             }
         }
         
@@ -632,7 +653,7 @@
             return true;
         }
         
-        // 从GitHub加载数据
+        // 从GitHub加载数据 - 修复版本
         async function loadFromGitHub() {
             try {
                 updateSyncStatus('正在从GitHub同步数据...', 'syncing');
@@ -649,7 +670,9 @@
                 });
                 
                 if (response.status === 404) {
-                    updateSyncStatus('GitHub上未找到数据文件，将使用本地数据', 'not-synced');
+                    console.log('GitHub上未找到数据文件，使用本地数据');
+                    updateSyncStatus('GitHub上未找到数据文件，使用本地数据', 'not-synced');
+                    dataLoaded = true;
                     return;
                 }
                 
@@ -667,14 +690,22 @@
                 
                 const data = await response.json();
                 const content = atob(data.content);
-                employees = JSON.parse(content);
+                const githubEmployees = JSON.parse(content);
                 
-                saveEmployees();
+                // 合并GitHub数据和本地数据（以GitHub数据为准）
+                employees = githubEmployees;
+                localStorage.setItem('employees', JSON.stringify(employees));
+                
                 updateSyncStatus('数据已从GitHub同步', 'synced');
                 showMessage('数据已从GitHub同步', 'success');
+                dataLoaded = true;
+                
+                console.log('从GitHub成功加载数据:', employees.length, '条记录');
                 
             } catch (error) {
                 console.error('从GitHub加载数据失败:', error);
+                // 即使GitHub加载失败，也标记数据已加载，使用本地数据
+                dataLoaded = true;
                 handleGitHubError(error, 'load');
             }
         }
@@ -700,31 +731,6 @@
                 console.error('Base64编码失败:', error);
                 // 方法3：回退方案 - 只处理ASCII字符
                 return btoa(unescape(encodeURIComponent(str)));
-            }
-        }
-        
-        // 修复：处理Base64解码
-        function base64ToUtf8(str) {
-            try {
-                // 方法1：使用TextDecoder
-                if (typeof TextDecoder !== 'undefined') {
-                    const binaryString = atob(str);
-                    const bytes = new Uint8Array(binaryString.length);
-                    for (let i = 0; i < binaryString.length; i++) {
-                        bytes[i] = binaryString.charCodeAt(i);
-                    }
-                    const decoder = new TextDecoder('utf-8');
-                    return decoder.decode(bytes);
-                }
-                
-                // 方法2：使用decodeURIComponent
-                return decodeURIComponent(Array.prototype.map.call(atob(str), function(c) {
-                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-                }).join(''));
-            } catch (error) {
-                console.error('Base64解码失败:', error);
-                // 方法3：回退方案
-                return decodeURIComponent(escape(atob(str)));
             }
         }
         
@@ -757,10 +763,9 @@
                 
                 // 修复：使用新的Base64编码函数处理中文字符
                 const jsonData = JSON.stringify(employees, null, 2);
-                console.log('要保存的数据:', jsonData); // 调试用
+                console.log('要保存的数据:', employees.length, '条记录');
                 
                 const content = utf8ToBase64(jsonData);
-                console.log('Base64编码后的内容长度:', content.length); // 调试用
                 
                 const response = await fetch(`https://api.github.com/repos/${githubConfig.repo}/contents/employees.json`, {
                     method: 'PUT',
@@ -881,7 +886,7 @@
         });
         fileInput.addEventListener('change', handleFileUpload);
         
-        // 搜索事件
+        // 搜索事件 - 修复版本
         searchBtn.addEventListener('click', searchEmployees);
         searchInput.addEventListener('keyup', (e) => {
             if (e.key === 'Enter') {
@@ -897,6 +902,9 @@
             if (this.value.trim() === '') {
                 dataSection.style.display = 'none';
                 updateStats(employees.length, 0);
+            } else {
+                // 如果有搜索关键词，立即搜索
+                searchEmployees();
             }
         });
         
@@ -952,8 +960,14 @@
             });
         }
         
-        // 搜索员工
+        // 搜索员工 - 修复版本
         function searchEmployees() {
+            // 确保数据已加载
+            if (!dataLoaded && employees.length === 0) {
+                showMessage('数据正在加载中，请稍后...', 'error');
+                return;
+            }
+            
             const keyword = searchInput.value.trim().toLowerCase();
             
             // 如果没有搜索关键词，隐藏结果区域
@@ -1092,6 +1106,9 @@
                 
                 // 清空文件输入
                 fileInput.value = '';
+                
+                // 标记数据已加载
+                dataLoaded = true;
                 
                 // 如果有搜索关键词，重新搜索以更新显示
                 if (searchInput.value.trim()) {
