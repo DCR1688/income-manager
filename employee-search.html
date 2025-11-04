@@ -553,6 +553,58 @@
         const syncStatus = document.getElementById('sync-status');
         const errorDetails = document.getElementById('error-details');
         
+        // 加密密钥（可以修改这个值来增强安全性）
+        const ENCRYPTION_KEY = "employee_secret_key_2024";
+        
+        // 简单的加密函数 - 将文本转换为乱码
+        function encryptText(text) {
+            if (!text) return '';
+            
+            let result = '';
+            for (let i = 0; i < text.length; i++) {
+                // 使用简单的字符替换和位移
+                const charCode = text.charCodeAt(i);
+                const keyChar = ENCRYPTION_KEY.charCodeAt(i % ENCRYPTION_KEY.length);
+                const encryptedChar = String.fromCharCode((charCode + keyChar) % 65536);
+                result += encryptedChar;
+            }
+            return result;
+        }
+        
+        // 解密函数
+        function decryptText(encryptedText) {
+            if (!encryptedText) return '';
+            
+            let result = '';
+            for (let i = 0; i < encryptedText.length; i++) {
+                const charCode = encryptedText.charCodeAt(i);
+                const keyChar = ENCRYPTION_KEY.charCodeAt(i % ENCRYPTION_KEY.length);
+                const decryptedChar = String.fromCharCode((charCode - keyChar + 65536) % 65536);
+                result += decryptedChar;
+            }
+            return result;
+        }
+        
+        // 加密员工数据
+        function encryptEmployeeData(employeeArray) {
+            return employeeArray.map(employee => ({
+                id: employee.id,
+                workplace: encryptText(employee.workplace),
+                name: encryptText(employee.name),
+                phone: encryptText(employee.phone)
+            }));
+        }
+        
+        // 解密员工数据
+        function decryptEmployeeData(encryptedArray) {
+            return encryptedArray.map(employee => ({
+                id: employee.id,
+                workplace: decryptText(employee.workplace),
+                name: decryptText(employee.name),
+                phone: decryptText(employee.phone)
+            }));
+        }
+        
         // 初始化 - 修复版本
         async function init() {
             updateStats();
@@ -698,16 +750,16 @@
                 const content = base64ToUtf8(data.content);
                 
                 // 修复：添加JSON解析错误处理
-                let githubEmployees;
+                let encryptedEmployees;
                 try {
-                    githubEmployees = JSON.parse(content);
+                    encryptedEmployees = JSON.parse(content);
                 } catch (parseError) {
                     console.error('GitHub数据JSON解析失败:', parseError);
                     throw new Error('GitHub上的数据文件格式错误，请检查文件内容');
                 }
                 
-                // 合并GitHub数据和本地数据（以GitHub数据为准）
-                employees = githubEmployees;
+                // 解密从GitHub获取的数据
+                employees = decryptEmployeeData(encryptedEmployees);
                 localStorage.setItem('employees', JSON.stringify(employees));
                 
                 updateSyncStatus('数据已从GitHub同步', 'synced');
@@ -797,9 +849,10 @@
                     // 文件不存在，继续创建
                 }
                 
-                // 修复：使用新的Base64编码函数处理中文字符
-                const jsonData = JSON.stringify(employees, null, 2);
-                console.log('要保存的数据:', employees.length, '条记录');
+                // 加密数据后再上传到GitHub
+                const encryptedEmployees = encryptEmployeeData(employees);
+                const jsonData = JSON.stringify(encryptedEmployees, null, 2);
+                console.log('要保存的加密数据:', encryptedEmployees.length, '条记录');
                 
                 const content = utf8ToBase64(jsonData);
                 
