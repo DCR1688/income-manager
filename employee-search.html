@@ -561,8 +561,14 @@
             // 首先尝试从本地存储加载
             const savedEmployees = localStorage.getItem('employees');
             if (savedEmployees) {
-                employees = JSON.parse(savedEmployees);
-                console.log('从本地存储加载数据:', employees.length, '条记录');
+                try {
+                    employees = JSON.parse(savedEmployees);
+                    console.log('从本地存储加载数据:', employees.length, '条记录');
+                } catch (e) {
+                    console.error('本地存储数据解析失败:', e);
+                    employees = [];
+                    localStorage.removeItem('employees');
+                }
             }
             
             // 如果配置了GitHub，尝试从GitHub加载数据
@@ -689,8 +695,16 @@
                 }
                 
                 const data = await response.json();
-                const content = atob(data.content);
-                const githubEmployees = JSON.parse(content);
+                const content = base64ToUtf8(data.content);
+                
+                // 修复：添加JSON解析错误处理
+                let githubEmployees;
+                try {
+                    githubEmployees = JSON.parse(content);
+                } catch (parseError) {
+                    console.error('GitHub数据JSON解析失败:', parseError);
+                    throw new Error('GitHub上的数据文件格式错误，请检查文件内容');
+                }
                 
                 // 合并GitHub数据和本地数据（以GitHub数据为准）
                 employees = githubEmployees;
@@ -710,7 +724,29 @@
             }
         }
         
-        // 修复：处理中文字符的Base64编码
+        // 修复：Base64转UTF-8（处理中文）
+        function base64ToUtf8(base64) {
+            try {
+                // 方法1：使用TextDecoder
+                if (typeof TextDecoder !== 'undefined') {
+                    const binaryString = atob(base64);
+                    const bytes = new Uint8Array(binaryString.length);
+                    for (let i = 0; i < binaryString.length; i++) {
+                        bytes[i] = binaryString.charCodeAt(i);
+                    }
+                    return new TextDecoder('utf-8').decode(bytes);
+                }
+                
+                // 方法2：使用decodeURIComponent + escape
+                return decodeURIComponent(escape(atob(base64)));
+            } catch (error) {
+                console.error('Base64解码失败:', error);
+                // 方法3：直接使用atob（可能产生乱码）
+                return atob(base64);
+            }
+        }
+        
+        // 修复：UTF-8转Base64（处理中文）
         function utf8ToBase64(str) {
             try {
                 // 方法1：使用TextEncoder
@@ -721,9 +757,9 @@
                     return btoa(binaryString);
                 }
                 
-                // 方法2：使用encodeURIComponent + 替换
+                // 方法2：使用encodeURIComponent + 替换（最可靠的方法）
                 return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, 
-                    function toSolidBytes(match, p1) {
+                    function(match, p1) {
                         return String.fromCharCode('0x' + p1);
                     }
                 ));
@@ -812,9 +848,9 @@
             } else if (error.message.includes('404')) {
                 errorMessage += '仓库或文件未找到';
                 detailedMessage = '请检查：\n1. 仓库名称是否正确\n2. 仓库是否存在\n3. 您是否有权限访问该仓库';
-            } else if (error.message.includes('btoa')) {
-                errorMessage += '数据编码错误';
-                detailedMessage = '数据包含特殊字符，编码失败。已修复此问题，请重试。';
+            } else if (error.message.includes('JSON解析失败') || error.message.includes('Unexpected end of JSON input')) {
+                errorMessage += '数据格式错误';
+                detailedMessage = 'GitHub上的数据文件可能已损坏。建议重新上传数据文件。';
             } else {
                 errorMessage += error.message;
                 detailedMessage = error.message;
