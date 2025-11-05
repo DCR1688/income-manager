@@ -469,7 +469,7 @@
                     <div class="github-config">
                         <h3><i class="fab fa-github"></i> GitHub 配置</h3>
                         <input type="password" id="github-token" class="config-input" placeholder="GitHub Personal Access Token">
-                        <input type="text" id="github-repo" class="config-input" placeholder="仓库名称 (例如: username/income-manager)" value="username/income-manager">
+                        <input type="text" id="github-repo" class="config-input" placeholder="仓库名称 (例如: username/income-manager)" value="DCR1688/income-manager">
                         <button id="save-config-btn" class="save-config-btn">保存配置</button>
                         <div class="sync-status" id="sync-status">
                             <i class="fas fa-sync-alt"></i>
@@ -527,7 +527,7 @@
         // GitHub配置
         let githubConfig = JSON.parse(localStorage.getItem('githubConfig')) || {
             token: '',
-            repo: 'username/income-manager'
+            repo: 'DCR1688/income-manager'
         };
         
         // 存储加载状态
@@ -616,6 +616,7 @@
                 try {
                     employees = JSON.parse(savedEmployees);
                     console.log('从本地存储加载数据:', employees.length, '条记录');
+                    dataLoaded = true;
                 } catch (e) {
                     console.error('本地存储数据解析失败:', e);
                     employees = [];
@@ -642,7 +643,7 @@
         // 加载GitHub配置
         function loadGitHubConfig() {
             githubTokenInput.value = githubConfig.token || '';
-            githubRepoInput.value = githubConfig.repo || 'username/income-manager';
+            githubRepoInput.value = githubConfig.repo || 'DCR1688/income-manager';
         }
         
         // 保存GitHub配置
@@ -755,7 +756,18 @@
                     encryptedEmployees = JSON.parse(content);
                 } catch (parseError) {
                     console.error('GitHub数据JSON解析失败:', parseError);
-                    throw new Error('GitHub上的数据文件格式错误，请检查文件内容');
+                    console.log('原始内容:', content);
+                    
+                    // 尝试修复可能的JSON格式问题
+                    try {
+                        // 尝试清理内容并重新解析
+                        const cleanedContent = content.trim();
+                        encryptedEmployees = JSON.parse(cleanedContent);
+                    } catch (secondError) {
+                        // 如果还是失败，创建新的空数据
+                        console.error('GitHub数据修复解析失败:', secondError);
+                        throw new Error('GitHub上的数据文件格式错误，请检查文件内容');
+                    }
                 }
                 
                 // 解密从GitHub获取的数据
@@ -901,7 +913,7 @@
             } else if (error.message.includes('404')) {
                 errorMessage += '仓库或文件未找到';
                 detailedMessage = '请检查：\n1. 仓库名称是否正确\n2. 仓库是否存在\n3. 您是否有权限访问该仓库';
-            } else if (error.message.includes('JSON解析失败') || error.message.includes('Unexpected end of JSON input')) {
+            } else if (error.message.includes('JSON解析失败') || error.message.includes('Unexpected end of JSON input') || error.message.includes('数据文件格式错误')) {
                 errorMessage += '数据格式错误';
                 detailedMessage = 'GitHub上的数据文件可能已损坏。建议重新上传数据文件。';
             } else {
