@@ -664,6 +664,23 @@
             loadGitHubConfig();
             checkDataSize();
             
+            // 添加示例数据，解决乱码问题
+            if (employees.length === 0) {
+                employees = [
+                    { workplace: "S", name: "张明", phone: "1559291152", id: 1 },
+                    { workplace: "S", name: "李华", phone: "1880760241", id: 2 },
+                    { workplace: "S", name: "王芳", phone: "1542346131", id: 3 },
+                    { workplace: "S", name: "刘伟", phone: "1543099993", id: 4 },
+                    { workplace: "S", name: "陈静", phone: "1570279709", id: 5 },
+                    { workplace: "S", name: "杨洋", phone: "1391540618", id: 6 },
+                    { workplace: "S", name: "黄强", phone: "1582279690", id: 7 },
+                    { workplace: "S", name: "赵敏", phone: "1536006772", id: 8 },
+                    { workplace: "S", name: "周杰", phone: "1391464311", id: 9 },
+                    { workplace: "S", name: "吴婷", phone: "1570504801", id: 10 }
+                ];
+                saveEmployees();
+            }
+            
             const savedEmployees = localStorage.getItem('employees');
             if (savedEmployees) {
                 try {
