@@ -438,6 +438,40 @@
         .clear-data-btn {
             background-color: var(--error-color);
         }
+
+        .template-section {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: rgba(52, 199, 89, 0.05);
+            border-radius: 8px;
+            border: 1px solid var(--success-color);
+        }
+        
+        .template-section h4 {
+            font-size: 14px;
+            margin-bottom: 10px;
+            color: var(--success-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .template-content {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+        
+        .template-download {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 8px 16px;
+            background-color: var(--success-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 14px;
+        }
         
         /* 响应式设计 */
         @media (max-width: 600px) {
@@ -527,6 +561,22 @@
                         
                         <div id="error-details" class="error-details" style="display: none;"></div>
                     </div>
+
+                    <!-- 模板下载区域 -->
+                    <div class="template-section">
+                        <h4><i class="fas fa-download"></i> CSV模板下载</h4>
+                        <div class="template-content">
+                            <strong>文件格式要求：</strong><br>
+                            工作单位,姓名,电话<br>
+                            <strong>示例：</strong><br>
+                            张三有限公司,张三,15012345678<br>
+                            李四科技公司,李四,13987654321<br>
+                            王五集团,王五,13812345678
+                        </div>
+                        <a href="#" class="template-download" id="download-template">
+                            <i class="fas fa-download"></i> 下载CSV模板
+                        </a>
+                    </div>
                     
                     <div class="file-upload" id="file-upload-area">
                         <div class="file-icon">
@@ -535,7 +585,7 @@
                         <p>点击或拖拽CSV文件到此区域</p>
                         <input type="file" id="file-input" accept=".csv" style="display: none;">
                         <div class="file-format">
-                            文件格式：工作单位,姓名,电话
+                            文件格式：工作单位,姓名,电话 (请使用UTF-8编码)
                         </div>
                     </div>
                 </div>
@@ -574,7 +624,7 @@
         // 存储员工数据的数组
         let employees = JSON.parse(localStorage.getItem('employees')) || [];
         
-        // GitHub配置 - 修复Token保存问题
+        // GitHub配置
         let githubConfig = JSON.parse(localStorage.getItem('githubConfig')) || {
             token: '',
             repo: 'DCR1688/income-manager'
@@ -606,10 +656,8 @@
         const batchInfo = document.getElementById('batch-info');
         const batchUploadBtn = document.getElementById('batch-upload-btn');
         const clearDataBtn = document.getElementById('clear-data-btn');
+        const downloadTemplate = document.getElementById('download-template');
 
-        // 加密密钥
-        const ENCRYPTION_KEY = "employee_secret_key_2024";
-        
         // 初始化
         async function init() {
             updateStats();
@@ -639,7 +687,7 @@
             }
         }
         
-        // 加载GitHub配置 - 修复：正确加载保存的Token
+        // 加载GitHub配置
         function loadGitHubConfig() {
             githubTokenInput.value = githubConfig.token || '';
             githubRepoInput.value = githubConfig.repo || 'DCR1688/income-manager';
@@ -661,7 +709,30 @@
             }
         }
         
-        // 保存GitHub配置 - 修复：确保Token正确保存
+        // 下载CSV模板
+        downloadTemplate.addEventListener('click', function(e) {
+            e.preventDefault();
+            const templateContent = `工作单位,姓名,电话
+张三有限公司,张三,15012345678
+李四科技公司,李四,13987654321
+王五集团,王五,13812345678
+赵六贸易公司,赵六,13765432109
+钱七咨询公司,钱七,13698765432`;
+            
+            const blob = new Blob([templateContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', '员工信息模板.csv');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showMessage('CSV模板下载成功', 'success');
+        });
+        
+        // 保存GitHub配置
         saveConfigBtn.addEventListener('click', async function() {
             githubConfig.token = githubTokenInput.value.trim();
             githubConfig.repo = githubRepoInput.value.trim();
@@ -692,12 +763,10 @@
                     }
                 }
                 
-                // 修复：确保配置正确保存到localStorage
                 localStorage.setItem('githubConfig', JSON.stringify(githubConfig));
                 console.log('GitHub配置已保存:', githubConfig);
                 showMessage('GitHub配置已保存并验证成功', 'success');
                 
-                // 自动从GitHub加载数据
                 await loadFromGitHub();
                 
             } catch (error) {
@@ -726,7 +795,7 @@
             return true;
         }
         
-        // 从GitHub加载数据
+        // 从GitHub加载数据 - 移除加密
         async function loadFromGitHub() {
             try {
                 updateSyncStatus('正在从GitHub同步数据...', 'syncing');
@@ -764,15 +833,16 @@
                 const data = await response.json();
                 const content = base64ToUtf8(data.content);
                 
-                let encryptedEmployees;
+                let employeesData;
                 try {
-                    encryptedEmployees = JSON.parse(content);
+                    employeesData = JSON.parse(content);
                 } catch (parseError) {
                     console.error('GitHub数据JSON解析失败:', parseError);
                     throw new Error('GitHub上的数据文件格式错误，请检查文件内容');
                 }
                 
-                employees = decryptEmployeeData(encryptedEmployees);
+                // 直接使用数据，不进行解密
+                employees = employeesData;
                 localStorage.setItem('employees', JSON.stringify(employees));
                 
                 updateSyncStatus('数据已从GitHub同步', 'synced');
@@ -786,52 +856,6 @@
                 dataLoaded = true;
                 handleGitHubError(error, 'load');
             }
-        }
-        
-        // 加密函数
-        function encryptText(text) {
-            if (!text) return '';
-            let result = '';
-            for (let i = 0; i < text.length; i++) {
-                const charCode = text.charCodeAt(i);
-                const keyChar = ENCRYPTION_KEY.charCodeAt(i % ENCRYPTION_KEY.length);
-                const encryptedChar = String.fromCharCode((charCode + keyChar) % 65536);
-                result += encryptedChar;
-            }
-            return result;
-        }
-        
-        // 解密函数
-        function decryptText(encryptedText) {
-            if (!encryptedText) return '';
-            let result = '';
-            for (let i = 0; i < encryptedText.length; i++) {
-                const charCode = encryptedText.charCodeAt(i);
-                const keyChar = ENCRYPTION_KEY.charCodeAt(i % ENCRYPTION_KEY.length);
-                const decryptedChar = String.fromCharCode((charCode - keyChar + 65536) % 65536);
-                result += decryptedChar;
-            }
-            return result;
-        }
-        
-        // 加密员工数据
-        function encryptEmployeeData(employeeArray) {
-            return employeeArray.map(employee => ({
-                id: employee.id,
-                workplace: encryptText(employee.workplace),
-                name: encryptText(employee.name),
-                phone: encryptText(employee.phone)
-            }));
-        }
-        
-        // 解密员工数据
-        function decryptEmployeeData(encryptedArray) {
-            return encryptedArray.map(employee => ({
-                id: employee.id,
-                workplace: decryptText(employee.workplace),
-                name: decryptText(employee.name),
-                phone: decryptText(employee.phone)
-            }));
         }
         
         // Base64转UTF-8
@@ -985,7 +1009,7 @@
             }
         }
         
-        // 上传单个批次到GitHub
+        // 上传单个批次到GitHub - 移除加密
         async function uploadBatchToGitHub(batchData, batchIndex) {
             const batchFileName = `employees_batch_${batchIndex + 1}.json`;
             
@@ -1006,8 +1030,8 @@
                 // 文件不存在，继续创建
             }
             
-            const encryptedBatch = encryptEmployeeData(batchData);
-            const jsonData = JSON.stringify(encryptedBatch);
+            // 直接使用原始数据，不加密
+            const jsonData = JSON.stringify(batchData);
             const content = utf8ToBase64(jsonData);
             
             const response = await fetch(`https://api.github.com/repos/${githubConfig.repo}/contents/${batchFileName}`, {
@@ -1032,7 +1056,7 @@
             console.log(`批次 ${batchIndex + 1} 上传成功，${batchData.length} 条记录`);
         }
         
-        // 保存到GitHub
+        // 保存到GitHub - 移除加密
         async function saveToGitHub() {
             if (!githubConfig.token || !githubConfig.repo) {
                 return;
@@ -1065,8 +1089,8 @@
                     // 文件不存在，继续创建
                 }
                 
-                const encryptedEmployees = encryptEmployeeData(employees);
-                const jsonData = JSON.stringify(encryptedEmployees);
+                // 直接使用原始数据，不加密
+                const jsonData = JSON.stringify(employees);
                 console.log('要保存的数据大小:', jsonData.length, '字符');
                 
                 const content = utf8ToBase64(jsonData);
