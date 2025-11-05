@@ -542,7 +542,7 @@
                         <h3><i class="fab fa-github"></i> GitHub 配置</h3>
                         <input type="text" id="github-token" class="config-input" placeholder="GitHub Personal Access Token">
                         <input type="text" id="github-repo" class="config-input" placeholder="仓库名称 (例如: username/income-manager)" value="DCR1688/income-manager">
-                        <button id="save-config-btn" class="save-config-btn">保存配置</button>
+                        <button id="save-config-btn" class="save-config-btn">保存配置到GitHub</button>
                         <div class="sync-status" id="sync-status">
                             <i class="fas fa-sync-alt"></i>
                             <span>未同步到GitHub</span>
@@ -624,7 +624,7 @@
         // 存储员工数据的数组
         let employees = JSON.parse(localStorage.getItem('employees')) || [];
         
-        // GitHub配置
+        // GitHub配置 - 先从本地存储加载，然后从GitHub同步
         let githubConfig = JSON.parse(localStorage.getItem('githubConfig')) || {
             token: '',
             repo: 'DCR1688/income-manager'
@@ -694,9 +694,10 @@
                 }
             }
             
-            // 如果已配置GitHub，自动尝试同步
+            // 如果已配置GitHub，自动尝试同步配置和数据
             if (githubConfig.token && githubConfig.repo) {
-                console.log('检测到GitHub配置，尝试从GitHub加载数据...');
+                console.log('检测到GitHub配置，尝试从GitHub加载配置和数据...');
+                await loadConfigFromGitHub();
                 await loadFromGitHub();
             } else {
                 console.log('未检测到GitHub配置，使用本地数据');
@@ -704,7 +705,113 @@
             }
         }
         
-        // 加载GitHub配置
+        // 从GitHub加载配置
+        async function loadConfigFromGitHub() {
+            try {
+                if (!githubConfig.token || !githubConfig.repo) {
+                    return;
+                }
+                
+                updateSyncStatus('正在从GitHub加载配置...', 'syncing');
+                
+                const response = await fetch(`https://api.github.com/repos/${githubConfig.repo}/contents/config.json`, {
+                    headers: {
+                        'Authorization': `token ${githubConfig.token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+                
+                if (response.status === 404) {
+                    console.log('GitHub上未找到配置文件，使用本地配置');
+                    updateSyncStatus('GitHub上未找到配置文件', 'not-synced');
+                    return;
+                }
+                
+                if (!response.ok) {
+                    throw new Error(`GitHub API错误: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                const content = base64ToUtf8(data.content);
+                const remoteConfig = JSON.parse(content);
+                
+                // 合并配置，优先使用远程配置
+                githubConfig = { ...githubConfig, ...remoteConfig };
+                localStorage.setItem('githubConfig', JSON.stringify(githubConfig));
+                loadGitHubConfig();
+                
+                updateSyncStatus('配置已从GitHub同步', 'synced');
+                console.log('从GitHub成功加载配置');
+                
+            } catch (error) {
+                console.error('从GitHub加载配置失败:', error);
+                updateSyncStatus('配置同步失败', 'error');
+            }
+        }
+        
+        // 保存配置到GitHub
+        async function saveConfigToGitHub() {
+            try {
+                if (!githubConfig.token || !githubConfig.repo) {
+                    return;
+                }
+                
+                updateSyncStatus('正在保存配置到GitHub...', 'syncing');
+                
+                let sha = null;
+                try {
+                    const response = await fetch(`https://api.github.com/repos/${githubConfig.repo}/contents/config.json`, {
+                        headers: {
+                            'Authorization': `token ${githubConfig.token}`,
+                            'Accept': 'application/vnd.github.v3+json'
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        sha = data.sha;
+                    }
+                } catch (error) {
+                    // 文件不存在，继续创建
+                }
+                
+                const configData = {
+                    token: githubConfig.token,
+                    repo: githubConfig.repo,
+                    lastUpdated: new Date().toISOString()
+                };
+                
+                const jsonData = JSON.stringify(configData, null, 2);
+                const content = utf8ToBase64(jsonData);
+                
+                const response = await fetch(`https://api.github.com/repos/${githubConfig.repo}/contents/config.json`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${githubConfig.token}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: `更新系统配置 - ${new Date().toLocaleString()}`,
+                        content: content,
+                        sha: sha
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`保存配置失败: ${response.status}`);
+                }
+                
+                updateSyncStatus('配置已保存到GitHub', 'synced');
+                showMessage('配置已成功保存到GitHub', 'success');
+                
+            } catch (error) {
+                console.error('保存配置到GitHub失败:', error);
+                handleGitHubError(error, 'save-config');
+            }
+        }
+        
+        // 加载GitHub配置到界面
         function loadGitHubConfig() {
             githubTokenInput.value = githubConfig.token || '';
             githubRepoInput.value = githubConfig.repo || 'DCR1688/income-manager';
@@ -782,8 +889,11 @@
                 
                 localStorage.setItem('githubConfig', JSON.stringify(githubConfig));
                 console.log('GitHub配置已保存:', githubConfig);
-                showMessage('GitHub配置已保存并验证成功', 'success');
                 
+                // 保存配置到GitHub
+                await saveConfigToGitHub();
+                
+                // 自动同步数据
                 await loadFromGitHub();
                 
             } catch (error) {
@@ -812,7 +922,7 @@
             return true;
         }
         
-        // 从GitHub加载数据 - 移除加密
+        // 从GitHub加载数据
         async function loadFromGitHub() {
             try {
                 updateSyncStatus('正在从GitHub同步数据...', 'syncing');
@@ -1026,7 +1136,7 @@
             }
         }
         
-        // 上传单个批次到GitHub - 移除加密
+        // 上传单个批次到GitHub
         async function uploadBatchToGitHub(batchData, batchIndex) {
             const batchFileName = `employees_batch_${batchIndex + 1}.json`;
             
@@ -1073,7 +1183,7 @@
             console.log(`批次 ${batchIndex + 1} 上传成功，${batchData.length} 条记录`);
         }
         
-        // 保存到GitHub - 移除加密
+        // 保存到GitHub
         async function saveToGitHub() {
             if (!githubConfig.token || !githubConfig.repo) {
                 return;
@@ -1188,6 +1298,8 @@
                 saveToGitHub();
             } else if (operation === 'batch-upload') {
                 uploadInBatches();
+            } else if (operation === 'save-config') {
+                saveConfigToGitHub();
             }
         }
         
