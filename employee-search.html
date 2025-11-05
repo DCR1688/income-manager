@@ -617,6 +617,11 @@
                     employees = JSON.parse(savedEmployees);
                     console.log('从本地存储加载数据:', employees.length, '条记录');
                     dataLoaded = true;
+                    
+                    // 调试：显示前几条数据
+                    if (employees.length > 0) {
+                        console.log('示例数据:', employees.slice(0, 3));
+                    }
                 } catch (e) {
                     console.error('本地存储数据解析失败:', e);
                     employees = [];
@@ -1061,7 +1066,7 @@
             });
         }
         
-        // 搜索员工 - 修复版本
+        // 搜索员工 - 修复版本（处理大小写和空格问题）
         function searchEmployees() {
             // 确保数据已加载
             if (!dataLoaded && employees.length === 0) {
@@ -1069,7 +1074,7 @@
                 return;
             }
             
-            const keyword = searchInput.value.trim().toLowerCase();
+            const keyword = searchInput.value.trim();
             
             // 如果没有搜索关键词，隐藏结果区域
             if (!keyword) {
@@ -1081,17 +1086,35 @@
             // 显示数据区域
             dataSection.style.display = 'block';
             
-            const filteredEmployees = employees.filter(employee => 
-                employee.workplace.toLowerCase().includes(keyword) ||
-                employee.name.toLowerCase().includes(keyword) ||
-                employee.phone.includes(keyword)
-            );
+            // 修复搜索逻辑：不转换为小写，直接搜索
+            const filteredEmployees = employees.filter(employee => {
+                // 检查工作单位（英文字母）
+                if (employee.workplace && employee.workplace.includes(keyword)) {
+                    return true;
+                }
+                
+                // 检查姓名
+                if (employee.name && employee.name.includes(keyword)) {
+                    return true;
+                }
+                
+                // 检查电话（直接匹配，不区分大小写）
+                if (employee.phone && employee.phone.includes(keyword)) {
+                    return true;
+                }
+                
+                return false;
+            });
             
             displayEmployees(filteredEmployees);
             updateStats(employees.length, filteredEmployees.length);
             
             if (filteredEmployees.length === 0) {
                 showMessage('未找到匹配的员工信息', 'error');
+                console.log('搜索关键词:', keyword);
+                console.log('可用数据:', employees);
+            } else {
+                console.log('找到', filteredEmployees.length, '条匹配记录');
             }
         }
         
@@ -1155,10 +1178,10 @@
                         continue;
                     }
                     
-                    // 简单的电话格式验证
-                    if (!/^[\d\-\+\(\)\s]+$/.test(phone)) {
+                    // 简单的电话格式验证 - 放宽限制，允许10位数字
+                    if (!/^[\d\-\+\(\)\s]{10,}$/.test(phone.replace(/\D/g, ''))) {
                         errorCount++;
-                        errorDetails.push(`第${lineNumber}行: 电话号码格式不正确`);
+                        errorDetails.push(`第${lineNumber}行: 电话号码格式不正确 (需要至少10位数字)`);
                         continue;
                     }
                     
