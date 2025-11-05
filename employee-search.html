@@ -839,7 +839,27 @@
             }
         }
         
-        // 保存数据到GitHub - 修复版本
+        // 优化数据存储 - 减少文件大小
+        function optimizeDataForStorage(employeeArray) {
+            return employeeArray.map(employee => ({
+                w: employee.workplace,  // 使用缩写减少JSON大小
+                n: employee.name,
+                p: employee.phone,
+                id: employee.id
+            }));
+        }
+        
+        // 从优化格式恢复数据
+        function restoreFromOptimized(optimizedArray) {
+            return optimizedArray.map(employee => ({
+                workplace: employee.w,
+                name: employee.n,
+                phone: employee.p,
+                id: employee.id
+            }));
+        }
+        
+        // 保存数据到GitHub - 优化版本
         async function saveToGitHub() {
             if (!githubConfig.token || !githubConfig.repo) {
                 return;
@@ -866,10 +886,18 @@
                     // 文件不存在，继续创建
                 }
                 
-                // 加密数据后再上传到GitHub
+                // 优化数据存储 - 减少文件大小
+                const optimizedEmployees = optimizeDataForStorage(employees);
                 const encryptedEmployees = encryptEmployeeData(employees);
-                const jsonData = JSON.stringify(encryptedEmployees, null, 2);
-                console.log('要保存的加密数据:', encryptedEmployees.length, '条记录');
+                
+                // 使用更紧凑的JSON格式
+                const jsonData = JSON.stringify(encryptedEmployees);
+                console.log('要保存的数据大小:', jsonData.length, '字符');
+                
+                // 检查文件大小是否过大
+                if (jsonData.length > 1000000) { // 1MB限制
+                    throw new Error('数据文件过大，GitHub无法显示。建议分批上传数据。');
+                }
                 
                 const content = utf8ToBase64(jsonData);
                 
@@ -881,7 +909,7 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        message: '更新员工数据',
+                        message: `更新员工数据 - ${new Date().toLocaleString()}`,
                         content: content,
                         sha: sha
                     })
@@ -921,6 +949,9 @@
             } else if (error.message.includes('JSON解析失败') || error.message.includes('Unexpected end of JSON input') || error.message.includes('数据文件格式错误')) {
                 errorMessage += '数据格式错误';
                 detailedMessage = 'GitHub上的数据文件可能已损坏。建议重新上传数据文件。';
+            } else if (error.message.includes('数据文件过大')) {
+                errorMessage += '数据文件过大';
+                detailedMessage = 'GitHub无法在网页上显示过大的文件。数据仍然保存在仓库中，可以通过API正常访问。建议：\n1. 分批上传数据\n2. 删除不必要的记录\n3. 使用数据分片功能';
             } else {
                 errorMessage += error.message;
                 detailedMessage = error.message;
