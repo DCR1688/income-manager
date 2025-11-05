@@ -541,7 +541,7 @@
                     <div class="github-config">
                         <h3><i class="fab fa-github"></i> GitHub 配置</h3>
                         <input type="text" id="github-token" class="config-input" placeholder="GitHub Personal Access Token">
-                        <input type="text" id="github-repo" class="config-input" placeholder="仓库名称 (例如: username/income-manager)" value="DCR1688/income-manager">
+                        <input type="text" id="github-repo" class="config-input" placeholder="仓库名称 (例如: username/repo-name)" value="DCR1688/income-manager">
                         <button id="save-config-btn" class="save-config-btn">保存配置到GitHub</button>
                         <div class="sync-status" id="sync-status">
                             <i class="fas fa-sync-alt"></i>
@@ -749,7 +749,7 @@
             }
         }
         
-        // 保存配置到GitHub - 修复409错误
+        // 保存配置到GitHub - 修复仓库不存在的问题
         async function saveConfigToGitHub() {
             try {
                 if (!githubConfig.token || !githubConfig.repo) {
@@ -757,6 +757,24 @@
                 }
                 
                 updateSyncStatus('正在保存配置到GitHub...', 'syncing');
+                
+                // 首先验证仓库是否存在且有写权限
+                const repoResponse = await fetch(`https://api.github.com/repos/${githubConfig.repo}`, {
+                    headers: {
+                        'Authorization': `token ${githubConfig.token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+                
+                if (!repoResponse.ok) {
+                    if (repoResponse.status === 404) {
+                        throw new Error(`仓库 ${githubConfig.repo} 不存在或您无权访问`);
+                    } else if (repoResponse.status === 403) {
+                        throw new Error('Token权限不足，请确保Token有repo权限');
+                    } else {
+                        throw new Error(`仓库访问失败: ${repoResponse.status}`);
+                    }
+                }
                 
                 // 首先获取当前文件的SHA
                 let sha = null;
@@ -950,6 +968,7 @@
             try {
                 updateSyncStatus('正在测试GitHub连接...', 'syncing');
                 
+                // 首先测试仓库访问权限
                 const testResponse = await fetch(`https://api.github.com/repos/${githubConfig.repo}`, {
                     headers: {
                         'Authorization': `token ${githubConfig.token}`,
@@ -959,7 +978,7 @@
                 
                 if (!testResponse.ok) {
                     if (testResponse.status === 404) {
-                        throw new Error('仓库不存在或您无权访问');
+                        throw new Error(`仓库 ${githubConfig.repo} 不存在或您无权访问`);
                     } else if (testResponse.status === 401) {
                         throw new Error('Token无效或权限不足');
                     } else {
@@ -969,6 +988,7 @@
                 
                 localStorage.setItem('githubConfig', JSON.stringify(githubConfig));
                 console.log('GitHub配置已保存到本地:', githubConfig);
+                showMessage('GitHub连接测试成功', 'success');
                 
                 // 保存配置到GitHub
                 await saveConfigToGitHub();
@@ -989,8 +1009,8 @@
                 return false;
             }
             
-            if (!githubConfig.repo || githubConfig.repo === 'username/income-manager') {
-                showMessage('请输入正确的仓库名称', 'error');
+            if (!githubConfig.repo) {
+                showMessage('请输入仓库名称', 'error');
                 return false;
             }
             
@@ -999,6 +1019,7 @@
                 return false;
             }
             
+            // 移除默认值检查，允许用户使用自己的仓库
             return true;
         }
         
@@ -1344,9 +1365,9 @@
             } else if (error.message.includes('403')) {
                 errorMessage += 'API限制或权限拒绝';
                 detailedMessage = '可能原因：\n1. API速率限制\n2. 仓库不存在或无权访问\n3. Token权限不足';
-            } else if (error.message.includes('404')) {
+            } else if (error.message.includes('404') || error.message.includes('仓库不存在')) {
                 errorMessage += '仓库或文件未找到';
-                detailedMessage = '请检查：\n1. 仓库名称是否正确\n2. 仓库是否存在\n3. 您是否有权限访问该仓库';
+                detailedMessage = `请检查：\n1. 仓库名称 "${githubConfig.repo}" 是否正确\n2. 仓库是否存在\n3. 您是否有权限访问该仓库\n4. Token是否有repo权限`;
             } else if (error.message.includes('409')) {
                 errorMessage += '文件冲突';
                 detailedMessage = '配置文件在GitHub上已被修改。系统已自动重试，如果仍然失败，请刷新页面后重试。';
